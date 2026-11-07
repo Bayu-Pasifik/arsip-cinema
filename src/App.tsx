@@ -2,15 +2,16 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } fro
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import Browse from './components/Browse';
-import MovieStory from './components/MovieStory';
+import MovieRoute from './components/MovieRoute';
 import Hero from './components/Hero';
 import StatusMessage from './components/StatusMessage';
 import TopBar from './components/TopBar';
 import { useCompact, useDebounced, useReducedMotion } from './hooks/useEnv';
 import { useMovieList } from './hooks/useMovieList';
+import { browsePath, cameFromApp, moviePath, navigate, useRoute } from './hooks/useRoute';
 import { createStage } from './scene/stage';
 import { CATEGORY_LABEL } from './services/tmdb';
-import type { Category, ListSource, Movie } from './types/tmdb';
+import type { Category, ListSource } from './types/tmdb';
 import { clamp } from './utils/format';
 
 gsap.registerPlugin(useGSAP);
@@ -29,13 +30,15 @@ export default function App() {
   const topRef = useRef<HTMLElement>(null);
   const browseRef = useRef<HTMLDivElement>(null);
 
-  const [entered, setEntered] = useState(false);
-  const [category, setCategory] = useState<Category>('trending');
-  const [query, setQuery] = useState('');
+  const route = useRoute();
+  const entered = route.name !== 'home';
+  const detailId = route.name === 'movie' ? route.id : null;
+
+  const [category, setCategory] = useState<Category>(route.name === 'browse' ? route.category : 'trending');
+  const [query, setQuery] = useState(route.name === 'browse' ? route.q : '');
   const [demo, setDemo] = useState(false);
   const [reload, setReload] = useState(0);
   const [index, setIndex] = useState(0);
-  const [detailMovie, setDetailMovie] = useState<Movie | null>(null);
 
   const debounced = useDebounced(query, 400);
   const trimmed = debounced.trim();
@@ -50,13 +53,14 @@ export default function App() {
   const list = useMovieList(source, reload);
   const movies = list.movies;
   const searching = !demo && (query.trim() !== trimmed || (searchActive && list.status === 'loading'));
+  const urlQuery = searchActive ? trimmed : '';
   const label = demo ? 'Demo' : searchActive ? `Hasil “${trimmed}”` : CATEGORY_LABEL[category];
 
   // ---- GSAP: keadaan awal + animasi pembuka -------------------------------
   const { contextSafe } = useGSAP(
     () => {
       gsap.set([topRef.current, browseRef.current], { autoAlpha: 0 });
-      if (reduced) return;
+      if (reduced || entered) return; // tautan langsung ke /browse atau /movie: lewati intro hero
       gsap
         .timeline({ delay: 0.2 })
         .from('.line', { yPercent: 110, duration: 1.1, ease: 'power4.out', stagger: 0.12 })
@@ -65,10 +69,9 @@ export default function App() {
     { scope: container },
   );
 
-  const enter = contextSafe(() => {
-    setEntered(true);
+  const playEnter = contextSafe((instant: boolean) => {
     gsap.killTweensOf(stage, 'enter');
-    if (reduced) {
+    if (reduced || instant) {
       stage.enter = 1;
       stage.invalidate();
       gsap.set(heroRef.current, { autoAlpha: 0 });
@@ -86,9 +89,7 @@ export default function App() {
       );
   });
 
-  const leave = contextSafe(() => {
-    setEntered(false);
-    setDetailMovie(null);
+  const playLeave = contextSafe(() => {
     gsap.killTweensOf(stage, 'enter');
     if (reduced) {
       stage.enter = 0;
@@ -103,6 +104,49 @@ export default function App() {
       .to(stage, { enter: 0, duration: 1.6, ease: 'power3.inOut', onUpdate: () => stage.invalidate() }, 0)
       .to(heroRef.current, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'power2.out' }, 0.8);
   });
+
+  // rute berubah (klik, tombol Back/Forward, tautan langsung) → jalankan animasi masuk/keluar
+  // Tautan langsung ke /browse atau /movie: terapkan keadaan "masuk" tanpa animasi. (Dijalankan ulang oleh StrictMode
+  // setelah konteks GSAP di-revert, karena itu terpisah dari efek perubahan di bawah.)
+  useEffect(() => {
+    if (entered) playEnter(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const lastEntered = useRef(entered);
+  useEffect(() => {
+    if (lastEntered.current === entered) return;
+    lastEntered.current = entered;
+    if (entered) playEnter(false);
+    else playLeave();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entered]);
+
+  // URL → state (popstate / tautan langsung)
+  useEffect(() => {
+    if (route.name !== 'browse') return;
+    // hanya terapkan bila berbeda: mencegah input pencarian "melompat" saat URL di-replace oleh debounce
+    if (route.category !== category) setCategory(route.category);
+    if (route.q.trim() !== urlQuery) setQuery(route.q);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [route]);
+
+  // state pencarian → URL (replace, agar riwayat tidak penuh oleh tiap ketikan)
+  useEffect(() => {
+    if (route.name !== 'browse') return;
+    if (route.q.trim() !== urlQuery) navigate(browsePath(category, urlQuery), { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlQuery]);
+
+  useEffect(() => {
+    document.title = route.name === 'movie' ? 'Detail film — Arsip Sinema' : 'Arsip Sinema — Jelajah Film 3D';
+  }, [route]);
+
+  const openMovie = useCallback((id: number) => navigate(moviePath(id)), []);
+  const closeDetail = useCallback(() => {
+    if (cameFromApp()) window.history.back();
+    else navigate(browsePath(category, urlQuery), { replace: true });
+  }, [category, urlQuery]);
 
   // ---- fokus poster ---------------------------------------------------------
   const goTo = useCallback(
@@ -149,7 +193,7 @@ export default function App() {
   // ---- input: keyboard, wheel, swipe ---------------------------------------
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (!entered || detailMovie) return;
+      if (!entered || detailId !== null) return;
       const t = e.target as HTMLElement;
       if (t.tagName === 'INPUT') return;
       if (e.key === 'ArrowRight') goTo(index + 1);
@@ -161,11 +205,11 @@ export default function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [entered, detailMovie, goTo, index, movies.length]);
+  }, [entered, detailId, goTo, index, movies.length]);
 
   const lastWheel = useRef(0);
   const onWheel = (e: React.WheelEvent) => {
-    if (!entered || detailMovie) return;
+    if (!entered || detailId !== null) return;
     const now = performance.now();
     const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
     if (Math.abs(d) < 12 || now - lastWheel.current < 380) return;
@@ -180,7 +224,7 @@ export default function App() {
   const onPointerUp = (e: React.PointerEvent) => {
     const x0 = swipeStart.current;
     swipeStart.current = null;
-    if (x0 === null || !entered || detailMovie) return;
+    if (x0 === null || !entered || detailId !== null) return;
     const dx = e.clientX - x0;
     if (Math.abs(dx) > 60) goTo(index + (dx < 0 ? 1 : -1));
   };
@@ -189,10 +233,11 @@ export default function App() {
   const onPick = useCallback(
     (i: number) => {
       if (!entered) return;
-      if (i === index) setDetailMovie(movies[i] ?? null);
-      else goTo(i);
+      if (i === index) {
+        if (movies[i]) openMovie(movies[i].id);
+      } else goTo(i);
     },
-    [entered, goTo, index, movies],
+    [entered, goTo, index, movies, openMovie],
   );
 
   const showSceneLoading = list.status === 'loading';
@@ -222,13 +267,14 @@ export default function App() {
         onCategory={(c) => {
           setQuery('');
           setCategory(c);
+          navigate(browsePath(c));
         }}
         onQuery={setQuery}
-        onHome={leave}
+        onHome={() => navigate('/')}
       />
 
       <main>
-        <Hero ref={heroRef} onEnter={enter} />
+        <Hero ref={heroRef} onEnter={() => navigate(browsePath(category, urlQuery))} />
 
         <Browse
           ref={browseRef}
@@ -237,7 +283,7 @@ export default function App() {
           reduced={reduced}
           label={label}
           onGo={goTo}
-          onOpen={() => setDetailMovie(movies[index] ?? null)}
+          onOpen={() => movies[index] && openMovie(movies[index].id)}
         />
 
         <div className="status-layer">
@@ -281,7 +327,7 @@ export default function App() {
         </p>
       )}
 
-      {detailMovie && <MovieStory movie={detailMovie} reduced={reduced} onClose={() => setDetailMovie(null)} />}
+      {detailId !== null && <MovieRoute id={detailId} movies={movies} reduced={reduced} onClose={closeDetail} />}
     </div>
   );
 }

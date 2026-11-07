@@ -58,3 +58,15 @@ src/
 - Bahasa data TMDB `id-ID` (konstanta `LANGUAGE` di `src/services/tmdb.ts`); bila sinopsis Indonesia kosong, detail memakai `en-US` dan diberi label.
 - Setiap daftar dibatasi 20 film (halaman pertama TMDB).
 - Referensi gerak (motionsites.ai) hanya dijadikan inspirasi umum (reveal baris judul, transisi kamera, stagger); tidak ada desain yang disalin.
+
+## Routing
+
+Router mini berbasis History API (`src/hooks/useRoute.ts`, tanpa dependensi):
+
+| URL | Tampilan |
+| --- | --- |
+| `/` | pembuka |
+| `/browse/:category?q=judul` | galeri (`trending`, `popular`, `top_rated`, `now_playing`); pencarian tersimpan di `?q=` |
+| `/movie/:id` | halaman detail film (dapat dibuka langsung/dibagikan) |
+
+Tombol Back/Forward browser berfungsi: membuka detail menambah riwayat, menutupnya (tombol Kembali atau Esc) kembali ke riwayat sebelumnya. Untuk tautan langsung, hosting statis harus mengarahkan semua path ke `index.html` (Vite dev/preview sudah melakukannya; di Netlify/Vercel tambahkan rewrite SPA).
