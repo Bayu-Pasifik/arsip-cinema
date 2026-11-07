@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
 import { textureUrl } from '../services/tmdb';
@@ -16,6 +16,8 @@ interface Props {
 }
 
 const lerp = THREE.MathUtils.lerp;
+/** jarak (dalam indeks) dari fokus tempat tekstur mulai dimuat; sedikit lebih jauh dari batas terlihat (9) */
+const NEAR = 12;
 
 /**
  * Tumpukan kartu diagonal: poster fokus di depan, sisanya menumpuk ke belakang
@@ -29,12 +31,19 @@ export function Poster({ movie, index, stage, compact, onPick }: Props) {
   const hover = useRef({ target: 0, value: 0 });
   const size = useThree((s) => s.size);
 
-  const tex = usePosterTexture(textureUrl(movie.poster_path, compact ? 'w185' : 'w342'), movie.title);
+  // Tekstur baru dimuat saat poster mendekati fokus (daftar bisa sampai 100 film); setelah dimuat tidak dilepas.
+  const [near, setNear] = useState(index < NEAR);
+  const nearRef = useRef(near);
+  const tex = usePosterTexture(textureUrl(movie.poster_path, compact ? 'w185' : 'w342'), movie.title, near);
 
   useFrame((_, dt) => {
     const g = group.current;
     if (!g) return;
     const d = index - stage.focus;
+    if (!nearRef.current && Math.abs(d) < NEAR) {
+      nearRef.current = true;
+      setNear(true);
+    }
     const e = stage.enter;
     const wide = size.width / size.height > 1.15;
 

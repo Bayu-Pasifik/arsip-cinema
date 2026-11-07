@@ -1299,3 +1299,17 @@ main > * {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+.thumb-more {
+  display: grid;
+  place-items: center;
+  border: 2px dashed var(--ink);
+  background: transparent;
+  font-size: 18px;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+.thumb-more:disabled {
+  cursor: progress;
+}

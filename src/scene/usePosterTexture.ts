@@ -35,12 +35,13 @@ function placeholderTexture(label: string, note = 'TANPA POSTER'): THREE.CanvasT
 }
 
 /** Memuat tekstur poster TMDB; membersihkan (dispose) saat dilepas. */
-export function usePosterTexture(url: string | null, title: string): THREE.Texture | null {
+export function usePosterTexture(url: string | null, title: string, enabled = true): THREE.Texture | null {
   const [tex, setTex] = useState<THREE.Texture | null>(null);
   const invalidate = useThree((s) => s.invalidate);
   const maxAniso = useThree((s) => s.gl.capabilities.getMaxAnisotropy());
 
   useEffect(() => {
+    if (!enabled) return; // belum dekat dengan fokus: tunda memuat tekstur
     let disposed = false;
     let current: THREE.Texture | null = null;
 
@@ -77,7 +78,7 @@ export function usePosterTexture(url: string | null, title: string): THREE.Textu
       current?.dispose();
       setTex(null);
     };
-  }, [url, title, invalidate, maxAniso]);
+  }, [url, title, invalidate, maxAniso, enabled]);
 
   return tex;
 }

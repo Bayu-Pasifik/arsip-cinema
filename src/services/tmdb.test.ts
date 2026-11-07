@@ -84,11 +84,21 @@ describe('request TMDB', () => {
     expect(init.headers).toEqual({ Authorization: 'Bearer eyJhbGciOi.test.token' });
   });
 
-  it('daftar dibatasi MAX_ITEMS', async () => {
+  it('fetchCategory mengembalikan film, halaman, dan totalPages (dibatasi 500)', async () => {
     const t = await load('k');
-    const results = Array.from({ length: 30 }, (_, i) => ({ id: i }));
-    fetchMock.mockReturnValue(json({ page: 1, results, total_pages: 1, total_results: 30 }));
-    expect(await t.fetchCategory('popular')).toHaveLength(t.MAX_ITEMS);
+    const results = Array.from({ length: 20 }, (_, i) => ({ id: i }));
+    fetchMock.mockReturnValue(json({ page: 3, results, total_pages: 9999, total_results: 199980 }));
+    const r = await t.fetchCategory('popular', 3);
+    expect(r.movies).toHaveLength(20);
+    expect(r).toMatchObject({ page: 3, totalPages: 500 });
+    expect(new URL(String(fetchMock.mock.calls[0][0])).searchParams.get('page')).toBe('3');
+  });
+
+  it('searchMovies meneruskan nomor halaman', async () => {
+    const t = await load('k');
+    fetchMock.mockReturnValue(json({ page: 2, results: [], total_pages: 2, total_results: 30 }));
+    await t.searchMovies('dune', 2);
+    expect(new URL(String(fetchMock.mock.calls[0][0])).searchParams.get('page')).toBe('2');
   });
 
   it('searchMovies mengirim query dan include_adult=false', async () => {

@@ -7,13 +7,17 @@ interface Props {
   index: number;
   reduced: boolean;
   label: string;
+  hasMore: boolean;
+  loadingMore: boolean;
+  moreError: string | null;
+  onLoadMore: () => void;
   onGo: (i: number) => void;
   onOpen: () => void;
 }
 
 /** Caption fokus + kontrol + rel thumbnail. Semua dapat dioperasikan dengan keyboard. */
 const Browse = forwardRef<HTMLDivElement, Props>(function Browse(
-  { movies, index, reduced, label, onGo, onOpen },
+  { movies, index, reduced, label, hasMore, loadingMore, moreError, onLoadMore, onGo, onOpen },
   ref,
 ) {
   const railRef = useRef<HTMLUListElement>(null);
@@ -37,6 +41,7 @@ const Browse = forwardRef<HTMLDivElement, Props>(function Browse(
       <div className="caption">
         <p className="eyebrow">
           {label} · {String(index + 1).padStart(2, '0')} / {String(movies.length).padStart(2, '0')}
+          {hasMore ? '+' : ''}
           {movie.demo && <span className="demo-tag">DEMO</span>}
         </p>
         <h2 className="caption-title" aria-live="polite">
@@ -63,7 +68,7 @@ const Browse = forwardRef<HTMLDivElement, Props>(function Browse(
             type="button"
             className="btn btn-ghost"
             onClick={() => onGo(index + 1)}
-            disabled={index === movies.length - 1}
+            disabled={index === movies.length - 1 && !hasMore}
           >
             Berikutnya <span aria-hidden="true">→</span>
           </button>
@@ -94,7 +99,23 @@ const Browse = forwardRef<HTMLDivElement, Props>(function Browse(
               </li>
             );
           })}
+          {(hasMore || moreError) && (
+            <li>
+              <button
+                type="button"
+                className="thumb thumb-more"
+                onClick={onLoadMore}
+                disabled={loadingMore}
+                aria-label={moreError ? `Gagal memuat film berikutnya: ${moreError.replace(/.$/, '')}. Coba lagi` : 'Muat film berikutnya'}
+              >
+                <span aria-hidden="true">{loadingMore ? '…' : moreError ? '↻' : '+'}</span>
+              </button>
+            </li>
+          )}
         </ul>
+        <p className="sr-only" role="status" aria-live="polite">
+          {loadingMore ? 'Memuat film berikutnya…' : ''}
+        </p>
       </nav>
     </div>
   );

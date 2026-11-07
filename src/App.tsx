@@ -55,6 +55,14 @@ export default function App() {
       : { kind: 'category', category };
 
   const list = useMovieList(source, reload);
+
+  // Daftar baru → indeks fokus kembali ke 0 SEKARANG (saat render, sebelum efek berjalan), supaya prefetch halaman
+  // berikutnya tidak membaca indeks lama dari daftar sebelumnya.
+  const [seenGeneration, setSeenGeneration] = useState(list.generation);
+  if (seenGeneration !== list.generation) {
+    setSeenGeneration(list.generation);
+    setIndex(0);
+  }
   const movies = list.movies;
   const searching = !demo && (query.trim() !== trimmed || (searchActive && list.status === 'loading'));
   const urlQuery = searchActive ? trimmed : '';
@@ -169,10 +177,11 @@ export default function App() {
     [movies.length, reduced, stage],
   );
 
-  // daftar berganti → fokus kembali ke awal + poster "muncul" dengan stagger
+  // daftar BARU dimuat (generation berubah) → fokus kembali ke awal + poster "muncul" dengan stagger;
+  // menambahkan halaman berikutnya tidak mengubah generation sehingga fokus tidak terlempar
+  const listReady = list.status === 'success';
   useEffect(() => {
-    if (list.status !== 'success') return;
-    setIndex(0);
+    if (!listReady) return;
     stage.focus = 0;
     gsap.killTweensOf(stage, 'spawn');
     if (reduced) {
@@ -185,7 +194,13 @@ export default function App() {
     return () => {
       tween.kill();
     };
-  }, [movies, list.status, reduced, stage]);
+  }, [list.generation, listReady, reduced, stage]);
+
+  // prefetch halaman berikutnya saat fokus mendekati akhir daftar yang sudah dimuat
+  const { hasMore, loadingMore, moreError, loadMore } = list;
+  useEffect(() => {
+    if (entered && hasMore && !loadingMore && !moreError && index >= movies.length - 5) loadMore();
+  }, [entered, hasMore, loadingMore, moreError, index, movies.length, loadMore]);
 
   useEffect(() => {
     const tweens = stage;
@@ -292,6 +307,10 @@ export default function App() {
           index={index}
           reduced={reduced}
           label={label}
+          hasMore={hasMore}
+          loadingMore={loadingMore}
+          moreError={moreError}
+          onLoadMore={loadMore}
           onGo={goTo}
           onOpen={() => movies[index] && openMovie(movies[index].id)}
         />

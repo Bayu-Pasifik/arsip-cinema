@@ -89,20 +89,26 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   now_playing: 'Now Playing',
 };
 
-export const MAX_ITEMS = 20;
+/** Batas total film yang dimuat per daftar (5 halaman TMDB × 20), agar jumlah tekstur dan elemen DOM tetap wajar. */
+export const MAX_TOTAL = 100;
 
-export async function fetchCategory(category: Category, signal?: AbortSignal): Promise<Movie[]> {
-  const data = await request<MovieListResponse>(CATEGORY_PATH[category], { page: 1 }, signal);
-  return data.results.slice(0, MAX_ITEMS);
+export interface MoviePage {
+  movies: Movie[];
+  page: number;
+  totalPages: number;
 }
 
-export async function searchMovies(query: string, signal?: AbortSignal): Promise<Movie[]> {
-  const data = await request<MovieListResponse>(
-    '/search/movie',
-    { query, page: 1, include_adult: 'false' },
-    signal,
-  );
-  return data.results.slice(0, MAX_ITEMS);
+function toPage(data: MovieListResponse): MoviePage {
+  // TMDB membatasi page maksimum 500
+  return { movies: data.results, page: data.page, totalPages: Math.min(data.total_pages, 500) };
+}
+
+export async function fetchCategory(category: Category, page = 1, signal?: AbortSignal): Promise<MoviePage> {
+  return toPage(await request<MovieListResponse>(CATEGORY_PATH[category], { page }, signal));
+}
+
+export async function searchMovies(query: string, page = 1, signal?: AbortSignal): Promise<MoviePage> {
+  return toPage(await request<MovieListResponse>('/search/movie', { query, page, include_adult: 'false' }, signal));
 }
 
 export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promise<MovieDetail> {
