@@ -90,3 +90,13 @@ Tombol Back/Forward browser berfungsi: membuka detail menambah riwayat, menutupn
 - Banner kecil menjelaskan "Mode 2D". Fallback tidak otomatis kembali ke 3D sampai halaman dimuat ulang.
 
 Untuk menguji: buka `/?webgl=off`, atau di konsol browser panggil `WEBGL_lose_context.loseContext()` pada canvas.
+
+## Lint & tes
+
+```bash
+npm run lint     # ESLint (typescript-eslint + react-hooks), tanpa peringatan
+npm test         # Vitest, sekali jalan (npm run test:watch untuk mode pantau)
+npm run build    # typecheck + build produksi
+```
+
+Cakupan tes (33 kasus, environment Node): klien TMDB (URL gambar & proxy, kunci v3/v4, pemetaan endpoint, klasifikasi error 401/404/429/5xx/jaringan/abort, batas `MAX_ITEMS`, cadangan sinopsis `en-US`), parser rute (`parseRoute`, `browsePath`, `moviePath`), utilitas format, dan data demo. Belum ada tes komponen React maupun adegan 3D; bagian itu diverifikasi manual di browser.
