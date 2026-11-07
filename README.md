@@ -46,6 +46,7 @@ Jika proxy tidak terpasang, poster 3D menampilkan kartu placeholder berlabel "PO
 - Kategori: Trending (`/trending/movie/week`), Popular, Top Rated, Now Playing.
 - Pencarian TMDB (`/search/movie`) dengan debounce 400 ms, indikator loading, state kosong/error, dan pembatalan request lama (`AbortController`).
 - Detail film (halaman scroll 3D: GSAP ScrollTrigger + Three.js): poster, backdrop, tagline, durasi, rating, genre, sinopsis, sutradara, pemeran (`/movie/{id}?append_to_response=credits`).
+- Trailer: tombol "Putar trailer" di halaman detail membuka lightbox YouTube (youtube-nocookie, iframe baru dibuat saat dibuka). Trailer dipilih dari `videos` TMDB: resmi → bahasa Indonesia → Inggris → terbaru; tombol tidak muncul bila film tidak punya trailer YouTube.
 - Navigasi: ← → / Home / End, gulir roda, geser, klik poster (poster fokus → buka detail), rel thumbnail, tombol Sebelumnya/Berikutnya. Esc menutup detail; fokus dikurung dan dikembalikan.
 - `prefers-reduced-motion`: semua transisi GSAP menjadi instan, parallax dan partikel dimatikan, render 3D hanya saat perlu (`frameloop="demand"`).
 - Layar kecil: DPR 1, tanpa antialias, partikel dikurangi, tekstur `w185`, kamera menyesuaikan rasio potret. Rel thumbnail menjamin akses konten.

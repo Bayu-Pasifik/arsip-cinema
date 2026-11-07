@@ -140,7 +140,7 @@ describe('fetchMovieDetail', () => {
     expect(d.overview).toBe('Halo');
     expect(d.overviewFallback).toBeUndefined();
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(new URL(String(fetchMock.mock.calls[0][0])).searchParams.get('append_to_response')).toBe('credits');
+    expect(new URL(String(fetchMock.mock.calls[0][0])).searchParams.get('append_to_response')).toBe('credits,videos');
   });
 
   it('sinopsis kosong → ambil en-US sebagai cadangan dan beri penanda', async () => {
@@ -159,5 +159,49 @@ describe('fetchMovieDetail', () => {
     const d = await t.fetchMovieDetail(1);
     expect(d.overview).toBe('');
     expect(d.overviewFallback).toBeUndefined();
+  });
+});
+
+describe('trailer', () => {
+  const v = (over: Record<string, unknown>) => ({
+    id: Math.random().toString(),
+    key: 'abcDEF123_-',
+    name: 'T',
+    site: 'YouTube',
+    type: 'Trailer',
+    official: true,
+    iso_639_1: 'en',
+    published_at: '2020-01-01T00:00:00.000Z',
+    ...over,
+  });
+
+  it('tanpa video atau bukan trailer YouTube → null', async () => {
+    const t = await load('k');
+    expect(t.pickTrailer(undefined)).toBeNull();
+    expect(t.pickTrailer([])).toBeNull();
+    expect(t.pickTrailer([v({ site: 'Vimeo' }), v({ type: 'Teaser' })] as never)).toBeNull();
+  });
+
+  it('kunci tidak valid dibuang', async () => {
+    const t = await load('k');
+    expect(t.pickTrailer([v({ key: 'x"><script>' })] as never)).toBeNull();
+  });
+
+  it('prioritas: resmi → bahasa Indonesia → Inggris → terbaru', async () => {
+    const t = await load('k');
+    const unofficialId = v({ key: 'unofficialId', official: false, iso_639_1: 'id' });
+    const officialEn = v({ key: 'officialEn01', official: true, iso_639_1: 'en' });
+    const officialId = v({ key: 'officialId01', official: true, iso_639_1: 'id' });
+    const newerEn = v({ key: 'newerEn00001', official: true, iso_639_1: 'en', published_at: '2024-01-01T00:00:00.000Z' });
+    expect(t.pickTrailer([unofficialId, officialEn] as never)?.key).toBe('officialEn01');
+    expect(t.pickTrailer([officialEn, officialId] as never)?.key).toBe('officialId01');
+    expect(t.pickTrailer([officialEn, newerEn] as never)?.key).toBe('newerEn00001');
+  });
+
+  it('youtubeEmbedUrl memakai youtube-nocookie dan menolak kunci berbahaya', async () => {
+    const t = await load('k');
+    expect(t.youtubeEmbedUrl('abcDEF123_-')).toContain('https://www.youtube-nocookie.com/embed/abcDEF123_-');
+    expect(t.youtubeEmbedUrl('a/../b')).toBeNull();
+    expect(t.youtubeEmbedUrl('')).toBeNull();
   });
 });

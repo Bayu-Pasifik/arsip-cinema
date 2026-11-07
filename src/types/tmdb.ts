@@ -29,6 +29,17 @@ export interface CrewMember {
   job: string;
 }
 
+export interface Video {
+  id: string;
+  key: string;
+  name: string;
+  site: string;
+  type: string;
+  official: boolean;
+  iso_639_1: string;
+  published_at: string;
+}
+
 export interface MovieDetail extends Movie {
   tagline: string;
   runtime: number | null;
@@ -37,6 +48,7 @@ export interface MovieDetail extends Movie {
   /** true bila sinopsis berasal dari bahasa Inggris karena terjemahan Indonesia kosong */
   overviewFallback?: boolean;
   credits?: { cast: CastMember[]; crew: CrewMember[] };
+  videos?: { results: Video[] };
 }
 
 export interface MovieListResponse {

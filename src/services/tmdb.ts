@@ -4,6 +4,7 @@ import type {
   MovieDetail,
   MovieListResponse,
   TmdbErrorKind,
+  Video,
 } from '../types/tmdb';
 
 const API_BASE = 'https://api.themoviedb.org/3';
@@ -105,7 +106,11 @@ export async function searchMovies(query: string, signal?: AbortSignal): Promise
 }
 
 export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promise<MovieDetail> {
-  const detail = await request<MovieDetail>(`/movie/${id}`, { append_to_response: 'credits' }, signal);
+  const detail = await request<MovieDetail>(
+    `/movie/${id}`,
+    { append_to_response: 'credits,videos', include_video_language: 'id,en,null' },
+    signal,
+  );
   // Banyak film belum punya sinopsis/tagline bahasa Indonesia: ambil versi en-US sebagai cadangan (diberi label di UI).
   if (!detail.overview) {
     try {
@@ -145,6 +150,32 @@ export function textureUrl(path: string | null, size: string): string | null {
 /** Tekstur backdrop untuk WebGL (lewat proxy same-origin, lihat textureUrl). */
 export function backdropTextureUrl(path: string | null): string | null {
   return path ? `${IMG_PROXY}/w780${path}` : null;
+}
+
+/**
+ * Memilih trailer terbaik dari daftar video TMDB: hanya YouTube bertipe "Trailer";
+ * urutan prioritas: resmi → bahasa Indonesia → Inggris → paling baru.
+ */
+export function pickTrailer(videos: Video[] | undefined): Video | null {
+  const candidates = (videos ?? []).filter(
+    (v) => v.site === 'YouTube' && v.type === 'Trailer' && /^[\w-]{6,20}$/.test(v.key),
+  );
+  if (candidates.length === 0) return null;
+  const lang = (v: Video) => (v.iso_639_1 === 'id' ? 2 : v.iso_639_1 === 'en' ? 1 : 0);
+  return (
+    [...candidates].sort(
+      (a, b) =>
+        Number(b.official) - Number(a.official) ||
+        lang(b) - lang(a) ||
+        Date.parse(b.published_at || '') - Date.parse(a.published_at || '') ||
+        0,
+    )[0] ?? null
+  );
+}
+
+/** URL embed YouTube (domain tanpa cookie pelacak sebelum diputar). Kunci divalidasi untuk mencegah injeksi URL. */
+export function youtubeEmbedUrl(key: string): string | null {
+  return /^[\w-]{6,20}$/.test(key) ? `https://www.youtube-nocookie.com/embed/${key}?autoplay=1&rel=0&modestbranding=1` : null;
 }
 
 export function releaseYear(date: string): string {

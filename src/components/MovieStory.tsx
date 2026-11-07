@@ -4,9 +4,10 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { useCompact } from '../hooks/useEnv';
 import { useMovieDetail } from '../hooks/useMovieDetail';
-import { imageUrl, releaseYear } from '../services/tmdb';
+import { imageUrl, pickTrailer, releaseYear } from '../services/tmdb';
 import type { Movie } from '../types/tmdb';
 import { formatRuntime } from '../utils/format';
+import TrailerModal from './TrailerModal';
 import type { StoryProgress } from '../scene/StoryScene';
 import { SceneBoundary } from '../scene/SceneBoundary';
 import { useWebGL } from '../utils/webgl';
@@ -43,6 +44,9 @@ export default function MovieStory({ movie, reduced, onClose }: Props) {
   const closing = useRef(false);
   const progress = useMemo<StoryProgress>(() => ({ p: 0 }), []);
   const [active, setActive] = useState(0);
+  const [trailerOpen, setTrailerOpen] = useState(false);
+  const trailerOpenRef = useRef(false);
+  trailerOpenRef.current = trailerOpen;
 
   const state = useMovieDetail(movie.id);
   const detail = state.status === 'success' ? state.detail : null;
@@ -52,6 +56,7 @@ export default function MovieStory({ movie, reduced, onClose }: Props) {
   const director = detail?.credits?.crew.find((c) => c.job === 'Director')?.name;
   const cast = useMemo(() => (detail?.credits?.cast ?? []).slice(0, 6), [detail]);
   const genres = detail?.genres ?? [];
+  const trailer = useMemo(() => pickTrailer(detail?.videos?.results), [detail]);
   const rating = movie.vote_average;
   const runtime = formatRuntime(detail?.runtime ?? null);
   const posterSrc = imageUrl(movie.poster_path, 'poster', 'w342');
@@ -206,6 +211,7 @@ export default function MovieStory({ movie, reduced, onClose }: Props) {
   // Esc menutup; Tab dikurung di dalam halaman detail
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (trailerOpenRef.current) return; // dialog trailer menangani Esc/Tab sendiri
       if (e.key === 'Escape') {
         e.preventDefault();
         close();
@@ -309,6 +315,11 @@ export default function MovieStory({ movie, reduced, onClose }: Props) {
               </span>
             </h2>
             {detail?.tagline && <p className="st-tagline st-hero-fade">“{detail.tagline}”</p>}
+            {trailer && (
+              <button type="button" className="btn btn-primary st-trailer" aria-haspopup="dialog" onClick={() => setTrailerOpen(true)}>
+                <span aria-hidden="true">▶</span> Putar trailer
+              </button>
+            )}
             <p className="st-cue st-hero-fade" aria-hidden="true">
               Gulir ↓
             </p>
@@ -393,6 +404,11 @@ export default function MovieStory({ movie, reduced, onClose }: Props) {
           {/* 5 — penutup */}
           <section className="st-ch st-end" aria-label="Penutup">
             <p className="st-end-title">{movie.title}</p>
+            {trailer && (
+              <button type="button" className="btn st-trailer-end" aria-haspopup="dialog" onClick={() => setTrailerOpen(true)}>
+                <span aria-hidden="true">▶</span> Putar trailer
+              </button>
+            )}
             <button type="button" className="btn btn-primary" onClick={close}>
               Kembali ke arsip <span aria-hidden="true">←</span>
             </button>
@@ -403,6 +419,9 @@ export default function MovieStory({ movie, reduced, onClose }: Props) {
           )}
         </div>
       </div>
+      {trailerOpen && trailer && (
+        <TrailerModal title={movie.title} videoKey={trailer.key} reduced={reduced} onClose={() => setTrailerOpen(false)} />
+      )}
     </div>
   );
 }
