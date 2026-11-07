@@ -7,6 +7,7 @@ import { useMovieDetail } from '../hooks/useMovieDetail';
 import { imageUrl, pickTrailer, releaseYear } from '../services/tmdb';
 import type { Movie } from '../types/tmdb';
 import { formatRuntime } from '../utils/format';
+import CollectionButtons from './CollectionButtons';
 import TrailerModal from './TrailerModal';
 import type { StoryProgress } from '../scene/StoryScene';
 import { SceneBoundary } from '../scene/SceneBoundary';
@@ -320,6 +321,7 @@ export default function MovieStory({ movie, reduced, onClose }: Props) {
                 <span aria-hidden="true">▶</span> Putar trailer
               </button>
             )}
+            <CollectionButtons movie={movie} className="collect-story" />
             <p className="st-cue st-hero-fade" aria-hidden="true">
               Gulir ↓
             </p>

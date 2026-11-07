@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useRef } from 'react';
 import { imageUrl, releaseYear } from '../services/tmdb';
+import CollectionButtons from './CollectionButtons';
 import type { Movie } from '../types/tmdb';
 
 interface Props {
@@ -73,6 +74,7 @@ const Browse = forwardRef<HTMLDivElement, Props>(function Browse(
             Berikutnya <span aria-hidden="true">→</span>
           </button>
         </div>
+        <CollectionButtons movie={movie} className="collect-caption" />
       </div>
 
       <nav aria-label="Daftar film">

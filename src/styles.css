@@ -860,7 +860,7 @@ main > * {
   /* potret/tablet: tumpukan di atas, caption di bawah di atas rel */
   .caption {
     top: auto;
-    bottom: 108px;
+    bottom: 122px;
     transform: none;
     width: auto;
     right: var(--pad);
@@ -1312,4 +1312,72 @@ main > * {
 
 .thumb-more:disabled {
   cursor: progress;
+}
+
+/* ---------- favorit & watchlist ---------- */
+.collect {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.collect-caption {
+  margin-top: 10px;
+}
+
+.collect-story {
+  margin: 0 0 18px;
+  pointer-events: auto;
+}
+
+.btn-collect {
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 13px;
+  border-color: var(--line);
+  background: var(--surface);
+}
+
+.btn-collect.is-active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #fff;
+}
+
+.pill-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0 5px;
+  border-radius: 99px;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.pill.is-active .pill-count {
+  background: #fff;
+  color: var(--ink);
+}
+
+@media (max-width: 560px) {
+  .btn-collect {
+    min-height: 36px;
+    padding: 0 12px;
+  }
+}
+
+@media (max-height: 520px) {
+  .collect-caption {
+    margin-top: 6px;
+  }
+
+  .btn-collect {
+    min-height: 32px;
+    font-size: 12px;
+  }
 }

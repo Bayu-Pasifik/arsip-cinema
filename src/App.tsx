@@ -11,6 +11,7 @@ import { SceneBoundary } from './scene/SceneBoundary';
 import { useWebGL } from './utils/webgl';
 import { useCompact, useDebounced, useReducedMotion } from './hooks/useEnv';
 import { useMovieList } from './hooks/useMovieList';
+import { isCollectionKey, useCollections } from './services/collections';
 import { browsePath, cameFromApp, moviePath, navigate, useRoute } from './hooks/useRoute';
 import { createStage } from './scene/stage';
 import { CATEGORY_LABEL } from './services/tmdb';
@@ -54,7 +55,9 @@ export default function App() {
       ? { kind: 'search', query: trimmed }
       : { kind: 'category', category };
 
-  const list = useMovieList(source, reload);
+  const collections = useCollections();
+  const list = useMovieList(source, reload, collections);
+  const inCollection = !demo && !searchActive && isCollectionKey(category);
 
   // Daftar baru → indeks fokus kembali ke 0 SEKARANG (saat render, sebelum efek berjalan), supaya prefetch halaman
   // berikutnya tidak membaca indeks lama dari daftar sebelumnya.
@@ -177,6 +180,15 @@ export default function App() {
     [movies.length, reduced, stage],
   );
 
+  // Daftar lokal bisa menyusut saat film dihapus: jaga agar fokus tetap di dalam rentang.
+  useEffect(() => {
+    if (movies.length === 0) {
+      if (index !== 0) setIndex(0);
+    } else if (index > movies.length - 1) {
+      goTo(movies.length - 1);
+    }
+  }, [movies.length, index, goTo]);
+
   // daftar BARU dimuat (generation berubah) → fokus kembali ke awal + poster "muncul" dengan stagger;
   // menambahkan halaman berikutnya tidak mengubah generation sehingga fokus tidak terlempar
   const listReady = list.status === 'success';
@@ -295,6 +307,7 @@ export default function App() {
           navigate(browsePath(c));
         }}
         onQuery={setQuery}
+        counts={{ favorites: collections.favorites.length, watchlist: collections.watchlist.length }}
         onHome={() => navigate('/')}
       />
 
@@ -338,7 +351,19 @@ export default function App() {
               </button>
             </StatusMessage>
           )}
-          {list.status === 'success' && movies.length === 0 && (
+          {list.status === 'success' && movies.length === 0 && inCollection && (
+            <StatusMessage kind="empty" title={category === 'favorites' ? 'Belum ada film favorit' : 'Watchlist masih kosong'}>
+              <p>
+                {category === 'favorites'
+                  ? 'Tekan tombol ♡ Favorit pada film yang Anda suka, lalu kembali ke sini.'
+                  : 'Tekan tombol ＋ Watchlist pada film yang ingin Anda tonton nanti.'}
+              </p>
+              <button type="button" className="btn btn-primary" onClick={() => navigate(browsePath('trending'))}>
+                Jelajahi film
+              </button>
+            </StatusMessage>
+          )}
+          {list.status === 'success' && movies.length === 0 && !inCollection && (
             <StatusMessage kind="empty" title={`Tidak ada hasil untuk “${trimmed}”`}>
               <p>Coba judul lain atau periksa ejaan.</p>
             </StatusMessage>

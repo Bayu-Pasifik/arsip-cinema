@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { demoMovies } from '../services/demo';
+import { isCollectionKey, type Collections } from '../services/collections';
 import { errorMessage, fetchCategory, MAX_TOTAL, searchMovies, TmdbError, type MoviePage } from '../services/tmdb';
 import type { ListSource, Movie } from '../types/tmdb';
 import { appendUnique, canLoadMore } from '../utils/movies';
@@ -36,7 +37,7 @@ interface Core {
   kind?: string;
 }
 
-export function useMovieList(source: ListSource, reloadToken: number): ListState {
+export function useMovieList(source: ListSource, reloadToken: number, local: Collections): ListState {
   const [core, setCore] = useState<Core>({ status: 'loading', movies: [], page: 0, totalPages: 0, generation: 0 });
   const [loadingMore, setLoadingMore] = useState(false);
   const [moreError, setMoreError] = useState<string | null>(null);
@@ -50,13 +51,18 @@ export function useMovieList(source: ListSource, reloadToken: number): ListState
   const loadingMoreRef = useRef(false);
 
   const fetchPage = (src: ListSource, page: number, signal: AbortSignal): Promise<MoviePage> =>
-    src.kind === 'search' ? searchMovies(src.query, page, signal) : fetchCategory(src.kind === 'category' ? src.category : 'trending', page, signal);
+    src.kind === 'search'
+      ? searchMovies(src.query, page, signal)
+      : fetchCategory(src.kind === 'category' && !isCollectionKey(src.category) ? src.category : 'trending', page, signal);
 
   useEffect(() => {
     moreController.current?.abort();
     loadingMoreRef.current = false;
     setLoadingMore(false);
     setMoreError(null);
+
+    // Favorit/Watchlist berasal dari penyimpanan lokal: tidak ada request jaringan
+    if (source.kind === 'category' && isCollectionKey(source.category)) return;
 
     if (source.kind === 'demo') {
       setCore((p) => ({ status: 'success', movies: demoMovies(), page: 1, totalPages: 1, generation: p.generation + 1 }));
@@ -127,6 +133,19 @@ export function useMovieList(source: ListSource, reloadToken: number): ListState
   }, []);
 
   useEffect(() => () => moreController.current?.abort(), []);
+
+  // Daftar lokal diturunkan langsung dari store (selalu mutakhir saat film ditambah/dihapus).
+  if (source.kind === 'category' && isCollectionKey(source.category)) {
+    return {
+      status: 'success',
+      movies: local[source.category],
+      generation: source.category === 'favorites' ? -1 : -2, // konstan per daftar: fokus tidak di-reset saat isi berubah
+      hasMore: false,
+      loadingMore: false,
+      moreError: null,
+      loadMore,
+    };
+  }
 
   const base: Base = {
     movies: core.movies,

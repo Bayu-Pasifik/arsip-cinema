@@ -44,6 +44,7 @@ Jika proxy tidak terpasang, poster 3D menampilkan kartu placeholder berlabel "PO
 
 - Pembuka sinematik → masuk ke tumpukan kartu poster 3D diagonal (terinspirasi pola "card stack" di motionsites.ai, bukan salinan), kamera dengan parallax halus.
 - Paginasi: daftar dimuat per halaman TMDB (20 film) dan halaman berikutnya diambil otomatis saat fokus mendekati akhir (5 film terakhir), hingga 100 film per daftar. Tombol "+" di ujung rel memuat manual; bila gagal berubah jadi "↻" untuk mencoba lagi. Tekstur poster hanya dimuat saat poster mendekati fokus.
+- Favorit & Watchlist: tombol ♡ Favorit / ＋ Watchlist di caption galeri dan halaman detail (toggle, `aria-pressed`, diumumkan ke pembaca layar). Disimpan di `localStorage` (`arsip.collections.v1`, sinkron antar tab, maks. 200 film per daftar) sebagai salinan ringkas sehingga daftar tampil tanpa memanggil API. Tab **Favorit** dan **Watchlist** (`/browse/favorites`, `/browse/watchlist`) menampilkan daftar itu dengan lencana jumlah. Tidak memakai akun TMDB; data hanya ada di browser ini. Film demo tidak dapat disimpan.
 - Kategori: Trending (`/trending/movie/week`), Popular, Top Rated, Now Playing.
 - Pencarian TMDB (`/search/movie`) dengan debounce 400 ms, indikator loading, state kosong/error, dan pembatalan request lama (`AbortController`).
 - Detail film (halaman scroll 3D: GSAP ScrollTrigger + Three.js): poster, backdrop, tagline, durasi, rating, genre, sinopsis, sutradara, pemeran (`/movie/{id}?append_to_response=credits`).

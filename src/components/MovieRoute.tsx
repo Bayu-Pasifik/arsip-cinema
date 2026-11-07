@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { useMovieDetail } from '../hooks/useMovieDetail';
 import type { Movie } from '../types/tmdb';
 import MovieStory from './MovieStory';
@@ -15,7 +16,12 @@ interface Props {
  * bila tidak (tautan langsung / refresh), data diambil dari TMDB.
  */
 export default function MovieRoute({ id, movies, reduced, onClose }: Props) {
-  const found = movies.find((m) => m.id === id) ?? null;
+  // Ingat film terakhir yang ditemukan: bila film keluar dari daftar (mis. dihapus dari Favorit saat detail terbuka)
+  // halaman detail tidak boleh dimuat ulang/berkedip.
+  const cache = useRef<Movie | null>(null);
+  const inList = movies.find((m) => m.id === id) ?? null;
+  if (inList) cache.current = inList;
+  const found = inList ?? (cache.current?.id === id ? cache.current : null);
   const state = useMovieDetail(found ? null : id);
 
   if (found) return <MovieStory key={found.id} movie={found} reduced={reduced} onClose={onClose} />;

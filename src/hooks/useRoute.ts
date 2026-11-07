@@ -4,7 +4,7 @@ import type { Category } from '../types/tmdb';
 /**
  * Router mini berbasis History API (tanpa dependensi):
  *   /                          pembuka
- *   /browse/:category?q=...    galeri (category: trending|popular|top_rated|now_playing)
+ *   /browse/:category?q=...    galeri (category: trending|popular|top_rated|now_playing|favorites|watchlist)
  *   /movie/:id                 halaman detail film
  */
 export type Route =
@@ -12,7 +12,7 @@ export type Route =
   | { name: 'browse'; category: Category; q: string }
   | { name: 'movie'; id: number };
 
-const CATEGORIES: readonly Category[] = ['trending', 'popular', 'top_rated', 'now_playing'];
+const CATEGORIES: readonly Category[] = ['trending', 'popular', 'top_rated', 'now_playing', 'favorites', 'watchlist'];
 const listeners = new Set<() => void>();
 
 const snapshot = () => window.location.pathname + window.location.search;

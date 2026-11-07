@@ -58,7 +58,11 @@ export interface MovieListResponse {
   total_results: number;
 }
 
-export type Category = 'trending' | 'popular' | 'top_rated' | 'now_playing';
+/** Kategori yang diambil dari TMDB. */
+export type TmdbCategory = 'trending' | 'popular' | 'top_rated' | 'now_playing';
+/** Daftar lokal milik pengguna (localStorage). */
+export type CollectionKey = 'favorites' | 'watchlist';
+export type Category = TmdbCategory | CollectionKey;
 
 export type ListSource =
   | { kind: 'category'; category: Category }

@@ -10,12 +10,14 @@ interface Props {
   onCategory: (c: Category) => void;
   onQuery: (q: string) => void;
   onHome: () => void;
+  /** jumlah item pada daftar lokal, ditampilkan sebagai lencana di tab Favorit/Watchlist */
+  counts: { favorites: number; watchlist: number };
 }
 
 const CATEGORIES = Object.keys(CATEGORY_LABEL) as Category[];
 
 const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
-  { category, query, searching, searchActive, onCategory, onQuery, onHome },
+  { category, query, searching, searchActive, onCategory, onQuery, onHome, counts },
   ref,
 ) {
   return (
@@ -37,6 +39,11 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
                   onClick={() => onCategory(c)}
                 >
                   {CATEGORY_LABEL[c]}
+                  {(c === 'favorites' || c === 'watchlist') && counts[c] > 0 && (
+                    <span className="pill-count" aria-label={`${counts[c]} film`}>
+                      {counts[c]}
+                    </span>
+                  )}
                 </button>
               </li>
             );

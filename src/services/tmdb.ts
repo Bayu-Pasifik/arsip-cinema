@@ -1,5 +1,6 @@
 import type {
   Category,
+  TmdbCategory,
   Movie,
   MovieDetail,
   MovieListResponse,
@@ -75,7 +76,7 @@ async function request<T>(path: string, params: Params = {}, signal?: AbortSigna
   }
 }
 
-const CATEGORY_PATH: Record<Category, string> = {
+const CATEGORY_PATH: Record<TmdbCategory, string> = {
   trending: '/trending/movie/week',
   popular: '/movie/popular',
   top_rated: '/movie/top_rated',
@@ -87,6 +88,8 @@ export const CATEGORY_LABEL: Record<Category, string> = {
   popular: 'Popular',
   top_rated: 'Top Rated',
   now_playing: 'Now Playing',
+  favorites: 'Favorit',
+  watchlist: 'Watchlist',
 };
 
 /** Batas total film yang dimuat per daftar (5 halaman TMDB × 20), agar jumlah tekstur dan elemen DOM tetap wajar. */
@@ -103,7 +106,7 @@ function toPage(data: MovieListResponse): MoviePage {
   return { movies: data.results, page: data.page, totalPages: Math.min(data.total_pages, 500) };
 }
 
-export async function fetchCategory(category: Category, page = 1, signal?: AbortSignal): Promise<MoviePage> {
+export async function fetchCategory(category: TmdbCategory, page = 1, signal?: AbortSignal): Promise<MoviePage> {
   return toPage(await request<MovieListResponse>(CATEGORY_PATH[category], { page }, signal));
 }
 
