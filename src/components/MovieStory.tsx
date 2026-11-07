@@ -266,6 +266,18 @@ export default function MovieStory({ movie, reduced, onClose }: Props) {
 
       <div className="story-track" ref={track}>
         <div className="story-stage">
+          {/* Poster ada di canvas (aria-hidden) → sediakan padanan teks untuk teknologi bantu. */}
+          {!reduced && webgl && (
+            <div
+              role="img"
+              className="sr-only"
+              aria-label={
+                movie.poster_path
+                  ? `Poster film ${movie.title}${movie.release_date ? ` (${releaseYear(movie.release_date)})` : ''}`
+                  : `Film ${movie.title} tidak memiliki poster di TMDB`
+              }
+            />
+          )}
           {!reduced && webgl && (
             <div className="story-canvas">
               <SceneBoundary>
