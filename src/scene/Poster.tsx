@@ -44,7 +44,9 @@ export function Poster({ movie, index, stage, compact, onPick }: Props) {
     // tata letak dasar: pembuka = tumpukan di bawah judul; jelajah = tumpukan di kanan (lebar) / atas (potret)
     const baseX = lerp(wide ? -2.4 : -1.1, wide ? 1.5 : -1.0, e);
     const baseY = lerp(-3.1, wide ? 0 : 0.9, e);
-    const baseScale = lerp(1.05, wide ? 1.3 : 1.45, e);
+    // viewport pendek (ponsel lanskap): perkecil agar tidak menutupi topbar dan rel thumbnail
+    const short = size.height < 600 ? Math.sqrt(size.height / 600) : 1;
+    const baseScale = lerp(1.05, wide ? 1.3 : 1.45, e) * short;
 
     const t = Math.max(0, d); // jarak ke belakang tumpukan
     const gone = Math.max(0, -d); // jarak yang sudah dilewati
