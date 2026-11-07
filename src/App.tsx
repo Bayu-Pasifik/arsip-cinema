@@ -2,7 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } fro
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import Browse from './components/Browse';
-import DetailPanel from './components/DetailPanel';
+import MovieStory from './components/MovieStory';
 import Hero from './components/Hero';
 import StatusMessage from './components/StatusMessage';
 import TopBar from './components/TopBar';
@@ -281,7 +281,7 @@ export default function App() {
         </p>
       )}
 
-      {detailMovie && <DetailPanel movie={detailMovie} reduced={reduced} onClose={() => setDetailMovie(null)} />}
+      {detailMovie && <MovieStory movie={detailMovie} reduced={reduced} onClose={() => setDetailMovie(null)} />}
     </div>
   );
 }

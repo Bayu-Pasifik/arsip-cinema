@@ -111,10 +111,11 @@ export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promis
   return detail;
 }
 
-type ImageKind = 'poster' | 'backdrop';
+type ImageKind = 'poster' | 'backdrop' | 'profile';
 const SIZES: Record<ImageKind, readonly string[]> = {
   poster: ['w185', 'w342', 'w500', 'w780'],
   backdrop: ['w300', 'w780', 'w1280'],
+  profile: ['w45', 'w185', 'h632'],
 };
 
 /** Mengembalikan URL gambar TMDB; `size` harus salah satu ukuran resmi untuk jenis tersebut. */
@@ -132,6 +133,11 @@ export function textureUrl(path: string | null, size: string): string | null {
   if (!path) return null;
   const safe = SIZES.poster.includes(size) ? size : SIZES.poster[1];
   return `/tmdb-img/${safe}${path}`;
+}
+
+/** Tekstur backdrop untuk WebGL (lewat proxy same-origin, lihat textureUrl). */
+export function backdropTextureUrl(path: string | null): string | null {
+  return path ? `/tmdb-img/w780${path}` : null;
 }
 
 export function releaseYear(date: string): string {

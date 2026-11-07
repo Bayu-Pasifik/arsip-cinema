@@ -35,7 +35,7 @@ Tanpa kunci, aplikasi menampilkan pesan konfigurasi dan tombol untuk melihat ant
 - Pembuka sinematik → masuk ke tumpukan kartu poster 3D diagonal (terinspirasi pola "card stack" di motionsites.ai, bukan salinan), kamera dengan parallax halus.
 - Kategori: Trending (`/trending/movie/week`), Popular, Top Rated, Now Playing.
 - Pencarian TMDB (`/search/movie`) dengan debounce 400 ms, indikator loading, state kosong/error, dan pembatalan request lama (`AbortController`).
-- Detail film (panel): poster, backdrop, tagline, durasi, rating, genre, sinopsis, sutradara, pemeran (`/movie/{id}?append_to_response=credits`).
+- Detail film (halaman scroll 3D: GSAP ScrollTrigger + Three.js): poster, backdrop, tagline, durasi, rating, genre, sinopsis, sutradara, pemeran (`/movie/{id}?append_to_response=credits`).
 - Navigasi: ← → / Home / End, gulir roda, geser, klik poster (poster fokus → buka detail), rel thumbnail, tombol Sebelumnya/Berikutnya. Esc menutup detail; fokus dikurung dan dikembalikan.
 - `prefers-reduced-motion`: semua transisi GSAP menjadi instan, parallax dan partikel dimatikan, render 3D hanya saat perlu (`frameloop="demand"`).
 - Layar kecil: DPR 1, tanpa antialias, partikel dikurangi, tekstur `w185`, kamera menyesuaikan rasio potret. Rel thumbnail menjamin akses konten.
