@@ -8,6 +8,8 @@ import { imageUrl, releaseYear } from '../services/tmdb';
 import type { Movie } from '../types/tmdb';
 import { formatRuntime } from '../utils/format';
 import type { StoryProgress } from '../scene/StoryScene';
+import { SceneBoundary } from '../scene/SceneBoundary';
+import { useWebGL } from '../utils/webgl';
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -33,6 +35,7 @@ const CHAPTERS = [
  */
 export default function MovieStory({ movie, reduced, onClose }: Props) {
   const compact = useCompact();
+  const webgl = useWebGL();
   const root = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const closeBtn = useRef<HTMLButtonElement>(null);
@@ -157,6 +160,17 @@ export default function MovieStory({ movie, reduced, onClose }: Props) {
       }
       fadeOut('.st-cast', 0.9);
 
+      // fallback tanpa WebGL: poster HTML mengikuti bab seperti poster 3D
+      const flat = q('.st-flat-poster');
+      if (flat.length) {
+        const W = window.innerWidth;
+        const wide = W > 900;
+        gsap.set(flat, { xPercent: -50, yPercent: -50 });
+        tl.to(flat, { x: wide ? W * 0.27 : 0, rotate: -4, duration: 0.06 }, 0.14);
+        tl.to(flat, { x: wide ? -W * 0.27 : 0, rotate: 3, duration: 0.04 }, 0.66);
+        tl.to(flat, { x: 0, y: -40, rotate: 0, scale: 1.12, duration: 0.06 }, 0.9);
+      }
+
       // bab 5 — penutup
       fadeIn('.st-end', 0.94, 0.05);
 
@@ -166,7 +180,7 @@ export default function MovieStory({ movie, reduced, onClose }: Props) {
         if (ratingEl) ratingEl.textContent = rating.toFixed(1);
       };
     },
-    { scope: root, dependencies: [reduced, words.length, cast.length, genres.length, rating], revertOnUpdate: true },
+    { scope: root, dependencies: [reduced, webgl, words.length, cast.length, genres.length, rating], revertOnUpdate: true },
   );
 
   const scrollToChapter = (at: number) => {
@@ -252,19 +266,24 @@ export default function MovieStory({ movie, reduced, onClose }: Props) {
 
       <div className="story-track" ref={track}>
         <div className="story-stage">
-          {!reduced && (
+          {!reduced && webgl && (
             <div className="story-canvas">
-              <Suspense fallback={null}>
-                <StoryScene
-                  title={movie.title}
-                  posterPath={movie.poster_path}
-                  backdropPath={movie.backdrop_path}
-                  rating={rating}
-                  progress={progress}
-                  compact={compact}
-                />
-              </Suspense>
+              <SceneBoundary>
+                <Suspense fallback={null}>
+                  <StoryScene
+                    title={movie.title}
+                    posterPath={movie.poster_path}
+                    backdropPath={movie.backdrop_path}
+                    rating={rating}
+                    progress={progress}
+                    compact={compact}
+                  />
+                </Suspense>
+              </SceneBoundary>
             </div>
+          )}
+          {!reduced && !webgl && posterSrc && (
+            <img className="st-flat-poster" src={posterSrc} alt={`Poster film ${movie.title}`} width={342} height={513} />
           )}
 
           {/* 1 — hero */}

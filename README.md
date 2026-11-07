@@ -70,3 +70,13 @@ Router mini berbasis History API (`src/hooks/useRoute.ts`, tanpa dependensi):
 | `/movie/:id` | halaman detail film (dapat dibuka langsung/dibagikan) |
 
 Tombol Back/Forward browser berfungsi: membuka detail menambah riwayat, menutupnya (tombol Kembali atau Esc) kembali ke riwayat sebelumnya. Untuk tautan langsung, hosting statis harus mengarahkan semua path ke `index.html` (Vite dev/preview sudah melakukannya; di Netlify/Vercel tambahkan rewrite SPA).
+
+## Fallback tanpa WebGL
+
+`src/utils/webgl.ts` mendeteksi dukungan WebGL saat start, dan `SceneBoundary` (error saat membuat Canvas) serta `ContextWatch` (event `webglcontextlost`) memicu fallback saat runtime. Bila WebGL tidak tersedia:
+
+- Galeri memakai `FlatStack`: tumpukan kartu yang sama dengan CSS transform.
+- Halaman detail tetap di-scrub oleh ScrollTrigger; poster 3D diganti poster HTML yang bergeser per bab (cincin rating 3D tidak ada, angka rating tetap menghitung naik).
+- Banner kecil menjelaskan "Mode 2D". Fallback tidak otomatis kembali ke 3D sampai halaman dimuat ulang.
+
+Untuk menguji: buka `/?webgl=off`, atau di konsol browser panggil `WEBGL_lose_context.loseContext()` pada canvas.

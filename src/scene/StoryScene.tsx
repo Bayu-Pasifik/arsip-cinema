@@ -2,6 +2,7 @@ import { useMemo, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { backdropTextureUrl, textureUrl } from '../services/tmdb';
+import { ContextWatch } from './SceneBoundary';
 import { POSTER_H, POSTER_W } from './stage';
 import { usePosterTexture } from './usePosterTexture';
 
@@ -247,6 +248,7 @@ export default function StoryScene({ title, posterPath, backdropPath, rating, pr
       gl={{ antialias: !compact, powerPreference: 'high-performance' }}
     >
       <color attach="background" args={[BG]} />
+      <ContextWatch />
       <CameraRig progress={progress} />
       <Backdrop path={backdropPath} progress={progress} />
       <Shards progress={progress} count={compact ? 6 : 14} />

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import type { Movie } from '../types/tmdb';
 import { Poster } from './Poster';
+import { ContextWatch } from './SceneBoundary';
 import type { Stage } from './stage';
 
 const BG = '#dfe5ec';
@@ -58,6 +59,7 @@ export default function ArchiveScene({ movies, stage, reduced, compact, onPick }
       }}
     >
       <color attach="background" args={[BG]} />
+      <ContextWatch />
       <Bridge stage={stage} />
       <CameraRig reduced={reduced} />
       {items.map(({ m, i }) => (

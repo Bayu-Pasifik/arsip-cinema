@@ -5,7 +5,10 @@ import Browse from './components/Browse';
 import MovieRoute from './components/MovieRoute';
 import Hero from './components/Hero';
 import StatusMessage from './components/StatusMessage';
+import FlatStack from './components/FlatStack';
 import TopBar from './components/TopBar';
+import { SceneBoundary } from './scene/SceneBoundary';
+import { useWebGL } from './utils/webgl';
 import { useCompact, useDebounced, useReducedMotion } from './hooks/useEnv';
 import { useMovieList } from './hooks/useMovieList';
 import { browsePath, cameFromApp, moviePath, navigate, useRoute } from './hooks/useRoute';
@@ -23,6 +26,7 @@ const ArchiveScene = lazy(() => import('./scene/ArchiveScene'));
 export default function App() {
   const reduced = useReducedMotion();
   const compact = useCompact();
+  const webgl = useWebGL();
   const stage = useMemo(createStage, []);
 
   const container = useRef<HTMLDivElement>(null);
@@ -250,11 +254,17 @@ export default function App() {
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
       >
-        <Suspense fallback={null}>
-          {movies.length > 0 && (
-            <ArchiveScene movies={movies} stage={stage} reduced={reduced} compact={compact} onPick={onPick} />
-          )}
-        </Suspense>
+        {webgl ? (
+          <SceneBoundary>
+            <Suspense fallback={null}>
+              {movies.length > 0 && (
+                <ArchiveScene movies={movies} stage={stage} reduced={reduced} compact={compact} onPick={onPick} />
+              )}
+            </Suspense>
+          </SceneBoundary>
+        ) : (
+          movies.length > 0 && <FlatStack movies={movies} index={index} entered={entered} onPick={onPick} />
+        )}
       </div>
       <div className="vignette" aria-hidden="true" />
 
@@ -320,6 +330,12 @@ export default function App() {
           {list.status === 'loading' ? 'Memuat film…' : ''}
         </p>
       </main>
+
+      {!webgl && (
+        <p className="gl-notice" role="status">
+          Mode 2D: WebGL tidak tersedia di perangkat atau browser ini, jadi adegan 3D diganti tampilan datar. Semua fitur tetap berfungsi.
+        </p>
+      )}
 
       {demo && (
         <p className="demo-banner" role="note">
