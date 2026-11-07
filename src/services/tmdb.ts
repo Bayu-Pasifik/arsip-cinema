@@ -7,6 +7,9 @@ import type {
 } from '../types/tmdb';
 
 const API_BASE = 'https://api.themoviedb.org/3';
+
+/** Bahasa data TMDB (parameter `language`). Bila terjemahan kosong, TMDB mengembalikan teks kosong atau judul asli. */
+const LANGUAGE = 'id-ID';
 const IMG_BASE = 'https://image.tmdb.org/t/p';
 
 const rawKey = (import.meta.env.VITE_TMDB_API_KEY ?? '').trim();
@@ -34,7 +37,7 @@ async function request<T>(path: string, params: Params = {}, signal?: AbortSigna
     throw new TmdbError('missing-key', 'VITE_TMDB_API_KEY belum diisi.');
   }
   const url = new URL(API_BASE + path);
-  url.searchParams.set('language', 'en-US');
+  url.searchParams.set('language', params.language ? String(params.language) : LANGUAGE);
   for (const [k, v] of Object.entries(params)) {
     if (v !== undefined && v !== '') url.searchParams.set(k, String(v));
   }
@@ -94,8 +97,18 @@ export async function searchMovies(query: string, signal?: AbortSignal): Promise
   return data.results.slice(0, MAX_ITEMS);
 }
 
-export function fetchMovieDetail(id: number, signal?: AbortSignal): Promise<MovieDetail> {
-  return request<MovieDetail>(`/movie/${id}`, { append_to_response: 'credits' }, signal);
+export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promise<MovieDetail> {
+  const detail = await request<MovieDetail>(`/movie/${id}`, { append_to_response: 'credits' }, signal);
+  // Banyak film belum punya sinopsis/tagline bahasa Indonesia: ambil versi en-US sebagai cadangan (diberi label di UI).
+  if (!detail.overview) {
+    try {
+      const en = await request<MovieDetail>(`/movie/${id}`, { language: 'en-US' }, signal);
+      if (en.overview) return { ...detail, overview: en.overview, overviewFallback: true, tagline: detail.tagline || en.tagline };
+    } catch (err) {
+      if ((err as Error).name === 'AbortError') throw err;
+    }
+  }
+  return detail;
 }
 
 type ImageKind = 'poster' | 'backdrop';

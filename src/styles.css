@@ -760,3 +760,4 @@ main > * {
     border-color: var(--ink);
   }
 }
+.dp-note { margin: 8px 0 0; font-size: 12px; }

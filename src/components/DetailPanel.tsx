@@ -133,7 +133,12 @@ export default function DetailPanel({ movie, reduced, onClose }: Props) {
             <h3 id="dp-ov" className="dp-h">
               Sinopsis
             </h3>
-            <p className="dp-text">{movie.overview || 'Sinopsis belum tersedia di TMDB.'}</p>
+            <p className="dp-text">{detail?.overview || movie.overview || 'Sinopsis belum tersedia di TMDB.'}</p>
+            {detail?.overviewFallback && (
+              <p className="dim dp-note" lang="en">
+                Sinopsis dalam bahasa Inggris — terjemahan Indonesia belum tersedia di TMDB.
+              </p>
+            )}
           </section>
 
           <div className="dp-anim" aria-live="polite">

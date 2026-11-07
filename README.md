@@ -55,6 +55,6 @@ src/
 
 ## Asumsi
 
-- Bahasa data TMDB `en-US`; teks antarmuka berbahasa Indonesia.
+- Bahasa data TMDB `id-ID` (konstanta `LANGUAGE` di `src/services/tmdb.ts`); bila sinopsis Indonesia kosong, detail memakai `en-US` dan diberi label.
 - Setiap daftar dibatasi 20 film (halaman pertama TMDB).
 - Referensi gerak (motionsites.ai) hanya dijadikan inspirasi umum (reveal baris judul, transisi kamera, stagger); tidak ada desain yang disalin.

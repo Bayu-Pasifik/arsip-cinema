@@ -33,6 +33,8 @@ export interface MovieDetail extends Movie {
   runtime: number | null;
   genres: Genre[];
   status: string;
+  /** true bila sinopsis berasal dari bahasa Inggris karena terjemahan Indonesia kosong */
+  overviewFallback?: boolean;
   credits?: { cast: CastMember[]; crew: CrewMember[] };
 }
 
