@@ -12,6 +12,13 @@ const API_BASE = 'https://api.themoviedb.org/3';
 const LANGUAGE = 'id-ID';
 const IMG_BASE = 'https://image.tmdb.org/t/p';
 
+/**
+ * Basis URL proxy gambar untuk tekstur WebGL (image.tmdb.org tidak mengirim header CORS).
+ * Default `/tmdb-img` (proxy Vite saat dev/preview, rewrite Netlify/Vercel/Nginx di produksi);
+ * ganti lewat VITE_TMDB_IMG_BASE bila proxy/CDN Anda ada di alamat lain.
+ */
+const IMG_PROXY = (import.meta.env.VITE_TMDB_IMG_BASE ?? '/tmdb-img').trim().replace(/\/+$/, '') || '/tmdb-img';
+
 const rawKey = (import.meta.env.VITE_TMDB_API_KEY ?? '').trim();
 
 /** Kunci v4 (JWT, diawali "eyJ") dikirim sebagai Bearer; kunci v3 sebagai query api_key. */
@@ -127,17 +134,17 @@ export function imageUrl(path: string | null, kind: ImageKind, size: string): st
 
 /**
  * URL untuk tekstur WebGL. CDN gambar TMDB tidak mengirim header CORS, jadi diakses lewat
- * proxy same-origin `/tmdb-img` (Vite dev/preview; di produksi sediakan rewrite yang sama).
+ * proxy same-origin (lihat IMG_PROXY).
  */
 export function textureUrl(path: string | null, size: string): string | null {
   if (!path) return null;
   const safe = SIZES.poster.includes(size) ? size : SIZES.poster[1];
-  return `/tmdb-img/${safe}${path}`;
+  return `${IMG_PROXY}/${safe}${path}`;
 }
 
 /** Tekstur backdrop untuk WebGL (lewat proxy same-origin, lihat textureUrl). */
 export function backdropTextureUrl(path: string | null): string | null {
-  return path ? `/tmdb-img/w780${path}` : null;
+  return path ? `${IMG_PROXY}/w780${path}` : null;
 }
 
 export function releaseYear(date: string): string {

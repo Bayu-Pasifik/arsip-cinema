@@ -26,9 +26,19 @@ Tanpa kunci, aplikasi menampilkan pesan konfigurasi dan tombol untuk melihat ant
 
 > Catatan keamanan: variabel `VITE_*` ikut masuk ke bundel browser, jadi kunci TMDB terlihat oleh pengunjung situs yang dipublikasikan. Untuk produksi publik, letakkan proxy server di depan TMDB.
 
-## Proxy gambar (penting)
+## Proxy gambar & deploy (penting)
 
-`image.tmdb.org` tidak mengirim header CORS, sehingga poster tidak bisa dipakai sebagai tekstur WebGL secara langsung. Tekstur dimuat lewat jalur same-origin `/tmdb-img/<ukuran>/<path>` yang di-proxy ke `https://image.tmdb.org/t/p/` oleh Vite (`vite.config.ts`, berlaku untuk `dev` dan `preview`). Saat deploy statis, tambahkan rewrite yang sama di hosting Anda (Netlify/Vercel/Nginx). Gambar HTML biasa (thumbnail, detail) memakai URL TMDB langsung.
+`image.tmdb.org` tidak mengirim header CORS, jadi poster tidak bisa dipakai sebagai tekstur WebGL secara langsung. Tekstur dimuat lewat jalur same-origin `/tmdb-img/<ukuran>/<path>` yang harus di-proxy ke `https://image.tmdb.org/t/p/`. Gambar HTML biasa (thumbnail, foto pemeran) memakai URL TMDB langsung dan tidak perlu proxy.
+
+| Lingkungan | Cara |
+| --- | --- |
+| `npm run dev` / `npm run preview` | otomatis, proxy di `vite.config.ts` |
+| Netlify | `public/_redirects` (ikut ter-copy ke `dist`) — proxy gambar + fallback SPA |
+| Vercel | `vercel.json` — rewrite gambar + fallback SPA |
+| Nginx / server sendiri | `deploy/nginx.conf.example` (proxy + cache 7 hari + `try_files` ke `index.html`) |
+| Proxy/CDN di alamat lain | set `VITE_TMDB_IMG_BASE` (mis. `https://img.contoh.com/tmdb`) saat build |
+
+Jika proxy tidak terpasang, poster 3D menampilkan kartu placeholder berlabel "POSTER GAGAL DIMUAT" (bukan layar kosong); aplikasi tetap bisa dipakai lewat thumbnail dan caption. Konfigurasi Netlify/Vercel/Nginx belum diuji di platform aslinya; yang sudah diuji adalah build produksi lewat `vite preview` (proxy gambar dan fallback SPA).
 
 ## Fitur
 

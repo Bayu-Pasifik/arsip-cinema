@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 
-function placeholderTexture(label: string): THREE.CanvasTexture {
+function placeholderTexture(label: string, note = 'TANPA POSTER'): THREE.CanvasTexture {
   const c = document.createElement('canvas');
   c.width = 342;
   c.height = 513;
@@ -14,7 +14,7 @@ function placeholderTexture(label: string): THREE.CanvasTexture {
   g.strokeRect(16, 16, c.width - 32, c.height - 32);
   g.fillStyle = '#b8330a';
   g.font = '700 16px sans-serif';
-  g.fillText('TANPA POSTER', 32, 52);
+  g.fillText(note, 32, 52);
   g.fillStyle = '#12161c';
   g.font = '40px serif';
   const words = label.split(' ');
@@ -66,7 +66,7 @@ export function usePosterTexture(url: string | null, title: string): THREE.Textu
         undefined,
         () => {
           if (disposed) return;
-          current = placeholderTexture(title);
+          current = placeholderTexture(title, 'POSTER GAGAL DIMUAT');
           setTex(current);
           invalidate();
         },

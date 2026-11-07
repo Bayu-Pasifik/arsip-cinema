@@ -1,0 +1,21 @@
+# Contoh server block Nginx untuk menyajikan hasil `npm run build` (folder dist).
+server {
+  listen 80;
+  server_name example.com;
+  root /var/www/arsip-cinema/dist;
+  index index.html;
+
+  # Proxy gambar TMDB agar tekstur WebGL lolos CORS (same-origin).
+  location /tmdb-img/ {
+    proxy_pass https://image.tmdb.org/t/p/;
+    proxy_set_header Host image.tmdb.org;
+    proxy_ssl_server_name on;
+    proxy_cache_valid 200 7d;
+    add_header Cache-Control "public, max-age=604800";
+  }
+
+  # SPA: semua path lain ke index.html (rute /browse/... dan /movie/...).
+  location / {
+    try_files $uri /index.html;
+  }
+}
