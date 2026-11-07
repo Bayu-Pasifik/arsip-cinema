@@ -46,7 +46,7 @@ const KFS: KF[] = [
   { p: 0.66, x: 2.3, y: 0, s: 1.05, ry: -0.35, rz: -0.03 },
   { p: 0.7, x: -2.7, y: 0.2, s: 0.95, ry: 0.5, rz: 0.04 },
   { p: 0.9, x: -2.7, y: 0.2, s: 0.95, ry: 0.35, rz: 0.02 },
-  { p: 1, x: 0, y: 0, s: 1.5, ry: 0, rz: 0 },
+  { p: 1, x: 0, y: 0.75, s: 1.2, ry: 0, rz: 0 },
 ];
 
 function pose(p: number, wide: boolean) {
@@ -111,16 +111,18 @@ function Backdrop({ path, progress }: { path: string | null; progress: StoryProg
   const mesh = useRef<THREE.Mesh>(null);
   const mat = useRef<THREE.MeshBasicMaterial>(null);
   const tex = usePosterTexture(backdropTextureUrl(path), '');
+  const size = useThree((st) => st.size);
 
   useFrame(() => {
     const m = mesh.current;
     if (!m || !mat.current) return;
     const p = progress.p;
     m.position.set(lerp(-1.2, 1.2, p), lerp(-0.4, 0.8, p), -7);
-    m.scale.setScalar(lerp(1.0, 1.35, p));
+    // layar potret butuh plane lebih besar agar tepinya tak terlihat
+    m.scale.setScalar(lerp(1.0, 1.35, p) * (size.width / size.height < 1 ? 2.4 : 1));
     // terang di hero & penutup, redup di tengah agar teks tetap terbaca
     const dim = 1 - 0.6 * seg(p, 0.1, 0.25) * (1 - seg(p, 0.9, 1));
-    mat.current.opacity = 0.34 * dim * seg(p, 0, 0.03);
+    mat.current.opacity = 0.28 * dim * seg(p, 0, 0.03);
   });
 
   if (!path) return null;
@@ -152,7 +154,7 @@ function RatingRing({ rating, progress, compact }: { rating: number; progress: S
     if (!g.visible) return;
     g.position.set(k.x, k.y, 0.1);
     g.rotation.z = -p * 2;
-    g.scale.setScalar(vis);
+    g.scale.setScalar(vis * (wide ? 1 : 0.72));
 
     const R = 2.05;
     const filled = Math.round(DOTS * (rating / 10) * seg(p, 0.46, 0.6));

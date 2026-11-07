@@ -42,9 +42,9 @@ export function Poster({ movie, index, stage, compact, onPick }: Props) {
     h.value += (h.target - h.value) * Math.min(1, dt * 10);
 
     // tata letak dasar: pembuka = tumpukan di bawah judul; jelajah = tumpukan di kanan (lebar) / atas (potret)
-    const baseX = lerp(-2.4, wide ? 1.5 : -0.6, e);
+    const baseX = lerp(wide ? -2.4 : -1.1, wide ? 1.5 : -1.0, e);
     const baseY = lerp(-3.1, wide ? 0 : 0.9, e);
-    const baseScale = lerp(1.05, wide ? 1.3 : 1.2, e);
+    const baseScale = lerp(1.05, wide ? 1.3 : 1.45, e);
 
     const t = Math.max(0, d); // jarak ke belakang tumpukan
     const gone = Math.max(0, -d); // jarak yang sudah dilewati

@@ -829,6 +829,7 @@ main > * {
 .story.is-static .st-static-poster {
   order: -1;
   width: min(260px, 60vw);
+  height: auto;
   border: 4px solid #fff;
   box-shadow: 6px 6px 0 rgba(18, 22, 28, 0.12);
 }
@@ -858,7 +859,7 @@ main > * {
   /* potret/tablet: tumpukan di atas, caption di bawah di atas rel */
   .caption {
     top: auto;
-    bottom: 96px;
+    bottom: 108px;
     transform: none;
     width: auto;
     right: var(--pad);
@@ -946,6 +947,12 @@ main > * {
     display: none;
   }
 
+  .st-cast-card img,
+  .st-cast-ph {
+    aspect-ratio: 1 / 1.15;
+    margin-bottom: 4px;
+  }
+
   .st-overview {
     font-size: clamp(20px, 5vw, 28px);
   }
@@ -964,5 +971,13 @@ main > * {
 
   .st-title {
     font-size: clamp(44px, 14vw, 90px);
+  }
+}
+
+@media (max-width: 560px) {
+  .caption-actions .btn {
+    min-height: 40px;
+    padding: 0 14px;
+    font-size: 13px;
   }
 }
