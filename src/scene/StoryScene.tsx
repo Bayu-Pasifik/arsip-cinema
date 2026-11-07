@@ -50,7 +50,11 @@ const KFS: KF[] = [
   { p: 1, x: 0, y: 0.75, s: 1.2, ry: 0, rz: 0 },
 ];
 
-function pose(p: number, wide: boolean) {
+/** Layar potret: ponsel (aspek ~0.46) → 0.72, tablet (aspek ~0.7) → ~1.0. */
+const portraitScale = (aspect: number) => Math.min(1.05, Math.max(0.72, 0.72 + (aspect - 0.46) * 1.35));
+
+function pose(p: number, aspect: number) {
+  const wide = aspect > 1.1;
   let i = 0;
   while (i < KFS.length - 2 && p > KFS[i + 1].p) i++;
   const a = KFS[i];
@@ -66,7 +70,7 @@ function pose(p: number, wide: boolean) {
   if (!wide) {
     out.x *= 0.15;
     out.y += 1.15;
-    out.s *= 0.72;
+    out.s *= portraitScale(aspect);
   }
   return out;
 }
@@ -79,9 +83,8 @@ function PosterCard({ posterPath, title, progress, compact }: Pick<Props, 'poste
   useFrame(() => {
     const g = group.current;
     if (!g) return;
-    const wide = size.width / size.height > 1.1;
     const p = progress.p;
-    const k = pose(p, wide);
+    const k = pose(p, size.width / size.height);
     // masuk: poster naik dari bawah saat halaman dibuka
     const intro = seg(p, 0, 0.04);
     g.position.set(k.x, k.y - (1 - intro) * 0.6 + Math.sin(performance.now() / 1600) * 0.04, 0);
@@ -147,15 +150,15 @@ function RatingRing({ rating, progress, compact }: { rating: number; progress: S
   useFrame(() => {
     const g = group.current;
     if (!g || !track.current || !fill.current) return;
-    const wide = size.width / size.height > 1.1;
+    const aspect = size.width / size.height;
     const p = progress.p;
-    const k = pose(p, wide);
+    const k = pose(p, aspect);
     const vis = seg(p, 0.42, 0.5) * (1 - seg(p, 0.64, 0.68));
     g.visible = vis > 0.001;
     if (!g.visible) return;
     g.position.set(k.x, k.y, 0.1);
     g.rotation.z = -p * 2;
-    g.scale.setScalar(vis * (wide ? 1 : 0.72));
+    g.scale.setScalar(vis * (aspect > 1.1 ? 1 : portraitScale(aspect)));
 
     const R = 2.05;
     const filled = Math.round(DOTS * (rating / 10) * seg(p, 0.46, 0.6));

@@ -333,7 +333,10 @@ export default function App() {
 
       {!webgl && (
         <p className="gl-notice" role="status">
-          Mode 2D: WebGL tidak tersedia di perangkat atau browser ini, jadi adegan 3D diganti tampilan datar. Semua fitur tetap berfungsi.
+          Mode 2D · WebGL tidak tersedia
+          <span className="sr-only">
+            . Adegan 3D diganti tampilan datar di perangkat atau browser ini; semua fitur tetap berfungsi.
+          </span>
         </p>
       )}
 
