@@ -14,7 +14,8 @@ import KeywordChips from './KeywordChips';
 import MovieRail from './MovieRail';
 import ReviewList from './ReviewList';
 import TranslationsPanel from './TranslationsPanel';
-import WatchProviders, { WATCH_REGION } from './WatchProviders';
+import { useRegion } from '../services/region';
+import WatchProviders from './WatchProviders';
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -83,6 +84,7 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
     { scope: root, dependencies: [reduced, detail?.id], revertOnUpdate: true },
   );
 
+  const region = useRegion();
   const detailId = detail?.id ?? -1;
   const recPages = useRelatedPages(detailId, 'recommendations', detail?.recommendations?.page ?? 1, detail?.recommendations?.total_pages ?? 1);
   const simPages = useRelatedPages(detailId, 'similar', detail?.similar?.page ?? 1, detail?.similar?.total_pages ?? 1);
@@ -115,7 +117,7 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
           <span>{t('more.title')}</span>
         </h2>
       </div>
-      {providers && <WatchProviders region={providers.results?.[WATCH_REGION]} />}
+      {providers && <WatchProviders region={providers.results?.[region]} />}
       <KeywordChips keywords={keywords} />
       <TranslationsPanel options={translations} />
       <ImageGallery id="st-gal" title={t('more.gallery')} items={gallery.backdrops} offset={0} onOpen={onOpenImage} />

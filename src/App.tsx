@@ -14,6 +14,8 @@ import { useCompact, useDebounced, useReducedMotion } from './hooks/useEnv';
 import { useMovieList } from './hooks/useMovieList';
 import { useGenres } from './hooks/useGenres';
 import { useKeywordName } from './hooks/useKeywordName';
+import { useProviders } from './hooks/useWatchProviders';
+import { useRegion } from './services/region';
 import { useCollectionName } from './hooks/useCollectionName';
 import { hasFilters, NO_FILTERS, sameFilters, type Filters } from './utils/filters';
 import { isCollectionKey, useCollections } from './services/collections';
@@ -51,6 +53,7 @@ export default function App() {
   const [query, setQuery] = useState(route.name === 'browse' ? route.q : '');
   const [filters, setFilters] = useState<Filters>(route.name === 'browse' ? route.filters : NO_FILTERS);
   const genres = useGenres();
+  const providers = useProviders(useRegion());
   const keywordName = useKeywordName(filters.keyword);
   const collectionName = useCollectionName(filters.collection);
   const filtered = hasFilters(filters);
@@ -93,6 +96,7 @@ export default function App() {
         : filtered
         ? [
             genres.find((g) => g.id === filters.genre)?.name,
+            providers.find((p) => p.provider_id === filters.provider)?.provider_name,
             filters.year,
             filters.rating !== null ? `★ ${filters.rating}+` : null,
             filters.keyword !== null ? (keywordName ?? `#${filters.keyword}`) : null,

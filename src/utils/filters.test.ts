@@ -5,13 +5,14 @@ const parse = (qs: string) => parseFilters(new URLSearchParams(qs));
 
 describe('parseFilters', () => {
   it('membaca semua filter valid', () => {
-    expect(parse('genre=28&year=1999&rating=7&sort=revenue.desc&keyword=9715&collection=10')).toEqual({
+    expect(parse('genre=28&year=1999&rating=7&sort=revenue.desc&keyword=9715&collection=10&provider=8')).toEqual({
       genre: 28,
       year: 1999,
       rating: 7,
       sort: 'revenue.desc',
       keyword: 9715,
       collection: 10,
+      provider: 8,
     });
   });
   it('mengabaikan nilai tak valid', () => {
@@ -48,6 +49,10 @@ describe('discoverParams', () => {
   });
   it('urutan terbaru dibatasi sampai hari ini', () => {
     expect(discoverParams({ ...NO_FILTERS, sort: 'primary_release_date.desc' }, '2026-11-08')['primary_release_date.lte']).toBe('2026-11-08');
+  });
+  it('penyedia tontonan memakai negara', () => {
+    const p = discoverParams({ ...NO_FILTERS, provider: 8 }, 'x', 'US');
+    expect(p).toMatchObject({ with_watch_providers: 8, watch_region: 'US', with_watch_monetization_types: 'flatrate|free|ads' });
   });
   it('genre, tahun, keyword diteruskan', () => {
     const p = discoverParams({ ...NO_FILTERS, genre: 35, year: 1994, keyword: 7 }, 'x');

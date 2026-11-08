@@ -1,10 +1,8 @@
 import { useT } from '../i18n';
 import { imageUrl } from '../services/tmdb';
+import { useRegion } from '../services/region';
 import { regionName } from '../utils/format';
 import type { WatchProvider, WatchRegion } from '../types/tmdb';
-
-/** Negara yang ditampilkan (kode ISO 3166-1). */
-export const WATCH_REGION = 'ID';
 
 const GROUPS = ['flatrate', 'free', 'ads', 'rent', 'buy'] as const;
 
@@ -19,12 +17,12 @@ function Provider({ p }: { p: WatchProvider }) {
 }
 
 /**
- * "Tonton di mana": penyedia streaming/sewa/beli untuk Indonesia. Data penyedia berasal dari JustWatch (TMDB
+ * "Tonton di mana": penyedia streaming/sewa/beli untuk negara terpilih. Data penyedia berasal dari JustWatch (TMDB
  * mewajibkan atribusi). Tautan mengarah ke halaman penyedia di TMDB, bukan langsung ke layanan.
  */
 export default function WatchProviders({ region }: { region: WatchRegion | undefined }) {
   const t = useT();
-  const country = regionName(WATCH_REGION);
+  const country = regionName(useRegion());
   const groups = GROUPS.map((key) => ({ key, list: region?.[key] ?? [] })).filter((g) => g.list.length > 0);
   return (
     <section className="wp" aria-labelledby="st-wp-h">

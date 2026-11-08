@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { demoMovies } from '../services/demo';
 import { isCollectionKey, type Collections } from '../services/collections';
 import { useLanguage } from '../services/language';
+import { useRegion } from '../services/region';
 import { discoverMovies, errorMessage, fetchCollectionMovies, fetchCategory, MAX_TOTAL, searchMovies, TmdbError, type MoviePage } from '../services/tmdb';
 import type { ListSource, Movie } from '../types/tmdb';
 import { filterParts } from '../utils/filters';
@@ -46,7 +47,8 @@ export function useMovieList(source: ListSource, reloadToken: number, local: Col
   const [loadingMore, setLoadingMore] = useState(false);
   const [moreError, setMoreError] = useState<string | null>(null);
   const language = useLanguage();
-  const key = `${sourceKey(source)}|${language}`;
+  const region = useRegion();
+  const key = `${sourceKey(source)}|${language}|${region}`;
 
   const sourceRef = useRef(source);
   sourceRef.current = source;

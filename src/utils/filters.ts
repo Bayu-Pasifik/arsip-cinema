@@ -11,9 +11,11 @@ export interface Filters {
   keyword: number | null;
   /** id koleksi/franchise: daftar film koleksi itu (tidak memakai /discover) */
   collection: number | null;
+  /** id penyedia tontonan (streaming) di negara terpilih */
+  provider: number | null;
 }
 
-export const NO_FILTERS: Filters = { genre: null, year: null, rating: null, sort: null, keyword: null, collection: null };
+export const NO_FILTERS: Filters = { genre: null, year: null, rating: null, sort: null, keyword: null, collection: null, provider: null };
 
 export const RATINGS = [5, 6, 7, 8] as const;
 
@@ -38,6 +40,7 @@ export function parseFilters(params: URLSearchParams): Filters {
     sort: (SORTS as readonly string[]).includes(sort ?? '') ? (sort as SortKey) : null,
     keyword: int(params.get('keyword'), 1, 99999999),
     collection: int(params.get('collection'), 1, 99999999),
+    provider: int(params.get('provider'), 1, 99999999),
   };
 }
 
@@ -50,18 +53,24 @@ export function filterParts(f: Filters): string[] {
   if (f.sort !== null) parts.push(`sort=${f.sort}`);
   if (f.keyword !== null) parts.push(`keyword=${f.keyword}`);
   if (f.collection !== null) parts.push(`collection=${f.collection}`);
+  if (f.provider !== null) parts.push(`provider=${f.provider}`);
   return parts;
 }
 
 export const sameFilters = (a: Filters, b: Filters): boolean => filterParts(a).join('&') === filterParts(b).join('&');
 
 /** Parameter TMDB /discover/movie untuk filter ini. */
-export function discoverParams(f: Filters, today: string): Record<string, string | number> {
+export function discoverParams(f: Filters, today: string, region = 'ID'): Record<string, string | number> {
   const sort = f.sort ?? 'popularity.desc';
   const p: Record<string, string | number> = { sort_by: sort, include_adult: 'false' };
   if (f.genre !== null) p.with_genres = f.genre;
   if (f.keyword !== null) p.with_keywords = f.keyword;
   if (f.year !== null) p.primary_release_year = f.year;
+  if (f.provider !== null) {
+    p.with_watch_providers = f.provider;
+    p.watch_region = region;
+    p.with_watch_monetization_types = 'flatrate|free|ads';
+  }
   if (f.rating !== null) p['vote_average.gte'] = f.rating;
   // tanpa batas suara minimum, urutan rating dipenuhi film dengan 1-2 suara
   if (f.rating !== null || sort === 'vote_average.desc') p['vote_count.gte'] = sort === 'vote_average.desc' ? 300 : 50;

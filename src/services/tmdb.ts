@@ -10,11 +10,13 @@ import type {
   Review,
   TmdbErrorKind,
   Video,
+  WatchProvider,
 } from '../types/tmdb';
 import { translate } from '../i18n';
 import { discoverParams, type Filters } from '../utils/filters';
 import type { RemoteLanguage } from '../utils/languages';
 import { getLanguage } from './language';
+import { getRegion } from './region';
 
 const API_BASE = 'https://api.themoviedb.org/3';
 
@@ -117,7 +119,7 @@ export async function searchMovies(query: string, page = 1, signal?: AbortSignal
 
 export async function discoverMovies(filters: Filters, page = 1, signal?: AbortSignal): Promise<MoviePage> {
   const today = new Date().toISOString().slice(0, 10);
-  return toPage(await request<MovieListResponse>('/discover/movie', { ...discoverParams(filters, today), page }, signal));
+  return toPage(await request<MovieListResponse>('/discover/movie', { ...discoverParams(filters, today, getRegion()), page }, signal));
 }
 
 interface Collection {
@@ -142,6 +144,23 @@ export async function fetchRelated(id: number, kind: RelatedKind, page: number, 
 }
 
 export const fetchLanguages = (signal?: AbortSignal) => request<RemoteLanguage[]>('/configuration/languages', {}, signal);
+
+/** Kode negara yang punya data penyedia tontonan. */
+export async function fetchRegions(signal?: AbortSignal): Promise<string[]> {
+  const data = await request<{ results: { iso_3166_1: string }[] }>('/watch/providers/regions', {}, signal);
+  return data.results.map((r) => r.iso_3166_1).sort();
+}
+
+/** Penyedia streaming film di `region`, maksimal 40 teratas menurut prioritas tampil TMDB. */
+export async function fetchProviders(region: string, signal?: AbortSignal): Promise<WatchProvider[]> {
+  const data = await request<{ results: (WatchProvider & { display_priorities?: Record<string, number> })[] }>(
+    '/watch/providers/movie',
+    { watch_region: region },
+    signal,
+  );
+  const rank = (p: { display_priorities?: Record<string, number> }) => p.display_priorities?.[region] ?? 999;
+  return [...data.results].sort((a, b) => rank(a) - rank(b)).slice(0, 40);
+}
 
 export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ id: number; name: string }> {
   return request<{ id: number; name: string }>(`/keyword/${id}`, {}, signal);

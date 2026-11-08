@@ -7,6 +7,9 @@ import { useCollectionName } from '../hooks/useCollectionName';
 import { usePeopleSearch } from '../hooks/usePeopleSearch';
 import { navigate, personPath } from '../hooks/useRoute';
 import { CATEGORIES, imageUrl } from '../services/tmdb';
+import { setRegion, useRegion } from '../services/region';
+import { useProviders, useWatchRegions } from '../hooks/useWatchProviders';
+import { regionName } from '../utils/format';
 import type { Category, Genre } from '../types/tmdb';
 import { filterCount, hasFilters, NO_FILTERS, RATINGS, SORTS, type Filters, type SortKey } from '../utils/filters';
 
@@ -40,6 +43,9 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const keywordName = useKeywordName(filters.keyword);
+  const region = useRegion();
+  const regions = useWatchRegions();
+  const providers = useProviders(region);
   const collectionName = useCollectionName(filters.collection);
   const people = usePeopleSearch(searchTerm);
   const filtered = hasFilters(filters);
@@ -158,6 +164,31 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
                   ))}
                 </select>
               </label>
+              {providers.length > 0 && (
+                <label>
+                  <span>{t('filter.provider')}</span>
+                  <select value={filters.provider ?? ''} onChange={(e) => set({ provider: e.target.value ? Number(e.target.value) : null })}>
+                    <option value="">{t('filter.providerAny')}</option>
+                    {providers.map((p) => (
+                      <option key={p.provider_id} value={p.provider_id}>
+                        {p.provider_name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              {regions.length > 0 && (
+                <label>
+                  <span>{t('filter.region')}</span>
+                  <select value={region} onChange={(e) => setRegion(e.target.value)}>
+                    {(regions.includes(region) ? regions : [region, ...regions]).map((r) => (
+                      <option key={r} value={r}>
+                        {regionName(r)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               {filters.keyword !== null && (
                 <p className="filter-kw">
                   <span lang="en">{t('filter.keyword', { name: keywordName ?? `#${filters.keyword}` })}</span>
