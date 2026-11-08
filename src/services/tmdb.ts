@@ -294,7 +294,7 @@ export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promis
     ? normalizeTvDetail(
         await request<TvRaw & Record<string, unknown>>(
           `/tv/${rid}`,
-          { append_to_response: 'credits,videos,recommendations,similar,images,reviews,watch/providers,content_ratings,keywords,external_ids,translations', ...mediaParams },
+          { append_to_response: 'credits,aggregate_credits,videos,recommendations,similar,images,reviews,watch/providers,content_ratings,keywords,external_ids,translations', ...mediaParams },
           signal,
         ),
       )

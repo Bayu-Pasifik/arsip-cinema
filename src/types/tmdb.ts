@@ -23,6 +23,8 @@ export interface CastMember {
   name: string;
   character: string;
   profile_path: string | null;
+  /** serial TV: jumlah episode yang dibintangi (aggregate_credits) */
+  episodes?: number;
 }
 
 export interface CrewMember {

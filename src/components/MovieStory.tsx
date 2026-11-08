@@ -565,7 +565,10 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
                           </span>
                         )}
                         <span className="st-cast-name">{c.name}</span>
-                        <span className="st-cast-role">{c.character}</span>
+                        <span className="st-cast-role">
+                          {c.character}
+                          {c.episodes ? `${c.character ? ' · ' : ''}${t('cast.episodes', { count: c.episodes })}` : ''}
+                        </span>
                       </button>
                     </li>
                   );

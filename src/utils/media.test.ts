@@ -54,6 +54,17 @@ describe('normalizeTvDetail', () => {
     expect(d.release_dates?.results[0].release_dates[0].certification).toBe('TV-MA');
     expect(d.translations?.translations[0].data.title).toBe('Bad');
   });
+  it('aggregate_credits: pemeran dengan jumlah episode, kru per jabatan', () => {
+    const agg = normalizeTvDetail({
+      ...raw,
+      aggregate_credits: {
+        cast: [{ id: 17419, name: 'Bryan Cranston', profile_path: '/b.jpg', total_episode_count: 62, roles: [{ character: 'Walter White', episode_count: 62 }, { character: 'Walt' }] }],
+        crew: [{ id: 7, name: 'M', jobs: [{ job: 'Producer', episode_count: 10 }, { job: 'Writer', episode_count: 3 }] }],
+      },
+    });
+    expect(agg.credits?.cast).toEqual([{ id: 17419, name: 'Bryan Cranston', profile_path: '/b.jpg', character: 'Walter White / Walt', episodes: 62 }]);
+    expect(agg.credits?.crew.map((c) => c.job)).toEqual(['Creator', 'Producer', 'Writer']);
+  });
   it('aman untuk respons minimal', () => {
     const min = normalizeTvDetail({ id: 1, name: 'X' });
     expect(min.runtime).toBeNull();
