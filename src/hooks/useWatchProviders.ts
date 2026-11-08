@@ -5,6 +5,8 @@ import type { WatchProvider } from '../types/tmdb';
 let regionsCache: string[] | null = null;
 const providersCache = new Map<string, WatchProvider[]>();
 
+type Mode = 'movie' | 'tv';
+
 /** Kode negara yang punya data penyedia tontonan (/watch/providers/regions). */
 export function useWatchRegions(): string[] {
   const [regions, setRegions] = useState<string[]>(regionsCache ?? []);
@@ -25,10 +27,11 @@ export function useWatchRegions(): string[] {
 }
 
 /** Penyedia streaming populer di `region` (/watch/providers/movie), urut menurut prioritas tampil. */
-export function useProviders(region: string): WatchProvider[] {
-  const [providers, setProviders] = useState<WatchProvider[]>(providersCache.get(region) ?? []);
+export function useProviders(region: string, mode: Mode = 'movie'): WatchProvider[] {
+  const key = `${mode}|${region}`;
+  const [providers, setProviders] = useState<WatchProvider[]>(providersCache.get(key) ?? []);
   useEffect(() => {
-    const hit = providersCache.get(region);
+    const hit = providersCache.get(key);
     if (hit) {
       setProviders(hit);
       return;
@@ -36,15 +39,15 @@ export function useProviders(region: string): WatchProvider[] {
     setProviders([]);
     if (!hasApiKey) return;
     const c = new AbortController();
-    fetchProviders(region, c.signal)
+    fetchProviders(region, c.signal, mode)
       .then((p) => {
-        providersCache.set(region, p);
+        providersCache.set(key, p);
         if (!c.signal.aborted) setProviders(p);
       })
       .catch(() => {
         /* filter penyedia disembunyikan bila gagal */
       });
     return () => c.abort();
-  }, [region]);
+  }, [region, key, mode]);
   return providers;
 }

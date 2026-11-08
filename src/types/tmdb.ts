@@ -268,7 +268,7 @@ import type { Filters } from '../utils/filters';
 export type ListSource =
   | { kind: 'category'; category: Category }
   | { kind: 'search'; query: string; media?: 'tv' }
-  | { kind: 'discover'; filters: Filters }
+  | { kind: 'discover'; filters: Filters; media?: 'tv' }
   | { kind: 'collection'; id: number }
   | { kind: 'demo' };
 

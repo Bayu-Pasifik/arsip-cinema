@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { discoverParams, filterCount, filterParts, hasFilters, NO_FILTERS, parseFilters, sameFilters } from './filters';
+import { discoverParams, discoverParamsTv, filterCount, filterParts, hasFilters, NO_FILTERS, parseFilters, sameFilters } from './filters';
 
 const parse = (qs: string) => parseFilters(new URLSearchParams(qs));
 
@@ -94,5 +94,31 @@ describe('discoverParams', () => {
     expect(discoverParams({ ...NO_FILTERS, company: 420 }, 'x')).toMatchObject({ with_companies: 420 });
     expect(discoverParams({ ...NO_FILTERS, cast: 6384 }, 'x')).toMatchObject({ with_cast: 6384 });
     expect(discoverParams({ ...NO_FILTERS, crew: 525 }, 'x')).toMatchObject({ with_crew: 525 });
+  });
+});
+
+describe('discoverParamsTv', () => {
+  it('memakai nama parameter TV dan mengabaikan filter khusus film', () => {
+    const p = discoverParamsTv({ ...NO_FILTERS, genre: 18, year: 2008, lang: 'ko', runtime: 'long', cert: 'R', cast: 5 }, 'x');
+    expect(p).toMatchObject({ with_genres: 18, first_air_date_year: 2008, with_original_language: 'ko' });
+    expect(p.primary_release_year).toBeUndefined();
+    expect(p['with_runtime.gte']).toBeUndefined();
+    expect(p.certification).toBeUndefined();
+    expect(p.with_cast).toBeUndefined();
+  });
+  it('urutan terbaru = first_air_date.desc dibatasi hari ini; revenue diabaikan', () => {
+    expect(discoverParamsTv({ ...NO_FILTERS, sort: 'primary_release_date.desc' }, '2026-11-08')).toMatchObject({ sort_by: 'first_air_date.desc', 'first_air_date.lte': '2026-11-08' });
+    expect(discoverParamsTv({ ...NO_FILTERS, sort: 'revenue.desc' }, 'x').sort_by).toBe('popularity.desc');
+  });
+  it('dekade dan penyedia', () => {
+    expect(discoverParamsTv({ ...NO_FILTERS, decade: 1990, provider: 8 }, 'x', 'US')).toMatchObject({
+      'first_air_date.gte': '1990-01-01',
+      'first_air_date.lte': '1999-12-31',
+      with_watch_providers: 8,
+      watch_region: 'US',
+    });
+  });
+  it('rating tertinggi butuh batas suara', () => {
+    expect(discoverParamsTv({ ...NO_FILTERS, sort: 'vote_average.desc' }, 'x')['vote_count.gte']).toBe(200);
   });
 });

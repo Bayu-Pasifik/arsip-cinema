@@ -18,7 +18,7 @@ import type {
   WatchProvider,
 } from '../types/tmdb';
 import { translate } from '../i18n';
-import { discoverParams, type Filters } from '../utils/filters';
+import { discoverParams, discoverParamsTv, type Filters } from '../utils/filters';
 import { isTvId, normalizeTv, normalizeTvDetail, rawId, type TvRaw } from '../utils/media';
 import type { RemoteLanguage } from '../utils/languages';
 import { getLanguage } from './language';
@@ -134,6 +134,11 @@ export async function searchMovies(query: string, page = 1, signal?: AbortSignal
   return toPage(await request<MovieListResponse>('/search/movie', { query, page, include_adult: 'false' }, signal));
 }
 
+export async function discoverTv(filters: Filters, page = 1, signal?: AbortSignal): Promise<MoviePage> {
+  const today = new Date().toISOString().slice(0, 10);
+  return toPage(await request<MovieListResponse>('/discover/tv', { ...discoverParamsTv(filters, today, getRegion()), page }, signal), true);
+}
+
 export async function searchTv(query: string, page = 1, signal?: AbortSignal): Promise<MoviePage> {
   return toPage(await request<MovieListResponse>('/search/tv', { query, page, include_adult: 'false' }, signal), true);
 }
@@ -174,9 +179,9 @@ export async function fetchRegions(signal?: AbortSignal): Promise<string[]> {
 }
 
 /** Penyedia streaming film di `region`, maksimal 40 teratas menurut prioritas tampil TMDB. */
-export async function fetchProviders(region: string, signal?: AbortSignal): Promise<WatchProvider[]> {
+export async function fetchProviders(region: string, signal?: AbortSignal, mode: 'movie' | 'tv' = 'movie'): Promise<WatchProvider[]> {
   const data = await request<{ results: (WatchProvider & { display_priorities?: Record<string, number> })[] }>(
-    '/watch/providers/movie',
+    `/watch/providers/${mode}`,
     { watch_region: region },
     signal,
   );
@@ -243,8 +248,8 @@ export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ 
   return request<{ id: number; name: string }>(`/keyword/${id}`, {}, signal);
 }
 
-export async function fetchGenres(signal?: AbortSignal): Promise<Genre[]> {
-  const data = await request<{ genres: Genre[] }>('/genre/movie/list', {}, signal);
+export async function fetchGenres(mode: 'movie' | 'tv' = 'movie', signal?: AbortSignal): Promise<Genre[]> {
+  const data = await request<{ genres: Genre[] }>(`/genre/${mode}/list`, {}, signal);
   return data.genres;
 }
 

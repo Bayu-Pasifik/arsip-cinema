@@ -5,29 +5,31 @@ import type { Genre } from '../types/tmdb';
 
 const cache = new Map<string, Genre[]>();
 
-/** Daftar genre film TMDB dalam bahasa aktif (di-cache per bahasa). Kosong bila tanpa API key atau gagal dimuat. */
-export function useGenres(): Genre[] {
+/** Daftar genre TMDB (film atau serial TV) dalam bahasa aktif, di-cache. Kosong bila tanpa API key atau gagal dimuat. */
+export function useGenres(mode: 'movie' | 'tv' = 'movie'): Genre[] {
   const language = useLanguage();
-  const [genres, setGenres] = useState<Genre[]>(() => cache.get(language) ?? []);
+  const key = `${mode}|${language}`;
+  const [genres, setGenres] = useState<Genre[]>(() => cache.get(key) ?? []);
 
   useEffect(() => {
-    const hit = cache.get(language);
+    const hit = cache.get(key);
     if (hit) {
       setGenres(hit);
       return;
     }
+    setGenres([]);
     if (!hasApiKey) return;
     const controller = new AbortController();
-    fetchGenres(controller.signal)
+    fetchGenres(mode, controller.signal)
       .then((g) => {
-        cache.set(language, g);
+        cache.set(key, g);
         if (!controller.signal.aborted) setGenres(g);
       })
       .catch(() => {
         /* genre opsional: pemilih disembunyikan bila gagal */
       });
     return () => controller.abort();
-  }, [language]);
+  }, [key, mode]);
 
   return genres;
 }

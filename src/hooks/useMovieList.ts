@@ -3,7 +3,7 @@ import { demoMovies } from '../services/demo';
 import { isCollectionKey, type Collections } from '../services/collections';
 import { useLanguage } from '../services/language';
 import { useRegion } from '../services/region';
-import { discoverMovies, errorMessage, fetchCollectionMovies, fetchCategory, MAX_TOTAL, searchMovies, searchTv, TmdbError, type MoviePage } from '../services/tmdb';
+import { discoverMovies, discoverTv, errorMessage, fetchCollectionMovies, fetchCategory, MAX_TOTAL, searchMovies, searchTv, TmdbError, type MoviePage } from '../services/tmdb';
 import type { ListSource, Movie } from '../types/tmdb';
 import { filterParts } from '../utils/filters';
 import { appendUnique, canLoadMore } from '../utils/movies';
@@ -28,7 +28,7 @@ function sourceKey(s: ListSource): string {
   if (s.kind === 'category') return `c:${s.category}`;
   if (s.kind === 'search') return `s:${s.media ?? 'movie'}:${s.query}`;
   if (s.kind === 'collection') return `col:${s.id}`;
-  if (s.kind === 'discover') return `d:${filterParts(s.filters).join('&')}`;
+  if (s.kind === 'discover') return `d:${s.media ?? 'movie'}:${filterParts(s.filters).join('&')}`;
   return 'demo';
 }
 
@@ -65,7 +65,9 @@ export function useMovieList(source: ListSource, reloadToken: number, local: Col
       : src.kind === 'collection'
         ? fetchCollectionMovies(src.id, signal)
         : src.kind === 'discover'
-        ? discoverMovies(src.filters, page, signal)
+        ? src.media === 'tv'
+          ? discoverTv(src.filters, page, signal)
+          : discoverMovies(src.filters, page, signal)
         : fetchCategory(src.kind === 'category' && !isCollectionKey(src.category) ? src.category : 'trending', page, signal);
 
   useEffect(() => {

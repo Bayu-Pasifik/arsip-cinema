@@ -99,6 +99,36 @@ export function filterParts(f: Filters): string[] {
 
 export const sameFilters = (a: Filters, b: Filters): boolean => filterParts(a).join('&') === filterParts(b).join('&');
 
+/** Parameter TMDB /discover/tv: hanya filter yang berlaku untuk serial (genre, tahun, dekade, rating, urutan, bahasa, layanan, kata kunci, studio). */
+export function discoverParamsTv(f: Filters, today: string, region = 'ID'): Record<string, string | number> {
+  const sort = f.sort === 'revenue.desc' ? null : f.sort;
+  const byDate = sort === 'primary_release_date.desc';
+  const p: Record<string, string | number> = { sort_by: byDate ? 'first_air_date.desc' : (sort ?? 'popularity.desc'), include_adult: 'false' };
+  if (f.genre !== null) p.with_genres = f.genre;
+  if (f.keyword !== null) p.with_keywords = f.keyword;
+  if (f.company !== null) p.with_companies = f.company;
+  if (f.year !== null) p.first_air_date_year = f.year;
+  if (f.lang !== null) p.with_original_language = f.lang;
+  if (f.rating !== null) p['vote_average.gte'] = f.rating;
+  if (f.provider !== null) {
+    p.with_watch_providers = f.provider;
+    p.watch_region = region;
+    p.with_watch_monetization_types = 'flatrate|free|ads';
+  }
+  if (f.rating !== null || sort === 'vote_average.desc') p['vote_count.gte'] = sort === 'vote_average.desc' ? 200 : 50;
+  if (byDate) {
+    p['first_air_date.lte'] = today;
+    p['vote_count.gte'] = 3;
+  }
+  if (f.decade !== null && f.year === null) {
+    p['first_air_date.gte'] = `${f.decade}-01-01`;
+    const end = `${f.decade + 9}-12-31`;
+    const cap = p['first_air_date.lte'];
+    p['first_air_date.lte'] = typeof cap === 'string' && cap < end ? cap : end;
+  }
+  return p;
+}
+
 /** Parameter TMDB /discover/movie untuk filter ini. */
 export function discoverParams(f: Filters, today: string, region = 'ID'): Record<string, string | number> {
   const sort = f.sort ?? 'popularity.desc';

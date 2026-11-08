@@ -61,8 +61,8 @@ export default function App() {
   const [mode, setMode] = useState<'movie' | 'tv'>(isTvCategory(category) ? 'tv' : 'movie');
   const [query, setQuery] = useState(route.name === 'browse' ? route.q : '');
   const [filters, setFilters] = useState<Filters>(route.name === 'browse' ? route.filters : NO_FILTERS);
-  const genres = useGenres();
-  const providers = useProviders(useRegion());
+  const genres = useGenres(mode);
+  const providers = useProviders(useRegion(), mode);
   const keywordName = useKeywordName(filters.keyword);
   const collectionName = useCollectionName(filters.collection);
   const companyName = useCompanyName(filters.company);
@@ -84,7 +84,7 @@ export default function App() {
       : filters.collection !== null
         ? { kind: 'collection', id: filters.collection }
         : filtered
-          ? { kind: 'discover', filters }
+          ? { kind: 'discover', filters, media: mode === 'tv' ? 'tv' : undefined }
           : { kind: 'category', category };
 
   // tempel ID IMDb (tt…/nm…) di kotak cari → langsung buka film/orangnya

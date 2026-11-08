@@ -70,7 +70,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
   const regions = useWatchRegions();
   const countries = useCountries();
   const regionText = (code: string) => regionLabel(code, regionName(code), countries);
-  const providers = useProviders(region);
+  const providers = useProviders(region, mode);
   const certs = useCertifications(region);
   const collectionName = useCollectionName(filters.collection);
   const company = useCompany(filters.company);
@@ -143,7 +143,6 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
         <button type="button" className="pill" onClick={() => navigate(PEOPLE_PATH)}>
           {t('people.nav')}
         </button>
-        {mode === 'movie' && (
         <div className="filter-wrap" ref={panelRef}>
           <button
             type="button"
@@ -209,6 +208,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
                     ))}
                 </select>
               </label>
+              {mode === 'movie' && (
               <label>
                 <span>{t('filter.runtime')}</span>
                 <select value={filters.runtime ?? ''} onChange={(e) => set({ runtime: (e.target.value || null) as RuntimeKey | null })}>
@@ -220,6 +220,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
                   ))}
                 </select>
               </label>
+              )}
               <label>
                 <span>{t('filter.rating')}</span>
                 <select value={filters.rating ?? ''} onChange={(e) => set({ rating: e.target.value ? Number(e.target.value) : null })}>
@@ -235,14 +236,14 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
                 <span>{t('filter.sort')}</span>
                 <select value={filters.sort ?? ''} onChange={(e) => set({ sort: (e.target.value || null) as SortKey | null })}>
                   <option value="">{t('sort.popularity.desc')}</option>
-                  {SORTS.filter((s) => s !== 'popularity.desc').map((s) => (
+                  {SORTS.filter((s) => s !== 'popularity.desc' && (mode === 'movie' || s !== 'revenue.desc')).map((s) => (
                     <option key={s} value={s}>
                       {t(`sort.${s}`)}
                     </option>
                   ))}
                 </select>
               </label>
-              {(certs.length > 0 || filters.cert !== null) && (
+              {mode === 'movie' && (certs.length > 0 || filters.cert !== null) && (
                 <label>
                   <span>{t('filter.cert', { country: regionText(region) })}</span>
                   <select value={filters.cert ?? ''} onChange={(e) => set({ cert: e.target.value || null })}>
@@ -350,7 +351,6 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
             </div>
           )}
         </div>
-        )}
 
         <form className="search" role="search" onSubmit={(e) => e.preventDefault()}>
           <label htmlFor="q" className="sr-only">
