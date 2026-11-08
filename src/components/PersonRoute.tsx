@@ -6,9 +6,10 @@ import { useLanguage } from '../services/language';
 import { usePersonDetail } from '../hooks/usePersonDetail';
 import { imageUrl, releaseYear } from '../services/tmdb';
 import { formatDate } from '../utils/format';
-import { crewFilms, filmography } from '../utils/person';
+import { bioOptions, crewFilms, filmography } from '../utils/person';
 import type { CreditMovie } from '../types/tmdb';
 import BackButton from './BackButton';
+import BioTranslations from './BioTranslations';
 import StatusMessage from './StatusMessage';
 
 interface Props {
@@ -86,6 +87,7 @@ export default function PersonRoute({ id, onClose, onOpenMovie }: Props) {
     .filter((ph) => ph.file_path !== p.profile_path)
     .sort((a, b) => b.vote_average - a.vote_average)
     .slice(0, 12);
+  const bios = bioOptions(p.translations?.translations);
   const directed = crewFilms(p.movie_credits?.crew, ['Director']);
   const facts: [string, string][] = [];
   if (p.known_for_department) facts.push([t('person.department'), p.known_for_department]);
@@ -130,6 +132,7 @@ export default function PersonRoute({ id, onClose, onOpenMovie }: Props) {
                 <p className="dim">{t('person.noBio')}</p>
               )}
             </div>
+            <BioTranslations options={bios} />
             <button
               type="button"
               className="btn btn-primary pr-all"

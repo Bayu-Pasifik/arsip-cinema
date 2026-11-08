@@ -190,6 +190,14 @@ export interface CollectionSummary {
 /** /certification/movie/list: sertifikasi usia per negara. */
 export type CertificationMap = Record<string, { certification: string; meaning: string; order: number }[]>;
 
+export interface PersonTranslation {
+  iso_639_1: string;
+  iso_3166_1: string;
+  name: string;
+  english_name: string;
+  data: { biography?: string };
+}
+
 export interface PersonDetail {
   id: number;
   name: string;
@@ -204,6 +212,7 @@ export interface PersonDetail {
   movie_credits?: { cast: CreditMovie[]; crew: CreditMovie[] };
   external_ids?: { imdb_id?: string | null };
   images?: { profiles: ImageInfo[] };
+  translations?: { translations: PersonTranslation[] };
 }
 
 export interface MovieListResponse {
