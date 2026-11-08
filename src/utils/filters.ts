@@ -13,9 +13,11 @@ export interface Filters {
   collection: number | null;
   /** id penyedia tontonan (streaming) di negara terpilih */
   provider: number | null;
+  /** id studio/perusahaan produksi */
+  company: number | null;
 }
 
-export const NO_FILTERS: Filters = { genre: null, year: null, rating: null, sort: null, keyword: null, collection: null, provider: null };
+export const NO_FILTERS: Filters = { genre: null, year: null, rating: null, sort: null, keyword: null, collection: null, provider: null, company: null };
 
 export const RATINGS = [5, 6, 7, 8] as const;
 
@@ -41,6 +43,7 @@ export function parseFilters(params: URLSearchParams): Filters {
     keyword: int(params.get('keyword'), 1, 99999999),
     collection: int(params.get('collection'), 1, 99999999),
     provider: int(params.get('provider'), 1, 99999999),
+    company: int(params.get('company'), 1, 99999999),
   };
 }
 
@@ -54,6 +57,7 @@ export function filterParts(f: Filters): string[] {
   if (f.keyword !== null) parts.push(`keyword=${f.keyword}`);
   if (f.collection !== null) parts.push(`collection=${f.collection}`);
   if (f.provider !== null) parts.push(`provider=${f.provider}`);
+  if (f.company !== null) parts.push(`company=${f.company}`);
   return parts;
 }
 
@@ -65,6 +69,7 @@ export function discoverParams(f: Filters, today: string, region = 'ID'): Record
   const p: Record<string, string | number> = { sort_by: sort, include_adult: 'false' };
   if (f.genre !== null) p.with_genres = f.genre;
   if (f.keyword !== null) p.with_keywords = f.keyword;
+  if (f.company !== null) p.with_companies = f.company;
   if (f.year !== null) p.primary_release_year = f.year;
   if (f.provider !== null) {
     p.with_watch_providers = f.provider;

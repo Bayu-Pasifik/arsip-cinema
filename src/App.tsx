@@ -14,6 +14,7 @@ import { useCompact, useDebounced, useReducedMotion } from './hooks/useEnv';
 import { useMovieList } from './hooks/useMovieList';
 import { useGenres } from './hooks/useGenres';
 import { useKeywordName } from './hooks/useKeywordName';
+import { useCompanyName } from './hooks/useCompanyName';
 import { useProviders } from './hooks/useWatchProviders';
 import { useRegion } from './services/region';
 import { useCollectionName } from './hooks/useCollectionName';
@@ -56,6 +57,7 @@ export default function App() {
   const providers = useProviders(useRegion());
   const keywordName = useKeywordName(filters.keyword);
   const collectionName = useCollectionName(filters.collection);
+  const companyName = useCompanyName(filters.company);
   const filtered = hasFilters(filters);
   const [demo, setDemo] = useState(false);
   const [reload, setReload] = useState(0);
@@ -100,6 +102,7 @@ export default function App() {
             filters.year,
             filters.rating !== null ? `★ ${filters.rating}+` : null,
             filters.keyword !== null ? (keywordName ?? `#${filters.keyword}`) : null,
+            filters.company !== null ? (companyName ?? `#${filters.company}`) : null,
           ]
             .filter(Boolean)
             .join(' · ') || t('cat.filtered')
