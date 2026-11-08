@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react';
+import { isLanguageCode } from '../utils/languages';
 
 /** Bahasa data TMDB yang dapat dipilih (parameter `language`, format ISO 639-1 + ISO 3166-1). */
 export const LANGUAGES = [
@@ -27,7 +28,8 @@ export const DEFAULT_LANGUAGE = 'id-ID';
 const STORAGE_KEY = 'arsip-sinema:language';
 const listeners = new Set<() => void>();
 
-const isSupported = (code: string | null): code is string => !!code && LANGUAGES.some((l) => l.code === code);
+/** Daftar kurasi atau kode bahasa TMDB mana pun ("sv", "pt-BR"): daftar lengkap diunduh dari /configuration/languages. */
+const isSupported = (code: string | null): code is string => isLanguageCode(code);
 
 function load(): string {
   try {

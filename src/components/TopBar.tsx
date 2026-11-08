@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useRef, useState } from 'react';
-import { LANGUAGES, setLanguage, useLanguage } from '../services/language';
+import { setLanguage, useLanguage } from '../services/language';
+import { useLanguages } from '../hooks/useLanguages';
 import { useT } from '../i18n';
 import { useKeywordName } from '../hooks/useKeywordName';
 import { useCollectionName } from '../hooks/useCollectionName';
@@ -34,6 +35,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
   ref,
 ) {
   const language = useLanguage();
+  const languages = useLanguages();
   const t = useT();
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -216,7 +218,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
         <label className="lang">
           <span className="sr-only">{t('top.language')}</span>
           <select value={language} onChange={(e) => setLanguage(e.target.value)}>
-            {LANGUAGES.map((l) => (
+            {languages.map((l) => (
               <option key={l.code} value={l.code}>
                 {l.label}
               </option>

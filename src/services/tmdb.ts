@@ -13,6 +13,7 @@ import type {
 } from '../types/tmdb';
 import { translate } from '../i18n';
 import { discoverParams, type Filters } from '../utils/filters';
+import type { RemoteLanguage } from '../utils/languages';
 import { getLanguage } from './language';
 
 const API_BASE = 'https://api.themoviedb.org/3';
@@ -139,6 +140,8 @@ export type RelatedKind = 'recommendations' | 'similar';
 export async function fetchRelated(id: number, kind: RelatedKind, page: number, signal?: AbortSignal): Promise<MoviePage> {
   return toPage(await request<MovieListResponse>(`/movie/${id}/${kind}`, { page }, signal));
 }
+
+export const fetchLanguages = (signal?: AbortSignal) => request<RemoteLanguage[]>('/configuration/languages', {}, signal);
 
 export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ id: number; name: string }> {
   return request<{ id: number; name: string }>(`/keyword/${id}`, {}, signal);
