@@ -93,6 +93,12 @@ export interface ImageInfo {
   iso_639_1: string | null;
 }
 
+export interface AlternativeTitle {
+  iso_3166_1: string;
+  title: string;
+  type: string;
+}
+
 export interface MovieDetail extends Movie {
   tagline: string;
   runtime: number | null;
@@ -121,6 +127,7 @@ export interface MovieDetail extends Movie {
   'watch/providers'?: { results: Record<string, WatchRegion> };
   keywords?: { keywords: Keyword[] };
   translations?: { translations: Translation[] };
+  alternative_titles?: { titles: AlternativeTitle[] };
   external_ids?: {
     imdb_id?: string | null;
     facebook_id?: string | null;
