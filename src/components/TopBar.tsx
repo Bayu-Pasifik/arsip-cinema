@@ -9,10 +9,10 @@ import { usePersonName } from '../hooks/usePersonName';
 import { useCertifications } from '../hooks/useCertifications';
 import KeywordSearch from './KeywordSearch';
 import { useCollectionName } from '../hooks/useCollectionName';
-import { usePeopleSearch } from '../hooks/usePeopleSearch';
+import { useMultiSearch } from '../hooks/useMultiSearch';
 import { useCollectionSearch } from '../hooks/useCollectionSearch';
 import { useCompanySearch } from '../hooks/useCompanySearch';
-import { navigate, PEOPLE_PATH, personPath } from '../hooks/useRoute';
+import { moviePath, navigate, PEOPLE_PATH, personPath } from '../hooks/useRoute';
 import { CATEGORIES, imageUrl, TV_CATEGORIES } from '../services/tmdb';
 import { setRegion, useRegion } from '../services/region';
 import { useProviders, useWatchRegions } from '../hooks/useWatchProviders';
@@ -79,7 +79,9 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
   const network = useNetwork(filters.network);
   const castName = usePersonName(filters.cast);
   const crewName = usePersonName(filters.crew);
-  const people = usePeopleSearch(searchTerm);
+  const { people, titles: found } = useMultiSearch(searchTerm);
+  // judul dari jenis lain (serial saat mode Film, film saat mode Serial); jenis yang sedang dilihat sudah ada di daftar utama
+  const otherTitles = found.filter((m) => (mode === 'tv' ? !m.media : m.media === 'tv')).slice(0, 3);
   const collections = useCollectionSearch(mode === 'movie' ? searchTerm : '');
   const companies = useCompanySearch(mode === 'movie' ? searchTerm : '');
   const filtered = hasFilters(filters);
@@ -395,7 +397,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
             spellCheck={false}
           />
           <span className={`spinner${searching ? ' on' : ''}`} role="status" aria-label={searching ? t('top.searching') : undefined} />
-          {(people.length > 0 || collections.length > 0 || companies.length > 0) && (
+          {(people.length > 0 || otherTitles.length > 0 || collections.length > 0 || companies.length > 0) && (
             <ul className="people" aria-label={t('top.people')}>
               {people.map((p) => {
                 const src = imageUrl(p.profile_path, 'profile', 'w45');
@@ -405,6 +407,18 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
                       {src ? <img src={src} alt="" width={32} height={32} /> : <span className="people-ph" aria-hidden="true" />}
                       <span className="people-name">{p.name}</span>
                       {p.known_for_department && <span className="people-dept">{p.known_for_department}</span>}
+                    </button>
+                  </li>
+                );
+              })}
+              {otherTitles.map((m) => {
+                const src = imageUrl(m.poster_path, 'poster', 'w92');
+                return (
+                  <li key={`ti-${m.id}`}>
+                    <button type="button" className="people-item" onClick={() => navigate(moviePath(m.id))}>
+                      {src ? <img src={src} alt="" width={32} height={32} /> : <span className="people-ph" aria-hidden="true" />}
+                      <span className="people-name">{m.title}</span>
+                      <span className="people-dept">{t(m.media === 'tv' ? 'mode.tv' : 'mode.movie')}</span>
                     </button>
                   </li>
                 );

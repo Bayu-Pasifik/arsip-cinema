@@ -21,6 +21,7 @@ import type {
 import { translate } from '../i18n';
 import { discoverParams, discoverParamsTv, type Filters } from '../utils/filters';
 import { isTvId, normalizeTv, normalizeTvDetail, rawId, type TvRaw } from '../utils/media';
+import { splitMulti, type MultiRaw } from '../utils/multi';
 import type { RemoteLanguage } from '../utils/languages';
 import { getLanguage } from './language';
 import { getRegion } from './region';
@@ -256,10 +257,10 @@ export async function fetchGenres(mode: 'movie' | 'tv' = 'movie', signal?: Abort
   return data.genres;
 }
 
-/** Maksimal 5 aktor/kru teratas yang cocok dengan `query`. */
-export async function searchPeople(query: string, signal?: AbortSignal): Promise<PersonSummary[]> {
-  const data = await request<{ results: PersonSummary[] }>('/search/person', { query, include_adult: 'false' }, signal);
-  return data.results.slice(0, 5);
+/** Satu panggilan /search/multi: maksimal 5 aktor/kru dan 8 judul (film dan serial) yang cocok dengan `query`. */
+export async function searchMulti(query: string, signal?: AbortSignal): Promise<{ people: PersonSummary[]; titles: Movie[] }> {
+  const data = await request<{ results: MultiRaw[] }>('/search/multi', { query, include_adult: 'false' }, signal);
+  return splitMulti(data.results);
 }
 
 export async function fetchPersonDetail(id: number, signal?: AbortSignal): Promise<PersonDetail> {
