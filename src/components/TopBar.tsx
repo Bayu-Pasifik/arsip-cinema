@@ -14,11 +14,23 @@ import { navigate, PEOPLE_PATH, personPath } from '../hooks/useRoute';
 import { CATEGORIES, imageUrl } from '../services/tmdb';
 import { setRegion, useRegion } from '../services/region';
 import { useProviders, useWatchRegions } from '../hooks/useWatchProviders';
-import { regionName } from '../utils/format';
+import { languageName, regionName } from '../utils/format';
 import { regionLabel, sortRegions } from '../utils/regions';
 import { useCountries } from '../hooks/useCountries';
 import type { Category, Genre } from '../types/tmdb';
-import { filterCount, hasFilters, NO_FILTERS, RATINGS, SORTS, type Filters, type SortKey } from '../utils/filters';
+import {
+  DECADES,
+  filterCount,
+  hasFilters,
+  NO_FILTERS,
+  ORIGINAL_LANGUAGES,
+  RATINGS,
+  RUNTIMES,
+  SORTS,
+  type Filters,
+  type RuntimeKey,
+  type SortKey,
+} from '../utils/filters';
 
 interface Props {
   category: Category;
@@ -154,6 +166,41 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
                   {YEARS.map((y) => (
                     <option key={y} value={y}>
                       {y}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>{t('filter.decade')}</span>
+                <select value={filters.decade ?? ''} onChange={(e) => set({ decade: e.target.value ? Number(e.target.value) : null })}>
+                  <option value="">{t('filter.decadeAny')}</option>
+                  {DECADES.map((d) => (
+                    <option key={d} value={d}>
+                      {d}–{d + 9}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>{t('filter.lang')}</span>
+                <select value={filters.lang ?? ''} onChange={(e) => set({ lang: e.target.value || null })}>
+                  <option value="">{t('filter.langAny')}</option>
+                  {(filters.lang !== null && !(ORIGINAL_LANGUAGES as readonly string[]).includes(filters.lang) ? [filters.lang] : [])
+                    .concat(ORIGINAL_LANGUAGES)
+                    .map((l) => (
+                      <option key={l} value={l}>
+                        {languageName(l)}
+                      </option>
+                    ))}
+                </select>
+              </label>
+              <label>
+                <span>{t('filter.runtime')}</span>
+                <select value={filters.runtime ?? ''} onChange={(e) => set({ runtime: (e.target.value || null) as RuntimeKey | null })}>
+                  <option value="">{t('filter.runtimeAny')}</option>
+                  {RUNTIMES.map((r) => (
+                    <option key={r} value={r}>
+                      {t(`runtime.${r}`)}
                     </option>
                   ))}
                 </select>

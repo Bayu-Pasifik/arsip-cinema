@@ -22,6 +22,7 @@ import { useProviders } from './hooks/useWatchProviders';
 import { useRegion } from './services/region';
 import { useCollectionName } from './hooks/useCollectionName';
 import { hasFilters, NO_FILTERS, sameFilters, type Filters } from './utils/filters';
+import { languageName } from './utils/format';
 import { isCollectionKey, useCollections } from './services/collections';
 import { browsePath, cameFromApp, moviePath, navigate, personPath, useRoute } from './hooks/useRoute';
 import { createStage } from './scene/stage';
@@ -116,6 +117,9 @@ export default function App() {
             filters.company !== null ? (companyName ?? `#${filters.company}`) : null,
             filters.cast !== null ? (castName ?? `#${filters.cast}`) : null,
             filters.cert,
+            filters.lang ? languageName(filters.lang) : null,
+            filters.runtime ? t(`runtime.${filters.runtime}`) : null,
+            filters.decade ? `${filters.decade}–${filters.decade + 9}` : null,
           ]
             .filter(Boolean)
             .join(' · ') || t('cat.filtered')
