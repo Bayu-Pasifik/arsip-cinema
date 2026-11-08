@@ -42,3 +42,12 @@ export function languageName(code: string | undefined): string {
     return code;
   }
 }
+
+/** Rapikan teks ulasan (hapus penanda markdown ringan) lalu potong di batas kata. */
+export function excerpt(text: string, max: number): { text: string; truncated: boolean } {
+  const clean = text.replace(/\r\n?/g, '\n').replace(/[*_`#>]+/g, '').replace(/\n{3,}/g, '\n\n').trim();
+  if (clean.length <= max) return { text: clean, truncated: false };
+  const cut = clean.slice(0, max);
+  const lastSpace = cut.lastIndexOf(' ');
+  return { text: `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`, truncated: true };
+}

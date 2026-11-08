@@ -40,6 +40,15 @@ export interface Video {
   published_at: string;
 }
 
+export interface Review {
+  id: string;
+  author: string;
+  content: string;
+  created_at: string;
+  url?: string;
+  author_details?: { username?: string; rating: number | null };
+}
+
 export interface ImageInfo {
   file_path: string;
   width: number;
@@ -72,6 +81,7 @@ export interface MovieDetail extends Movie {
   recommendations?: { results: Movie[] };
   similar?: { results: Movie[] };
   images?: { backdrops: ImageInfo[]; posters: ImageInfo[]; logos: ImageInfo[] };
+  reviews?: { results: Review[] };
 }
 
 export interface MovieListResponse {

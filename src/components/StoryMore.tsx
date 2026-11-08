@@ -3,6 +3,7 @@ import type { MovieDetail } from '../types/tmdb';
 import { buildGallery } from '../utils/gallery';
 import ImageGallery from './ImageGallery';
 import MovieRail from './MovieRail';
+import ReviewList from './ReviewList';
 
 interface Props {
   detail: MovieDetail | null;
@@ -20,7 +21,11 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
   const seen = new Set(recommendations.map((m) => m.id));
   const similar = (detail.similar?.results ?? []).filter((m) => !seen.has(m.id));
 
-  if (recommendations.length === 0 && similar.length === 0 && gallery.all.length === 0) return null;
+  const reviews = detail.reviews?.results ?? [];
+
+  if (recommendations.length === 0 && similar.length === 0 && gallery.all.length === 0 && reviews.length === 0) {
+    return null;
+  }
 
   return (
     <div className="story-more">
@@ -32,6 +37,7 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
         offset={gallery.posterOffset}
         onOpen={onOpenImage}
       />
+      <ReviewList reviews={reviews} />
       <MovieRail id="st-rec" title="Rekomendasi untuk Anda" movies={recommendations} onOpen={onOpenMovie} />
       <MovieRail id="st-sim" title="Film serupa" movies={similar} onOpen={onOpenMovie} />
     </div>

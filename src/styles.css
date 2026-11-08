@@ -1525,6 +1525,62 @@ main > * {
   color: var(--muted);
 }
 
+/* ---------- ulasan ---------- */
+.rv-note {
+  margin: 4px 0 0;
+  font-size: 12px;
+}
+
+.rv-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
+  align-items: start;
+  margin-top: 14px;
+}
+
+.rv {
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.rv-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+
+.rv-rating {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.rv-body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.rv-toggle {
+  margin-top: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
 /* ---------- galeri gambar + lightbox ---------- */
 .gal-item {
   flex: 0 0 auto;

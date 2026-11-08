@@ -4,6 +4,7 @@ import type {
   Movie,
   MovieDetail,
   MovieListResponse,
+  Review,
   TmdbErrorKind,
   Video,
 } from '../types/tmdb';
@@ -118,22 +119,32 @@ export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promis
   const detail = await request<MovieDetail>(
     `/movie/${id}`,
     {
-      append_to_response: 'credits,videos,recommendations,similar,images',
+      append_to_response: 'credits,videos,recommendations,similar,images,reviews',
       include_video_language: 'id,en,null',
       include_image_language: 'id,en,null',
     },
     signal,
   );
   // Banyak film belum punya sinopsis/tagline bahasa Indonesia: ambil versi en-US sebagai cadangan (diberi label di UI).
+  let result = detail;
   if (!detail.overview) {
     try {
       const en = await request<MovieDetail>(`/movie/${id}`, { language: 'en-US' }, signal);
-      if (en.overview) return { ...detail, overview: en.overview, overviewFallback: true, tagline: detail.tagline || en.tagline };
+      if (en.overview) result = { ...detail, overview: en.overview, overviewFallback: true, tagline: detail.tagline || en.tagline };
     } catch (err) {
       if ((err as Error).name === 'AbortError') throw err;
     }
   }
-  return detail;
+  // Ulasan TMDB difilter menurut `language`; hampir semuanya berbahasa Inggris, jadi daftar id-ID biasanya kosong.
+  if (result.reviews && result.reviews.results.length === 0) {
+    try {
+      const en = await request<{ results: Review[] }>(`/movie/${id}/reviews`, { language: 'en-US' }, signal);
+      if (en.results?.length) result = { ...result, reviews: { results: en.results } };
+    } catch (err) {
+      if ((err as Error).name === 'AbortError') throw err;
+    }
+  }
+  return result;
 }
 
 type ImageKind = 'poster' | 'backdrop' | 'profile';

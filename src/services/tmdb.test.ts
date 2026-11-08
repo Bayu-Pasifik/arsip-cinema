@@ -150,7 +150,7 @@ describe('fetchMovieDetail', () => {
     expect(d.overview).toBe('Halo');
     expect(d.overviewFallback).toBeUndefined();
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(new URL(String(fetchMock.mock.calls[0][0])).searchParams.get('append_to_response')).toBe('credits,videos,recommendations,similar,images');
+    expect(new URL(String(fetchMock.mock.calls[0][0])).searchParams.get('append_to_response')).toBe('credits,videos,recommendations,similar,images,reviews');
   });
 
   it('sinopsis kosong → ambil en-US sebagai cadangan dan beri penanda', async () => {
@@ -169,6 +169,25 @@ describe('fetchMovieDetail', () => {
     const d = await t.fetchMovieDetail(1);
     expect(d.overview).toBe('');
     expect(d.overviewFallback).toBeUndefined();
+  });
+
+  it('ulasan id-ID kosong → ambil ulasan en-US sebagai cadangan', async () => {
+    const t = await load('k');
+    fetchMock
+      .mockReturnValueOnce(json({ id: 1, overview: 'Halo', reviews: { results: [] } }))
+      .mockReturnValueOnce(json({ results: [{ id: 'r1', author: 'A', content: 'Great', created_at: '2020-01-01' }] }));
+    const d = await t.fetchMovieDetail(1);
+    expect(d.reviews?.results).toHaveLength(1);
+    const url = new URL(String(fetchMock.mock.calls[1][0]));
+    expect(url.pathname).toBe('/3/movie/1/reviews');
+    expect(url.searchParams.get('language')).toBe('en-US');
+  });
+
+  it('ulasan id-ID sudah ada → tidak ada request tambahan', async () => {
+    const t = await load('k');
+    fetchMock.mockReturnValue(json({ id: 1, overview: 'Halo', reviews: { results: [{ id: 'r1' }] } }));
+    await t.fetchMovieDetail(1);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
 

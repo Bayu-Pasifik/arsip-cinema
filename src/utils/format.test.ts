@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clamp, formatDate, formatMoney, formatRuntime, statusLabel } from './format';
+import { clamp, excerpt, formatDate, formatMoney, formatRuntime, statusLabel } from './format';
 
 describe('formatDate', () => {
   it('memformat tanggal ISO ke bahasa Indonesia', () => {
@@ -47,5 +47,17 @@ describe('formatRuntime', () => {
   it('mengembalikan string kosong bila tidak ada durasi', () => {
     expect(formatRuntime(null)).toBe('');
     expect(formatRuntime(0)).toBe('');
+  });
+});
+
+describe('excerpt', () => {
+  it('tidak memotong teks pendek dan membuang penanda markdown', () => {
+    expect(excerpt('**Bagus** sekali', 50)).toEqual({ text: 'Bagus sekali', truncated: false });
+  });
+  it('memotong di batas kata dan menambah elipsis', () => {
+    const r = excerpt('satu dua tiga empat lima enam tujuh', 20);
+    expect(r.truncated).toBe(true);
+    expect(r.text.endsWith('…')).toBe(true);
+    expect(r.text.length).toBeLessThanOrEqual(21);
   });
 });
