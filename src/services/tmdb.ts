@@ -117,7 +117,11 @@ export async function searchMovies(query: string, page = 1, signal?: AbortSignal
 export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promise<MovieDetail> {
   const detail = await request<MovieDetail>(
     `/movie/${id}`,
-    { append_to_response: 'credits,videos,recommendations,similar', include_video_language: 'id,en,null' },
+    {
+      append_to_response: 'credits,videos,recommendations,similar,images',
+      include_video_language: 'id,en,null',
+      include_image_language: 'id,en,null',
+    },
     signal,
   );
   // Banyak film belum punya sinopsis/tagline bahasa Indonesia: ambil versi en-US sebagai cadangan (diberi label di UI).

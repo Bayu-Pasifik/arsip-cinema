@@ -1525,6 +1525,85 @@ main > * {
   color: var(--muted);
 }
 
+/* ---------- galeri gambar + lightbox ---------- */
+.gal-item {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+.gal-btn {
+  display: block;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.gal-btn img {
+  display: block;
+  height: 150px;
+  width: auto;
+  border-radius: 6px;
+  border: 3px solid #fff;
+  background: var(--surface-2);
+  box-shadow: 4px 4px 0 rgba(18, 22, 28, 0.12);
+  transition:
+    transform 0.25s,
+    box-shadow 0.25s;
+}
+
+.gal-poster .gal-btn img {
+  height: 210px;
+}
+
+.gal-btn:hover img,
+.gal-btn:focus-visible img {
+  transform: translateY(-4px);
+  box-shadow: 6px 8px 0 rgba(18, 22, 28, 0.16);
+}
+
+.gal-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 14px;
+  padding: 64px var(--pad) 24px;
+  background: rgba(223, 229, 236, 0.95);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 16px;
+  right: var(--pad);
+}
+
+.lightbox-img {
+  max-width: min(92vw, 1280px);
+  max-height: calc(100dvh - 160px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border: 4px solid #fff;
+  background: var(--surface-2);
+  box-shadow: 10px 10px 0 rgba(18, 22, 28, 0.18);
+}
+
+.lightbox-nav {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ---------- metadata tambahan detail film ---------- */
 .st-ch a {
   pointer-events: auto;

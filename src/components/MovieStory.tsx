@@ -6,9 +6,11 @@ import { useCompact } from '../hooks/useEnv';
 import { useMovieDetail } from '../hooks/useMovieDetail';
 import { imageUrl, pickTrailer, releaseYear } from '../services/tmdb';
 import type { Movie } from '../types/tmdb';
+import { buildGallery } from '../utils/gallery';
 import { formatDate, formatMoney, formatRuntime, languageName, statusLabel } from '../utils/format';
 import BackButton from './BackButton';
 import CollectionButtons from './CollectionButtons';
+import ImageLightbox from './ImageLightbox';
 import StoryMore from './StoryMore';
 import TrailerModal from './TrailerModal';
 import type { StoryProgress } from '../scene/StoryScene';
@@ -53,8 +55,9 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
   const [active, setActive] = useState(0);
   const [past, setPast] = useState(false);
   const [trailerOpen, setTrailerOpen] = useState(false);
-  const trailerOpenRef = useRef(false);
-  trailerOpenRef.current = trailerOpen;
+  const [lightbox, setLightbox] = useState<number | null>(null);
+  const modalOpenRef = useRef(false);
+  modalOpenRef.current = trailerOpen || lightbox !== null;
 
   const state = useMovieDetail(movie.id);
   const detail = state.status === 'success' ? state.detail : null;
@@ -68,6 +71,7 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
   const rating = movie.vote_average;
   const runtime = formatRuntime(detail?.runtime ?? null);
   const posterSrc = imageUrl(movie.poster_path, 'poster', 'w342');
+  const gallery = useMemo(() => buildGallery(detail), [detail]);
 
   // metadata tambahan dari TMDB (hanya tampil bila ada nilainya)
   const crewBy = (...jobs: string[]) =>
@@ -264,7 +268,7 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
   // Esc menutup; Tab dikurung di dalam halaman detail
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (trailerOpenRef.current) return; // dialog trailer menangani Esc/Tab sendiri
+      if (modalOpenRef.current) return; // dialog trailer/galeri menangani Esc/Tab sendiri
       if (e.key === 'Escape') {
         e.preventDefault();
         close();
@@ -513,7 +517,10 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
           )}
         </div>
       </div>
-      <StoryMore detail={detail} onOpenMovie={onOpenMovie} />
+      <StoryMore detail={detail} onOpenMovie={onOpenMovie} onOpenImage={setLightbox} />
+      {lightbox !== null && gallery.all.length > 0 && (
+        <ImageLightbox title={movie.title} images={gallery.all} start={lightbox} reduced={reduced} onClose={() => setLightbox(null)} />
+      )}
       {trailerOpen && trailer && (
         <TrailerModal title={movie.title} videoKey={trailer.key} reduced={reduced} onClose={() => setTrailerOpen(false)} />
       )}

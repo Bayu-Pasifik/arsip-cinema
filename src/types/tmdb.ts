@@ -40,6 +40,14 @@ export interface Video {
   published_at: string;
 }
 
+export interface ImageInfo {
+  file_path: string;
+  width: number;
+  height: number;
+  vote_average: number;
+  iso_639_1: string | null;
+}
+
 export interface MovieDetail extends Movie {
   tagline: string;
   runtime: number | null;
@@ -63,6 +71,7 @@ export interface MovieDetail extends Movie {
   videos?: { results: Video[] };
   recommendations?: { results: Movie[] };
   similar?: { results: Movie[] };
+  images?: { backdrops: ImageInfo[]; posters: ImageInfo[]; logos: ImageInfo[] };
 }
 
 export interface MovieListResponse {
