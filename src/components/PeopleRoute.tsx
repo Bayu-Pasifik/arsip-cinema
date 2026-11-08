@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type CSSProperties } from 'react';
 import { useT } from '../i18n';
 import { usePeopleList } from '../hooks/usePeopleList';
 import { imageUrl, type PeopleKind } from '../services/tmdb';
@@ -37,10 +37,11 @@ export default function PeopleRoute({ onClose, onOpenPerson }: Props) {
 
         {list.people.length > 0 && (
           <ul className="pr-grid pe-grid">
-            {list.people.map((p) => {
+            {list.people.map((p, i) => {
               const src = imageUrl(p.profile_path, 'profile', 'w185');
+              // hanya 14 kartu pertama pada tiap halaman yang berjeda; halaman berikutnya muncul tanpa tunda panjang
               return (
-                <li key={p.id}>
+                <li key={p.id} className="pr-in" style={{ '--i': Math.min(i % 20, 14) } as CSSProperties}>
                   <button type="button" className="pr-film" onClick={() => onOpenPerson(p.id)} aria-label={t('detail.openPerson', { name: p.name })}>
                     {src ? <img src={src} alt="" loading="lazy" width={185} height={278} /> : <span className="st-cast-ph" aria-hidden="true">{p.name.slice(0, 1)}</span>}
                     <span className="pr-film-title">{p.name}</span>

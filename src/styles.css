@@ -2727,3 +2727,45 @@ main > * {
   gap: 10px;
   margin-top: 18px;
 }
+
+/* ---------- animasi masuk halaman orang (dimatikan bila gerak dikurangi) ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  .person {
+    animation: person-fade 0.35s ease-out both;
+  }
+
+  .person-inner > .back3d,
+  .person-inner .pr-photo,
+  .person-inner .pr-info,
+  .person-inner .pe-title,
+  .person-inner .pe-tabs {
+    animation: person-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .person-inner .pr-info,
+  .person-inner .pe-title {
+    animation-delay: 0.08s;
+  }
+
+  .person-inner .pe-tabs {
+    animation-delay: 0.16s;
+  }
+
+  .pr-in {
+    animation: person-rise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(0.2s + var(--i, 0) * 35ms);
+  }
+}
+
+@keyframes person-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes person-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}

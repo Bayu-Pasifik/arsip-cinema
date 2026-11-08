@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, type CSSProperties } from 'react';
 import { useT } from '../i18n';
 import { browsePath, navigate } from '../hooks/useRoute';
 import { NO_FILTERS } from '../utils/filters';
@@ -32,11 +32,11 @@ function FilmGrid({ films, label, role, onOpenMovie }: GridProps) {
     <section className="pr-section" aria-label={label}>
       <h2 className="tag">{label}</h2>
       <ul className="pr-grid">
-        {films.map((f) => {
+        {films.map((f, i) => {
           const src = imageUrl(f.poster_path, 'poster', 'w185');
           const sub = role === 'character' ? f.character : f.job;
           return (
-            <li key={f.id}>
+            <li key={f.id} className="pr-in" style={{ '--i': Math.min(i, 14) } as CSSProperties}>
               <button type="button" className="pr-film" onClick={() => onOpenMovie(f.id)} aria-label={t('person.openMovie', { title: f.title })}>
                 {src && <img src={src} alt="" loading="lazy" width={185} height={278} />}
                 <span className="pr-film-title">{f.title}</span>
