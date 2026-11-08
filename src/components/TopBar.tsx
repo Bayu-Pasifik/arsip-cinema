@@ -8,6 +8,7 @@ import { usePersonName } from '../hooks/usePersonName';
 import KeywordSearch from './KeywordSearch';
 import { useCollectionName } from '../hooks/useCollectionName';
 import { usePeopleSearch } from '../hooks/usePeopleSearch';
+import { useCollectionSearch } from '../hooks/useCollectionSearch';
 import { navigate, PEOPLE_PATH, personPath } from '../hooks/useRoute';
 import { CATEGORIES, imageUrl } from '../services/tmdb';
 import { setRegion, useRegion } from '../services/region';
@@ -53,6 +54,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
   const companyName = useCompanyName(filters.company);
   const castName = usePersonName(filters.cast);
   const people = usePeopleSearch(searchTerm);
+  const collections = useCollectionSearch(searchTerm);
   const filtered = hasFilters(filters);
   const count = filterCount(filters);
   const set = (patch: Partial<Filters>) => onFilters({ ...filters, ...patch });
@@ -253,7 +255,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
             spellCheck={false}
           />
           <span className={`spinner${searching ? ' on' : ''}`} role="status" aria-label={searching ? t('top.searching') : undefined} />
-          {people.length > 0 && (
+          {(people.length > 0 || collections.length > 0) && (
             <ul className="people" aria-label={t('top.people')}>
               {people.map((p) => {
                 const src = imageUrl(p.profile_path, 'profile', 'w45');
@@ -263,6 +265,18 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
                       {src ? <img src={src} alt="" width={32} height={32} /> : <span className="people-ph" aria-hidden="true" />}
                       <span className="people-name">{p.name}</span>
                       {p.known_for_department && <span className="people-dept">{p.known_for_department}</span>}
+                    </button>
+                  </li>
+                );
+              })}
+              {collections.map((c) => {
+                const src = imageUrl(c.poster_path, 'poster', 'w92');
+                return (
+                  <li key={`col-${c.id}`}>
+                    <button type="button" className="people-item" onClick={() => onFilters({ ...NO_FILTERS, collection: c.id })}>
+                      {src ? <img src={src} alt="" width={32} height={32} /> : <span className="people-ph" aria-hidden="true" />}
+                      <span className="people-name">{c.name}</span>
+                      <span className="people-dept">{t('cat.collection')}</span>
                     </button>
                   </li>
                 );

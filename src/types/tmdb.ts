@@ -146,6 +146,13 @@ export interface PersonSummary {
   known_for_department?: string;
 }
 
+/** Hasil /search/collection. */
+export interface CollectionSummary {
+  id: number;
+  name: string;
+  poster_path: string | null;
+}
+
 export interface PersonDetail {
   id: number;
   name: string;

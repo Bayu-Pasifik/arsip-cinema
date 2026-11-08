@@ -3,6 +3,7 @@ import type {
   Genre,
   PersonDetail,
   PersonSummary,
+  CollectionSummary,
   TmdbCategory,
   Movie,
   MovieDetail,
@@ -179,6 +180,12 @@ export async function fetchPeople(kind: PeopleKind, page: number, signal?: Abort
   const path = kind === 'popular' ? '/person/popular' : '/trending/person/week';
   const data = await request<{ results: PersonSummary[]; page: number; total_pages: number }>(path, { page }, signal);
   return { people: data.results, page: data.page, totalPages: Math.min(data.total_pages, 500) };
+}
+
+/** Maksimal 3 franchise/koleksi yang cocok dengan `query`. */
+export async function searchCollections(query: string, signal?: AbortSignal): Promise<CollectionSummary[]> {
+  const data = await request<{ results: CollectionSummary[] }>('/search/collection', { query }, signal);
+  return data.results.slice(0, 3);
 }
 
 export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ id: number; name: string }> {
