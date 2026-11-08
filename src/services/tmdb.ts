@@ -224,7 +224,7 @@ export async function searchPeople(query: string, signal?: AbortSignal): Promise
 }
 
 export async function fetchPersonDetail(id: number, signal?: AbortSignal): Promise<PersonDetail> {
-  const person = await request<PersonDetail>(`/person/${id}`, { append_to_response: 'movie_credits,external_ids' }, signal);
+  const person = await request<PersonDetail>(`/person/${id}`, { append_to_response: 'movie_credits,external_ids,images' }, signal);
   // Banyak biografi hanya tersedia dalam bahasa Inggris: pakai itu sebagai cadangan (diberi label di UI).
   if (!person.biography && getLanguage().split('-')[0] !== 'en') {
     try {

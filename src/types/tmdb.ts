@@ -176,6 +176,7 @@ export interface PersonDetail {
   known_for_department?: string;
   movie_credits?: { cast: CreditMovie[]; crew: CreditMovie[] };
   external_ids?: { imdb_id?: string | null };
+  images?: { profiles: ImageInfo[] };
 }
 
 export interface MovieListResponse {

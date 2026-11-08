@@ -81,6 +81,11 @@ export default function PersonRoute({ id, onClose, onOpenMovie }: Props) {
   const p = state.person;
   const photo = imageUrl(p.profile_path, 'profile', 'h632');
   const acted = filmography(p.movie_credits?.cast);
+  // foto terbaik dulu (bukan foto utama yang sudah tampil di atas), maksimal 12
+  const photos = [...(p.images?.profiles ?? [])]
+    .filter((ph) => ph.file_path !== p.profile_path)
+    .sort((a, b) => b.vote_average - a.vote_average)
+    .slice(0, 12);
   const directed = crewFilms(p.movie_credits?.crew, ['Director']);
   const facts: [string, string][] = [];
   if (p.known_for_department) facts.push([t('person.department'), p.known_for_department]);
@@ -144,6 +149,26 @@ export default function PersonRoute({ id, onClose, onOpenMovie }: Props) {
             </p>
           </div>
         </header>
+        {photos.length > 1 && (
+          <section className="pr-section" aria-label={t('person.photos')}>
+            <h2 className="tag">{t('person.photos')}</h2>
+            <ul className="pr-photos">
+              {photos.map((ph) => {
+                const thumb = imageUrl(ph.file_path, 'profile', 'w185');
+                const full = imageUrl(ph.file_path, 'profile', 'original');
+                if (!thumb || !full) return null;
+                return (
+                  <li key={ph.file_path}>
+                    <a href={full} target="_blank" rel="noopener noreferrer">
+                      <img src={thumb} alt={t('detail.photoAlt', { name: p.name })} loading="lazy" width={185} height={278} />
+                      <span className="sr-only">{t('common.newTab')}</span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
         <FilmGrid films={acted} label={t('person.acting')} role="character" onOpenMovie={onOpenMovie} />
         <FilmGrid films={directed} label={t('person.directing')} role="job" onOpenMovie={onOpenMovie} />
       </div>
