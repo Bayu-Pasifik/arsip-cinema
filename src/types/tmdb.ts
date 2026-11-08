@@ -40,6 +40,14 @@ export interface Video {
   published_at: string;
 }
 
+export interface Translation {
+  iso_3166_1: string;
+  iso_639_1: string;
+  name: string;
+  english_name: string;
+  data: { title?: string; overview?: string; tagline?: string; homepage?: string };
+}
+
 export interface Keyword {
   id: number;
   name: string;
@@ -112,6 +120,7 @@ export interface MovieDetail extends Movie {
   reviews?: { results: Review[] };
   'watch/providers'?: { results: Record<string, WatchRegion> };
   keywords?: { keywords: Keyword[] };
+  translations?: { translations: Translation[] };
   external_ids?: {
     imdb_id?: string | null;
     facebook_id?: string | null;

@@ -119,7 +119,7 @@ export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promis
   const detail = await request<MovieDetail>(
     `/movie/${id}`,
     {
-      append_to_response: 'credits,videos,recommendations,similar,images,reviews,watch/providers,release_dates,keywords,external_ids',
+      append_to_response: 'credits,videos,recommendations,similar,images,reviews,watch/providers,release_dates,keywords,external_ids,translations',
       include_video_language: 'id,en,null',
       include_image_language: 'id,en,null',
     },
@@ -127,7 +127,11 @@ export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promis
   );
   // Banyak film belum punya sinopsis/tagline bahasa Indonesia: ambil versi en-US sebagai cadangan (diberi label di UI).
   let result = detail;
-  if (!detail.overview) {
+  // Terjemahan sudah ikut di respons (append_to_response) → pakai versi Inggris dari sana tanpa request tambahan.
+  const enData = detail.translations?.translations.find((t) => t.iso_639_1 === 'en' && t.data.overview)?.data;
+  if (!detail.overview && enData?.overview) {
+    result = { ...detail, overview: enData.overview, overviewFallback: true, tagline: detail.tagline || enData.tagline || '' };
+  } else if (!detail.overview) {
     try {
       const en = await request<MovieDetail>(`/movie/${id}`, { language: 'en-US' }, signal);
       if (en.overview) result = { ...detail, overview: en.overview, overviewFallback: true, tagline: detail.tagline || en.tagline };

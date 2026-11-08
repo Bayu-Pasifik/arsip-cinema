@@ -1,10 +1,12 @@
 import { useMemo } from 'react';
 import type { MovieDetail } from '../types/tmdb';
 import { buildGallery } from '../utils/gallery';
+import { translationOptions } from '../utils/translations';
 import ImageGallery from './ImageGallery';
 import KeywordChips from './KeywordChips';
 import MovieRail from './MovieRail';
 import ReviewList from './ReviewList';
+import TranslationsPanel from './TranslationsPanel';
 import WatchProviders, { WATCH_REGION } from './WatchProviders';
 
 interface Props {
@@ -26,15 +28,23 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
   const reviews = detail.reviews?.results ?? [];
   const providers = detail['watch/providers'];
   const keywords = detail.keywords?.keywords ?? [];
+  const translations = translationOptions(detail.translations?.translations);
 
-  if (!providers && keywords.length === 0 &&recommendations.length === 0 && similar.length === 0 && gallery.all.length === 0 && reviews.length === 0) {
-    return null;
-  }
+  const empty =
+    !providers &&
+    keywords.length === 0 &&
+    translations.length === 0 &&
+    recommendations.length === 0 &&
+    similar.length === 0 &&
+    gallery.all.length === 0 &&
+    reviews.length === 0;
+  if (empty) return null;
 
   return (
     <div className="story-more">
       {providers && <WatchProviders region={providers.results?.[WATCH_REGION]} />}
       <KeywordChips keywords={keywords} />
+      <TranslationsPanel options={translations} />
       <ImageGallery id="st-gal" title="Galeri adegan" items={gallery.backdrops} offset={0} onOpen={onOpenImage} />
       <ImageGallery
         id="st-pos"

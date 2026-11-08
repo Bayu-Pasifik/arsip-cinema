@@ -1581,6 +1581,45 @@ main > * {
   text-underline-offset: 3px;
 }
 
+/* ---------- terjemahan ---------- */
+.tr-label {
+  display: block;
+  margin: 6px 0 8px;
+  font-size: 13px;
+}
+
+.tr-select {
+  min-height: 44px;
+  max-width: 100%;
+  padding: 0 14px;
+  border: 1px solid var(--ink);
+  border-radius: 99px;
+  background: var(--surface);
+  font-size: 14px;
+}
+
+.tr-body {
+  max-width: 720px;
+  margin-top: 16px;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+.tr-body p {
+  margin: 0 0 10px;
+}
+
+.tr-title {
+  font-family: var(--serif);
+  font-size: 26px;
+  line-height: 1.15;
+}
+
+.tr-tagline {
+  font-style: italic;
+  color: var(--muted);
+}
+
 /* ---------- ulasan ---------- */
 .rv-note {
   margin: 4px 0 0;

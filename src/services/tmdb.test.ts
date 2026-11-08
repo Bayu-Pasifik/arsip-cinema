@@ -151,7 +151,7 @@ describe('fetchMovieDetail', () => {
     expect(d.overview).toBe('Halo');
     expect(d.overviewFallback).toBeUndefined();
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(new URL(String(fetchMock.mock.calls[0][0])).searchParams.get('append_to_response')).toBe('credits,videos,recommendations,similar,images,reviews,watch/providers,release_dates,keywords,external_ids');
+    expect(new URL(String(fetchMock.mock.calls[0][0])).searchParams.get('append_to_response')).toBe('credits,videos,recommendations,similar,images,reviews,watch/providers,release_dates,keywords,external_ids,translations');
   });
 
   it('sinopsis kosong → ambil en-US sebagai cadangan dan beri penanda', async () => {
@@ -162,6 +162,21 @@ describe('fetchMovieDetail', () => {
     const d = await t.fetchMovieDetail(1);
     expect(d).toMatchObject({ overview: 'Hello', overviewFallback: true, tagline: 'Tag' });
     expect(new URL(String(fetchMock.mock.calls[1][0])).searchParams.get('language')).toBe('en-US');
+  });
+
+  it('sinopsis kosong tapi terjemahan en ikut di respons → tanpa request tambahan', async () => {
+    const t = await load('k');
+    fetchMock.mockReturnValue(
+      json({
+        id: 1,
+        overview: '',
+        tagline: '',
+        translations: { translations: [{ iso_639_1: 'en', iso_3166_1: 'US', name: 'English', english_name: 'English', data: { overview: 'Hello', tagline: 'Tag' } }] },
+      }),
+    );
+    const d = await t.fetchMovieDetail(1);
+    expect(d).toMatchObject({ overview: 'Hello', overviewFallback: true, tagline: 'Tag' });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it('cadangan en-US gagal → tetap mengembalikan detail Indonesia tanpa melempar', async () => {
