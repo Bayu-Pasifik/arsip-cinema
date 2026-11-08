@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { demoMovies } from '../services/demo';
 import { isCollectionKey, type Collections } from '../services/collections';
+import { useLanguage } from '../services/language';
 import { errorMessage, fetchCategory, MAX_TOTAL, searchMovies, TmdbError, type MoviePage } from '../services/tmdb';
 import type { ListSource, Movie } from '../types/tmdb';
 import { appendUnique, canLoadMore } from '../utils/movies';
@@ -41,7 +42,8 @@ export function useMovieList(source: ListSource, reloadToken: number, local: Col
   const [core, setCore] = useState<Core>({ status: 'loading', movies: [], page: 0, totalPages: 0, generation: 0 });
   const [loadingMore, setLoadingMore] = useState(false);
   const [moreError, setMoreError] = useState<string | null>(null);
-  const key = sourceKey(source);
+  const language = useLanguage();
+  const key = `${sourceKey(source)}|${language}`;
 
   const sourceRef = useRef(source);
   sourceRef.current = source;

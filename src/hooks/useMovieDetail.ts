@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLanguage } from '../services/language';
 import { errorMessage, fetchMovieDetail } from '../services/tmdb';
 import type { MovieDetail } from '../types/tmdb';
 
@@ -10,6 +11,7 @@ export type DetailState =
 
 export function useMovieDetail(id: number | null): DetailState {
   const [state, setState] = useState<DetailState>({ status: 'idle' });
+  const language = useLanguage();
 
   useEffect(() => {
     if (id === null || id < 0) {
@@ -27,7 +29,7 @@ export function useMovieDetail(id: number | null): DetailState {
         setState({ status: 'error', message: errorMessage(err) });
       });
     return () => controller.abort();
-  }, [id]);
+  }, [id, language]);
 
   return state;
 }

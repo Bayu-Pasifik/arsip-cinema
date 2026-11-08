@@ -8,11 +8,10 @@ import type {
   TmdbErrorKind,
   Video,
 } from '../types/tmdb';
+import { getLanguage } from './language';
 
 const API_BASE = 'https://api.themoviedb.org/3';
 
-/** Bahasa data TMDB (parameter `language`). Bila terjemahan kosong, TMDB mengembalikan teks kosong atau judul asli. */
-const LANGUAGE = 'id-ID';
 const IMG_BASE = 'https://image.tmdb.org/t/p';
 
 /**
@@ -47,7 +46,8 @@ async function request<T>(path: string, params: Params = {}, signal?: AbortSigna
     throw new TmdbError('missing-key', 'VITE_TMDB_API_KEY belum diisi.');
   }
   const url = new URL(API_BASE + path);
-  url.searchParams.set('language', params.language ? String(params.language) : LANGUAGE);
+  // Bahasa data dipilih pengguna (lihat language.ts). Bila terjemahan kosong, TMDB mengembalikan teks kosong atau judul asli.
+  url.searchParams.set('language', params.language ? String(params.language) : getLanguage());
   for (const [k, v] of Object.entries(params)) {
     if (v !== undefined && v !== '') url.searchParams.set(k, String(v));
   }
@@ -116,12 +116,14 @@ export async function searchMovies(query: string, page = 1, signal?: AbortSignal
 }
 
 export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promise<MovieDetail> {
+  const base = getLanguage().split('-')[0];
+  const mediaLangs = [...new Set([base, 'en', 'null'])].join(',');
   const detail = await request<MovieDetail>(
     `/movie/${id}`,
     {
       append_to_response: 'credits,videos,recommendations,similar,images,reviews,watch/providers,release_dates,keywords,external_ids,translations',
-      include_video_language: 'id,en,null',
-      include_image_language: 'id,en,null',
+      include_video_language: mediaLangs,
+      include_image_language: mediaLangs,
     },
     signal,
   );

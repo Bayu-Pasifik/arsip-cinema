@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+import { LANGUAGES, setLanguage, useLanguage } from '../services/language';
 import { CATEGORY_LABEL } from '../services/tmdb';
 import type { Category } from '../types/tmdb';
 
@@ -20,6 +21,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
   { category, query, searching, searchActive, onCategory, onQuery, onHome, counts },
   ref,
 ) {
+  const language = useLanguage();
   return (
     <header className="topbar" ref={ref}>
       <button type="button" className="brand" onClick={onHome} aria-label="Arsip Sinema — kembali ke pembuka">
@@ -51,21 +53,34 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
         </ul>
       </nav>
 
-      <form className="search" role="search" onSubmit={(e) => e.preventDefault()}>
-        <label htmlFor="q" className="sr-only">
-          Cari film
+      <div className="tb-right">
+        <form className="search" role="search" onSubmit={(e) => e.preventDefault()}>
+          <label htmlFor="q" className="sr-only">
+            Cari film
+          </label>
+          <input
+            id="q"
+            type="search"
+            value={query}
+            onChange={(e) => onQuery(e.target.value)}
+            placeholder="Cari judul film…"
+            autoComplete="off"
+            spellCheck={false}
+          />
+          <span className={`spinner${searching ? ' on' : ''}`} role="status" aria-label={searching ? 'Mencari' : undefined} />
+        </form>
+
+        <label className="lang">
+          <span className="sr-only">Bahasa data film (TMDB)</span>
+          <select value={language} onChange={(e) => setLanguage(e.target.value)}>
+            {LANGUAGES.map((l) => (
+              <option key={l.code} value={l.code}>
+                {l.label}
+              </option>
+            ))}
+          </select>
         </label>
-        <input
-          id="q"
-          type="search"
-          value={query}
-          onChange={(e) => onQuery(e.target.value)}
-          placeholder="Cari judul film…"
-          autoComplete="off"
-          spellCheck={false}
-        />
-        <span className={`spinner${searching ? ' on' : ''}`} role="status" aria-label={searching ? 'Mencari' : undefined} />
-      </form>
+      </div>
     </header>
   );
 });

@@ -238,9 +238,26 @@ main > * {
   color: #fff;
 }
 
+.tb-right {
+  display: flex;
+  align-items: center;
+  justify-self: end;
+  gap: 8px;
+}
+
+.lang select {
+  min-height: 46px;
+  max-width: 130px;
+  padding: 0 12px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 14px;
+}
+
 .search {
   position: relative;
-  justify-self: end;
 }
 
 .search input {
