@@ -2687,3 +2687,29 @@ main > * {
   background: #fff;
   padding: 3px;
 }
+
+.filter-co {
+  display: grid;
+  gap: 8px;
+}
+
+.filter-co-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.filter-co-info img {
+  flex: none;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 8px;
+  padding: 4px;
+  border: 1px solid var(--line);
+}
+
+.filter-co-info p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}

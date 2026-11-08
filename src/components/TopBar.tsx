@@ -3,7 +3,7 @@ import { setLanguage, useLanguage } from '../services/language';
 import { useLanguages } from '../hooks/useLanguages';
 import { useT } from '../i18n';
 import { useKeywordName } from '../hooks/useKeywordName';
-import { useCompanyName } from '../hooks/useCompanyName';
+import { useCompany } from '../hooks/useCompanyName';
 import { usePersonName } from '../hooks/usePersonName';
 import { useCertifications } from '../hooks/useCertifications';
 import KeywordSearch from './KeywordSearch';
@@ -70,7 +70,8 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
   const providers = useProviders(region);
   const certs = useCertifications(region);
   const collectionName = useCollectionName(filters.collection);
-  const companyName = useCompanyName(filters.company);
+  const company = useCompany(filters.company);
+  const companyName = company?.name ?? null;
   const castName = usePersonName(filters.cast);
   const people = usePeopleSearch(searchTerm);
   const collections = useCollectionSearch(searchTerm);
@@ -285,12 +286,33 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
                 </p>
               )}
               {filters.company !== null && (
-                <p className="filter-kw">
-                  <span>{t('filter.company', { name: companyName ?? `#${filters.company}` })}</span>
-                  <button type="button" className="filter-x" onClick={() => set({ company: null })} aria-label={t('filter.removeCompany')}>
-                    ×
-                  </button>
-                </p>
+                <div className="filter-co">
+                  <div className="filter-kw">
+                    <span>{t('filter.company', { name: companyName ?? `#${filters.company}` })}</span>
+                    <button type="button" className="filter-x" onClick={() => set({ company: null })} aria-label={t('filter.removeCompany')}>
+                      ×
+                    </button>
+                  </div>
+                  {company && (
+                    <div className="filter-co-info">
+                      {company.logo_path && <img src={imageUrl(company.logo_path, 'logo', 'w92') ?? ''} alt="" width={46} height={46} />}
+                      <p className="dim">
+                        {[company.headquarters, company.origin_country ? regionText(company.origin_country) : '']
+                          .filter(Boolean)
+                          .join(' · ')}
+                        {company.homepage && /^https?:\/\//.test(company.homepage) && (
+                          <>
+                            {' · '}
+                            <a href={company.homepage} target="_blank" rel="noopener noreferrer">
+                              {t('filter.website')}
+                              <span className="sr-only">{t('common.newTab')}</span>
+                            </a>
+                          </>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                </div>
               )}
               {filters.collection !== null && (
                 <p className="filter-kw">

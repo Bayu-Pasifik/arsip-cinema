@@ -161,6 +161,17 @@ export interface PersonSummary {
   known_for_department?: string;
 }
 
+/** Detail /company/{id}. */
+export interface CompanyDetail {
+  id: number;
+  name: string;
+  logo_path: string | null;
+  description?: string;
+  headquarters?: string;
+  homepage?: string;
+  origin_country?: string;
+}
+
 /** Hasil /search/company. */
 export interface CompanySummary {
   id: number;

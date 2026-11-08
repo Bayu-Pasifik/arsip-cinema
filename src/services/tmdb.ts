@@ -4,6 +4,7 @@ import type {
   PersonDetail,
   PersonSummary,
   CollectionSummary,
+  CompanyDetail,
   CompanySummary,
   CertificationMap,
   TmdbCategory,
@@ -172,7 +173,7 @@ export async function searchKeywords(query: string, signal?: AbortSignal): Promi
   return data.results.slice(0, 8);
 }
 
-export const fetchCompany = (id: number, signal?: AbortSignal) => request<{ id: number; name: string }>(`/company/${id}`, {}, signal);
+export const fetchCompany = (id: number, signal?: AbortSignal) => request<CompanyDetail>(`/company/${id}`, {}, signal);
 
 export const fetchPersonName = async (id: number, signal?: AbortSignal) =>
   (await request<{ name: string }>(`/person/${id}`, {}, signal)).name;
