@@ -42,6 +42,10 @@ export default function BackButton({ onClick, label = 'Kembali', hint = 'Ke arsi
       onPointerMove={onMove}
       onPointerLeave={onLeave}
     >
+      {/* penentu lebar: muka-muka berposisi absolut, jadi teks terpanjang diukur di sini */}
+      <span className="back3d-size" aria-hidden="true">
+        {label.length >= hint.length ? label : hint}
+      </span>
       <span className="back3d-box">
         <span className="back3d-face back3d-front">
           <span className="back3d-arrow" aria-hidden="true">

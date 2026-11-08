@@ -6,7 +6,7 @@ import { useCompact } from '../hooks/useEnv';
 import { useMovieDetail } from '../hooks/useMovieDetail';
 import { imageUrl, pickTrailer, releaseYear } from '../services/tmdb';
 import type { Movie } from '../types/tmdb';
-import { formatRuntime } from '../utils/format';
+import { formatDate, formatMoney, formatRuntime, languageName, statusLabel } from '../utils/format';
 import BackButton from './BackButton';
 import CollectionButtons from './CollectionButtons';
 import TrailerModal from './TrailerModal';
@@ -64,6 +64,29 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft }:
   const rating = movie.vote_average;
   const runtime = formatRuntime(detail?.runtime ?? null);
   const posterSrc = imageUrl(movie.poster_path, 'poster', 'w342');
+
+  // metadata tambahan dari TMDB (hanya tampil bila ada nilainya)
+  const crewBy = (...jobs: string[]) =>
+    [...new Set((detail?.credits?.crew ?? []).filter((c) => jobs.includes(c.job)).map((c) => c.name))].slice(0, 3).join(', ');
+  const writers = crewBy('Screenplay', 'Writer', 'Story');
+  const composer = crewBy('Original Music Composer');
+  const cinematographer = crewBy('Director of Photography');
+  const originalTitle = detail?.original_title && detail.original_title !== movie.title ? detail.original_title : '';
+  const facts: [string, string][] = (
+    [
+      ['Status', statusLabel(detail?.status)],
+      ['Rilis', formatDate(movie.release_date)],
+      ['Bahasa asli', languageName(detail?.original_language)],
+      ['Anggaran', formatMoney(detail?.budget)],
+      ['Pendapatan', formatMoney(detail?.revenue)],
+      ['Negara', (detail?.production_countries ?? []).map((c) => c.name).slice(0, 2).join(', ')],
+      ['Studio', (detail?.production_companies ?? []).map((c) => c.name).slice(0, 2).join(', ')],
+      ['Popularitas', detail?.popularity ? detail.popularity.toLocaleString('id-ID', { maximumFractionDigits: 0 }) : ''],
+    ] as [string, string][]
+  ).filter(([, v]) => v);
+  const collection = detail?.belongs_to_collection?.name;
+  const imdbUrl = detail?.imdb_id ? `https://www.imdb.com/title/${detail.imdb_id}/` : '';
+  const homepage = /^https?:\/\//.test(detail?.homepage ?? '') ? (detail?.homepage as string) : '';
 
   // fokus: simpan pemicu, pindah ke tombol tutup, kembalikan saat selesai
   useEffect(() => {
@@ -330,6 +353,11 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft }:
                 <span className="st-line">{movie.title}</span>
               </span>
             </h2>
+            {originalTitle && (
+              <p className="st-orig st-hero-fade" lang={detail?.original_language}>
+                {originalTitle}
+              </p>
+            )}
             {detail?.tagline && <p className="st-tagline st-hero-fade">“{detail.tagline}”</p>}
             {trailer && (
               <button type="button" className="btn btn-primary st-trailer" aria-haspopup="dialog" onClick={() => setTrailerOpen(true)}>
@@ -381,6 +409,16 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft }:
                 </li>
               ))}
             </ul>
+            {facts.length > 0 && (
+              <dl className="st-meta">
+                {facts.map(([k, v]) => (
+                  <div key={k}>
+                    <dt>{k}</dt>
+                    <dd>{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
             {state.status === 'loading' && <p className="dim">Memuat detail tambahan…</p>}
             {state.status === 'error' && (
               <p className="dp-error" role="alert">
@@ -394,6 +432,17 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft }:
             <h3 id="st-cast-h" className="tag">
               Pemeran{director ? ` · Sutradara ${director}` : ''}
             </h3>
+            {(writers || composer || cinematographer) && (
+              <p className="dim st-crew">
+                {[
+                  writers && `Penulis: ${writers}`,
+                  composer && `Musik: ${composer}`,
+                  cinematographer && `Sinematografi: ${cinematographer}`,
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </p>
+            )}
             {cast.length === 0 ? (
               <p className="dim">{state.status === 'loading' ? 'Memuat pemeran…' : 'Data pemeran belum tersedia.'}</p>
             ) : (
@@ -421,6 +470,23 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft }:
           {/* 5 — penutup */}
           <section className="st-ch st-end" aria-label="Penutup">
             <p className="st-end-title">{movie.title}</p>
+            {collection && <p className="dim st-collection">Bagian dari {collection}</p>}
+            {(imdbUrl || homepage) && (
+              <p className="st-links">
+                {imdbUrl && (
+                  <a href={imdbUrl} target="_blank" rel="noopener noreferrer">
+                    IMDb <span aria-hidden="true">↗</span>
+                    <span className="sr-only"> (tab baru)</span>
+                  </a>
+                )}
+                {homepage && (
+                  <a href={homepage} target="_blank" rel="noopener noreferrer">
+                    Situs resmi <span aria-hidden="true">↗</span>
+                    <span className="sr-only"> (tab baru)</span>
+                  </a>
+                )}
+              </p>
+            )}
             {trailer && (
               <button type="button" className="btn st-trailer-end" aria-haspopup="dialog" onClick={() => setTrailerOpen(true)}>
                 <span aria-hidden="true">▶</span> Putar trailer
