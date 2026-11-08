@@ -2928,3 +2928,24 @@ main > * {
     grid-column: 1 / -1;
   }
 }
+
+.filter-co-info img.filter-co-poster {
+  object-fit: cover;
+  padding: 0;
+  border-radius: 4px;
+}
+
+.filter-posters {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  position: relative;
+}
+
+.filter-posters img {
+  display: block;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+  object-fit: cover;
+}

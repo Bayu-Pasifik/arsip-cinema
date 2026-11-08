@@ -7,7 +7,9 @@ import type {
   PersonDetail,
   SeasonDetail,
   PersonSummary,
+  CollectionDetail,
   CollectionSummary,
+  ImageInfo,
   CompanyDetail,
   CompanySummary,
   CertificationMap,
@@ -158,13 +160,17 @@ export async function discoverMovies(filters: Filters, page = 1, signal?: AbortS
   return toPage(await request<MovieListResponse>('/discover/movie', { ...discoverParams(filters, today, getRegion()), page }, signal));
 }
 
-interface Collection {
-  id: number;
-  name: string;
-  parts: Movie[];
-}
+export const fetchCollection = (id: number, signal?: AbortSignal) => request<CollectionDetail>(`/collection/${id}`, {}, signal);
 
-export const fetchCollection = (id: number, signal?: AbortSignal) => request<Collection>(`/collection/${id}`, {}, signal);
+/** Poster dan backdrop koleksi (/collection/{id}/images); bahasa gambar mengikuti bahasa aktif, Inggris, dan tanpa teks. */
+export function fetchCollectionImages(id: number, signal?: AbortSignal): Promise<{ posters: ImageInfo[]; backdrops: ImageInfo[] }> {
+  const base = getLanguage().split('-')[0];
+  return request<{ posters: ImageInfo[]; backdrops: ImageInfo[] }>(
+    `/collection/${id}/images`,
+    { include_image_language: [...new Set([base, 'en', 'null'])].join(',') },
+    signal,
+  );
+}
 
 /** Seluruh film satu koleksi (satu halaman), berurutan menurut tanggal rilis. */
 export async function fetchCollectionMovies(id: number, signal?: AbortSignal): Promise<MoviePage> {

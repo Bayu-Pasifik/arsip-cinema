@@ -1,38 +1,42 @@
 import { useEffect, useState } from 'react';
 import { useLanguage } from '../services/language';
 import { fetchCollection, hasApiKey } from '../services/tmdb';
+import type { CollectionDetail } from '../types/tmdb';
 
-const cache = new Map<string, string>();
+const cache = new Map<string, CollectionDetail>();
 
-/** Nama koleksi/franchise TMDB (menurut bahasa aktif) untuk label; null selama belum diketahui. */
-export function useCollectionName(id: number | null): string | null {
+/** Detail koleksi/franchise TMDB (menurut bahasa aktif); null selama belum diketahui. Di-cache per id dan bahasa. */
+export function useCollection(id: number | null): CollectionDetail | null {
   const language = useLanguage();
   const key = id === null ? '' : `${id}|${language}`;
-  const [name, setName] = useState<string | null>(key ? (cache.get(key) ?? null) : null);
+  const [collection, setCollection] = useState<CollectionDetail | null>(key ? (cache.get(key) ?? null) : null);
 
   useEffect(() => {
     if (id === null) {
-      setName(null);
+      setCollection(null);
       return;
     }
     const hit = cache.get(key);
     if (hit) {
-      setName(hit);
+      setCollection(hit);
       return;
     }
-    setName(null);
+    setCollection(null);
     if (!hasApiKey) return;
     const controller = new AbortController();
     fetchCollection(id, controller.signal)
       .then((c) => {
-        cache.set(key, c.name);
-        if (!controller.signal.aborted) setName(c.name);
+        cache.set(key, c);
+        if (!controller.signal.aborted) setCollection(c);
       })
       .catch(() => {
-        /* label opsional */
+        /* info opsional */
       });
     return () => controller.abort();
   }, [id, key]);
 
-  return name;
+  return collection;
 }
+
+/** Nama koleksi untuk label; null selama belum diketahui. */
+export const useCollectionName = (id: number | null): string | null => useCollection(id)?.name ?? null;

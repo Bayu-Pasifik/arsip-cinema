@@ -8,7 +8,7 @@ import { useNetwork } from '../hooks/useNetwork';
 import { usePersonName } from '../hooks/usePersonName';
 import { useCertifications } from '../hooks/useCertifications';
 import KeywordSearch from './KeywordSearch';
-import { useCollectionName } from '../hooks/useCollectionName';
+import CollectionCard from './CollectionCard';
 import { useMultiSearch } from '../hooks/useMultiSearch';
 import { useCollectionSearch } from '../hooks/useCollectionSearch';
 import { useCompanySearch } from '../hooks/useCompanySearch';
@@ -73,7 +73,6 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
   const regionText = (code: string) => regionLabel(code, regionName(code), countries);
   const providers = useProviders(region, mode);
   const certs = useCertifications(region);
-  const collectionName = useCollectionName(filters.collection);
   const company = useCompany(filters.company);
   const companyName = company?.name ?? null;
   const network = useNetwork(filters.network);
@@ -366,14 +365,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
                   )}
                 </div>
               )}
-              {filters.collection !== null && (
-                <p className="filter-kw">
-                  <span>{t('filter.collection', { name: collectionName ?? `#${filters.collection}` })}</span>
-                  <button type="button" className="filter-x" onClick={() => set({ collection: null })} aria-label={t('filter.removeCollection')}>
-                    ×
-                  </button>
-                </p>
-              )}
+              {filters.collection !== null && <CollectionCard id={filters.collection} onRemove={() => set({ collection: null })} />}
               {filtered && (
                 <button type="button" className="btn btn-ghost filter-reset" onClick={() => onFilters(NO_FILTERS)}>
                   {t('filter.reset')}
