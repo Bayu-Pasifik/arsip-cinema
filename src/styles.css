@@ -2435,3 +2435,39 @@ main > * {
   gap: 12px;
   margin-top: 16px;
 }
+
+/* ---------- cari kata kunci di panel filter ---------- */
+.filter-panel input[type='search'] {
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  font-size: 14px;
+}
+
+.kws-list {
+  display: grid;
+  gap: 2px;
+  margin-top: 6px;
+}
+
+.kws-list button {
+  width: 100%;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  text-align: left;
+  font-size: 14px;
+}
+
+.kws-list button:hover,
+.kws-list button:focus-visible {
+  background: var(--surface-2);
+}
+
+.filter-panel {
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+}

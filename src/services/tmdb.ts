@@ -162,6 +162,12 @@ export async function fetchProviders(region: string, signal?: AbortSignal): Prom
   return [...data.results].sort((a, b) => rank(a) - rank(b)).slice(0, 40);
 }
 
+/** Maksimal 8 kata kunci yang cocok dengan `query`. */
+export async function searchKeywords(query: string, signal?: AbortSignal): Promise<{ id: number; name: string }[]> {
+  const data = await request<{ results: { id: number; name: string }[] }>('/search/keyword', { query }, signal);
+  return data.results.slice(0, 8);
+}
+
 export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ id: number; name: string }> {
   return request<{ id: number; name: string }>(`/keyword/${id}`, {}, signal);
 }

@@ -3,6 +3,7 @@ import { setLanguage, useLanguage } from '../services/language';
 import { useLanguages } from '../hooks/useLanguages';
 import { useT } from '../i18n';
 import { useKeywordName } from '../hooks/useKeywordName';
+import KeywordSearch from './KeywordSearch';
 import { useCollectionName } from '../hooks/useCollectionName';
 import { usePeopleSearch } from '../hooks/usePeopleSearch';
 import { navigate, personPath } from '../hooks/useRoute';
@@ -189,6 +190,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
                   </select>
                 </label>
               )}
+              <KeywordSearch onPick={(id) => set({ keyword: id })} />
               {filters.keyword !== null && (
                 <p className="filter-kw">
                   <span lang="en">{t('filter.keyword', { name: keywordName ?? `#${filters.keyword}` })}</span>
