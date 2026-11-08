@@ -11,6 +11,11 @@ describe('parseRoute', () => {
     expect(parseRoute('/browse/top_rated?q=dune')).toEqual({ name: 'browse', category: 'top_rated', q: 'dune', genre: null });
   });
 
+  it('/person/:id', () => {
+    expect(parseRoute('/person/287')).toEqual({ name: 'person', id: 287 });
+    expect(parseRoute('/person/abc')).toEqual({ name: 'home' });
+  });
+
   it('daftar lokal favorites dan watchlist adalah kategori valid', () => {
     expect(parseRoute('/browse/favorites')).toEqual({ name: 'browse', category: 'favorites', q: '', genre: null });
     expect(parseRoute('/browse/watchlist')).toMatchObject({ category: 'watchlist' });

@@ -131,6 +131,28 @@ export interface MovieDetail extends Movie {
   release_dates?: { results: { iso_3166_1: string; release_dates: ReleaseDate[] }[] };
 }
 
+/** Film dalam filmografi seseorang (TMDB movie_credits). */
+export interface CreditMovie extends Movie {
+  popularity?: number;
+  character?: string;
+  job?: string;
+}
+
+export interface PersonDetail {
+  id: number;
+  name: string;
+  biography: string;
+  /** true bila biografi diambil dari bahasa Inggris karena terjemahan kosong */
+  biographyFallback?: boolean;
+  birthday: string | null;
+  deathday: string | null;
+  place_of_birth: string | null;
+  profile_path: string | null;
+  known_for_department?: string;
+  movie_credits?: { cast: CreditMovie[]; crew: CreditMovie[] };
+  external_ids?: { imdb_id?: string | null };
+}
+
 export interface MovieListResponse {
   page: number;
   results: Movie[];

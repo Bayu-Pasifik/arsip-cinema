@@ -1,6 +1,7 @@
 import type {
   Category,
   Genre,
+  PersonDetail,
   TmdbCategory,
   Movie,
   MovieDetail,
@@ -123,6 +124,20 @@ export async function discoverByGenre(genre: number, page = 1, signal?: AbortSig
 export async function fetchGenres(signal?: AbortSignal): Promise<Genre[]> {
   const data = await request<{ genres: Genre[] }>('/genre/movie/list', {}, signal);
   return data.genres;
+}
+
+export async function fetchPersonDetail(id: number, signal?: AbortSignal): Promise<PersonDetail> {
+  const person = await request<PersonDetail>(`/person/${id}`, { append_to_response: 'movie_credits,external_ids' }, signal);
+  // Banyak biografi hanya tersedia dalam bahasa Inggris: pakai itu sebagai cadangan (diberi label di UI).
+  if (!person.biography && getLanguage().split('-')[0] !== 'en') {
+    try {
+      const en = await request<PersonDetail>(`/person/${id}`, { language: 'en-US' }, signal);
+      if (en.biography) return { ...person, biography: en.biography, biographyFallback: true };
+    } catch (err) {
+      if ((err as Error).name === 'AbortError') throw err;
+    }
+  }
+  return person;
 }
 
 export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promise<MovieDetail> {

@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import Browse from './components/Browse';
 import MovieRoute from './components/MovieRoute';
+import PersonRoute from './components/PersonRoute';
 import Hero from './components/Hero';
 import StatusMessage from './components/StatusMessage';
 import FlatStack from './components/FlatStack';
@@ -40,6 +41,8 @@ export default function App() {
   const route = useRoute();
   const entered = route.name !== 'home';
   const detailId = route.name === 'movie' ? route.id : null;
+  const personId = route.name === 'person' ? route.id : null;
+  const overlayOpen = detailId !== null || personId !== null;
 
   const [category, setCategory] = useState<Category>(route.name === 'browse' ? route.category : 'trending');
   const [query, setQuery] = useState(route.name === 'browse' ? route.q : '');
@@ -196,6 +199,11 @@ export default function App() {
   }, [ghostId]);
   const clearGhost = useCallback(() => setExited(lastDetail.current), []);
 
+  const closePerson = useCallback(() => {
+    if (cameFromApp()) window.history.back();
+    else navigate(browsePath(category, urlQuery, genre), { replace: true });
+  }, [category, urlQuery, genre]);
+
   const closeDetail = useCallback(() => {
     uiClosed.current = true;
     if (cameFromApp()) window.history.back();
@@ -263,7 +271,7 @@ export default function App() {
   // ---- input: keyboard, wheel, swipe ---------------------------------------
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (!entered || detailId !== null) return;
+      if (!entered || overlayOpen) return;
       const t = e.target as HTMLElement;
       if (t.tagName === 'INPUT') return;
       if (e.key === 'ArrowRight') goTo(index + 1);
@@ -275,11 +283,11 @@ export default function App() {
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [entered, detailId, goTo, index, movies.length]);
+  }, [entered, overlayOpen, goTo, index, movies.length]);
 
   const lastWheel = useRef(0);
   const onWheel = (e: React.WheelEvent) => {
-    if (!entered || detailId !== null) return;
+    if (!entered || overlayOpen) return;
     const now = performance.now();
     const d = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
     if (Math.abs(d) < 12 || now - lastWheel.current < 380) return;
@@ -294,7 +302,7 @@ export default function App() {
   const onPointerUp = (e: React.PointerEvent) => {
     const x0 = swipeStart.current;
     swipeStart.current = null;
-    if (x0 === null || !entered || detailId !== null) return;
+    if (x0 === null || !entered || overlayOpen) return;
     const dx = e.clientX - x0;
     if (Math.abs(dx) > 60) goTo(index + (dx < 0 ? 1 : -1));
   };
@@ -434,6 +442,8 @@ export default function App() {
           {t('status.demoBanner')}
         </p>
       )}
+
+      {personId !== null && <PersonRoute key={personId} id={personId} onClose={closePerson} onOpenMovie={openMovie} />}
 
       {(detailId ?? ghostId) !== null && (
         <MovieRoute

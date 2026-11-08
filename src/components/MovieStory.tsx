@@ -5,6 +5,7 @@ import { useGSAP } from '@gsap/react';
 import { useCompact } from '../hooks/useEnv';
 import { useT } from '../i18n';
 import { useMovieDetail } from '../hooks/useMovieDetail';
+import { navigate, personPath } from '../hooks/useRoute';
 import { imageUrl, pickTrailer, releaseYear } from '../services/tmdb';
 import type { Movie } from '../types/tmdb';
 import { buildGallery } from '../utils/gallery';
@@ -550,15 +551,17 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
                   const src = imageUrl(c.profile_path, 'profile', 'w185');
                   return (
                     <li className="st-cast-card" key={c.id}>
-                      {src ? (
-                        <img src={src} alt={t('detail.photoAlt', { name: c.name })} loading="lazy" width={185} height={278} />
-                      ) : (
-                        <span className="st-cast-ph" aria-hidden="true">
-                          {c.name.slice(0, 1)}
-                        </span>
-                      )}
-                      <span className="st-cast-name">{c.name}</span>
-                      <span className="st-cast-role">{c.character}</span>
+                      <button type="button" className="st-cast-btn" onClick={() => navigate(personPath(c.id))} aria-label={t('detail.openPerson', { name: c.name })}>
+                        {src ? (
+                          <img src={src} alt={t('detail.photoAlt', { name: c.name })} loading="lazy" width={185} height={278} />
+                        ) : (
+                          <span className="st-cast-ph" aria-hidden="true">
+                            {c.name.slice(0, 1)}
+                          </span>
+                        )}
+                        <span className="st-cast-name">{c.name}</span>
+                        <span className="st-cast-role">{c.character}</span>
+                      </button>
                     </li>
                   );
                 })}
