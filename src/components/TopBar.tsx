@@ -73,6 +73,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
   const company = useCompany(filters.company);
   const companyName = company?.name ?? null;
   const castName = usePersonName(filters.cast);
+  const crewName = usePersonName(filters.crew);
   const people = usePeopleSearch(searchTerm);
   const collections = useCollectionSearch(searchTerm);
   const companies = useCompanySearch(searchTerm);
@@ -273,6 +274,14 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
                 <p className="filter-kw">
                   <span lang="en">{t('filter.keyword', { name: keywordName ?? `#${filters.keyword}` })}</span>
                   <button type="button" className="filter-x" onClick={() => set({ keyword: null })} aria-label={t('filter.removeKeyword')}>
+                    ×
+                  </button>
+                </p>
+              )}
+              {filters.crew !== null && (
+                <p className="filter-kw">
+                  <span>{t('filter.crew', { name: crewName ?? `#${filters.crew}` })}</span>
+                  <button type="button" className="filter-x" onClick={() => set({ crew: null })} aria-label={t('filter.removeCrew')}>
                     ×
                   </button>
                 </p>

@@ -5,7 +5,7 @@ const parse = (qs: string) => parseFilters(new URLSearchParams(qs));
 
 describe('parseFilters', () => {
   it('membaca semua filter valid', () => {
-    expect(parse('genre=28&year=1999&rating=7&sort=revenue.desc&keyword=9715&collection=10&provider=8&company=420&cast=6384&cert=PG-13&lang=ko&runtime=long&decade=1990')).toEqual({
+    expect(parse('genre=28&year=1999&rating=7&sort=revenue.desc&keyword=9715&collection=10&provider=8&company=420&cast=6384&crew=525&cert=PG-13&lang=ko&runtime=long&decade=1990')).toEqual({
       genre: 28,
       year: 1999,
       rating: 7,
@@ -15,6 +15,7 @@ describe('parseFilters', () => {
       provider: 8,
       company: 420,
       cast: 6384,
+      crew: 525,
       cert: 'PG-13',
       lang: 'ko',
       runtime: 'long',
@@ -92,5 +93,6 @@ describe('discoverParams', () => {
     expect(p).toMatchObject({ with_genres: 35, primary_release_year: 1994, with_keywords: 7 });
     expect(discoverParams({ ...NO_FILTERS, company: 420 }, 'x')).toMatchObject({ with_companies: 420 });
     expect(discoverParams({ ...NO_FILTERS, cast: 6384 }, 'x')).toMatchObject({ with_cast: 6384 });
+    expect(discoverParams({ ...NO_FILTERS, crew: 525 }, 'x')).toMatchObject({ with_crew: 525 });
   });
 });

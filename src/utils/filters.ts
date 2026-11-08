@@ -17,6 +17,8 @@ export interface Filters {
   company: number | null;
   /** id aktor/kru: film yang dibintanginya (with_cast) */
   cast: number | null;
+  /** id aktor/kru: film yang dikerjakannya sebagai kru (with_crew) */
+  crew: number | null;
   /** sertifikasi usia (mis. "PG-13") menurut negara tontonan terpilih */
   cert: string | null;
   /** bahasa asli film (ISO 639-1) */
@@ -26,7 +28,7 @@ export interface Filters {
   decade: number | null;
 }
 
-export const NO_FILTERS: Filters = { genre: null, year: null, rating: null, sort: null, keyword: null, collection: null, provider: null, company: null, cast: null, cert: null, lang: null, runtime: null, decade: null };
+export const NO_FILTERS: Filters = { genre: null, year: null, rating: null, sort: null, keyword: null, collection: null, provider: null, company: null, cast: null, crew: null, cert: null, lang: null, runtime: null, decade: null };
 
 export const RATINGS = [5, 6, 7, 8] as const;
 
@@ -64,6 +66,7 @@ export function parseFilters(params: URLSearchParams): Filters {
     provider: int(params.get('provider'), 1, 99999999),
     company: int(params.get('company'), 1, 99999999),
     cast: int(params.get('cast'), 1, 99999999),
+    crew: int(params.get('crew'), 1, 99999999),
     cert: /^[A-Za-z0-9+./-]{1,10}$/.test(params.get('cert') ?? '') ? params.get('cert') : null,
     lang: /^[a-z]{2}$/.test(params.get('lang') ?? '') ? params.get('lang') : null,
     runtime: (RUNTIMES as readonly string[]).includes(params.get('runtime') ?? '') ? (params.get('runtime') as RuntimeKey) : null,
@@ -86,6 +89,7 @@ export function filterParts(f: Filters): string[] {
   if (f.provider !== null) parts.push(`provider=${f.provider}`);
   if (f.company !== null) parts.push(`company=${f.company}`);
   if (f.cast !== null) parts.push(`cast=${f.cast}`);
+  if (f.crew !== null) parts.push(`crew=${f.crew}`);
   if (f.cert !== null) parts.push(`cert=${encodeURIComponent(f.cert)}`);
   if (f.lang !== null) parts.push(`lang=${f.lang}`);
   if (f.runtime !== null) parts.push(`runtime=${f.runtime}`);
@@ -103,6 +107,7 @@ export function discoverParams(f: Filters, today: string, region = 'ID'): Record
   if (f.keyword !== null) p.with_keywords = f.keyword;
   if (f.company !== null) p.with_companies = f.company;
   if (f.cast !== null) p.with_cast = f.cast;
+  if (f.crew !== null) p.with_crew = f.crew;
   if (f.lang !== null) p.with_original_language = f.lang;
   if (f.runtime === 'short') p['with_runtime.lte'] = 89;
   if (f.runtime === 'medium') {

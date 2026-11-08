@@ -64,6 +64,7 @@ export default function App() {
   const collectionName = useCollectionName(filters.collection);
   const companyName = useCompanyName(filters.company);
   const castName = usePersonName(filters.cast);
+  const crewName = usePersonName(filters.crew);
   const filtered = hasFilters(filters);
   const [demo, setDemo] = useState(false);
   const [reload, setReload] = useState(0);
@@ -116,6 +117,7 @@ export default function App() {
             filters.keyword !== null ? (keywordName ?? `#${filters.keyword}`) : null,
             filters.company !== null ? (companyName ?? `#${filters.company}`) : null,
             filters.cast !== null ? (castName ?? `#${filters.cast}`) : null,
+            filters.crew !== null ? (crewName ?? `#${filters.crew}`) : null,
             filters.cert,
             filters.lang ? languageName(filters.lang) : null,
             filters.runtime ? t(`runtime.${filters.runtime}`) : null,

@@ -133,13 +133,26 @@ export default function PersonRoute({ id, onClose, onOpenMovie }: Props) {
               )}
             </div>
             <BioTranslations options={bios} />
-            <button
-              type="button"
-              className="btn btn-primary pr-all"
-              onClick={() => navigate(browsePath('trending', '', { ...NO_FILTERS, cast: p.id }))}
-            >
-              {t('person.allFilms', { name: p.name })}
-            </button>
+            <div className="pr-actions">
+              {(p.movie_credits?.cast.length ?? 0) > 0 && (
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={() => navigate(browsePath('trending', '', { ...NO_FILTERS, cast: p.id }))}
+                >
+                  {t('person.allFilms', { name: p.name })}
+                </button>
+              )}
+              {(p.movie_credits?.crew.length ?? 0) > 0 && (
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={() => navigate(browsePath('trending', '', { ...NO_FILTERS, crew: p.id }))}
+                >
+                  {t('person.allCrewFilms', { name: p.name })}
+                </button>
+              )}
+            </div>
             <p className="pr-links">
               {imdb && (
                 <a href={`https://www.imdb.com/name/${imdb}`} target="_blank" rel="noopener noreferrer">

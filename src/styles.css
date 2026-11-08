@@ -2720,3 +2720,10 @@ main > * {
   margin-top: 16px;
   max-width: 62ch;
 }
+
+.pr-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
