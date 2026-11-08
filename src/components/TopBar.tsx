@@ -15,6 +15,8 @@ import { CATEGORIES, imageUrl } from '../services/tmdb';
 import { setRegion, useRegion } from '../services/region';
 import { useProviders, useWatchRegions } from '../hooks/useWatchProviders';
 import { regionName } from '../utils/format';
+import { regionLabel, sortRegions } from '../utils/regions';
+import { useCountries } from '../hooks/useCountries';
 import type { Category, Genre } from '../types/tmdb';
 import { filterCount, hasFilters, NO_FILTERS, RATINGS, SORTS, type Filters, type SortKey } from '../utils/filters';
 
@@ -50,6 +52,8 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
   const keywordName = useKeywordName(filters.keyword);
   const region = useRegion();
   const regions = useWatchRegions();
+  const countries = useCountries();
+  const regionText = (code: string) => regionLabel(code, regionName(code), countries);
   const providers = useProviders(region);
   const certs = useCertifications(region);
   const collectionName = useCollectionName(filters.collection);
@@ -178,7 +182,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
               </label>
               {(certs.length > 0 || filters.cert !== null) && (
                 <label>
-                  <span>{t('filter.cert', { country: regionName(region) })}</span>
+                  <span>{t('filter.cert', { country: regionText(region) })}</span>
                   <select value={filters.cert ?? ''} onChange={(e) => set({ cert: e.target.value || null })}>
                     <option value="">{t('filter.certAny')}</option>
                     {(filters.cert !== null && !certs.includes(filters.cert) ? [filters.cert, ...certs] : certs).map((c) => (
@@ -206,9 +210,9 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
                 <label>
                   <span>{t('filter.region')}</span>
                   <select value={region} onChange={(e) => setRegion(e.target.value)}>
-                    {(regions.includes(region) ? regions : [region, ...regions]).map((r) => (
+                    {sortRegions(regions.includes(region) ? regions : [region, ...regions], regionText, language).map((r) => (
                       <option key={r} value={r}>
-                        {regionName(r)}
+                        {regionText(r)}
                       </option>
                     ))}
                   </select>

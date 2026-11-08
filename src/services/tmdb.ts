@@ -193,6 +193,9 @@ export async function fetchCertifications(signal?: AbortSignal): Promise<Certifi
   return (await request<{ certifications: CertificationMap }>('/certification/movie/list', {}, signal)).certifications;
 }
 
+export const fetchCountries = (signal?: AbortSignal) =>
+  request<{ iso_3166_1: string; english_name: string; native_name: string }[]>('/configuration/countries', {}, signal);
+
 export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ id: number; name: string }> {
   return request<{ id: number; name: string }>(`/keyword/${id}`, {}, signal);
 }
