@@ -2553,3 +2553,68 @@ main > * {
   margin: 0;
   font-weight: 500;
 }
+
+/* ---------- ponsel: top bar bertumpuk (brand / kontrol / kategori) ---------- */
+@media (max-width: 640px) {
+  .topbar {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 8px;
+  }
+
+  .tb-right {
+    position: relative;
+    grid-row: 2;
+    justify-self: stretch;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .cats {
+    grid-row: 3;
+  }
+
+  .search {
+    flex: 1 1 150px;
+    min-width: 0;
+  }
+
+  .search input {
+    width: 100%;
+  }
+
+  .filter-wrap {
+    position: static;
+  }
+
+  .filter-panel {
+    left: 0;
+    right: 0;
+    width: auto;
+  }
+
+  .demo-banner {
+    top: 170px;
+  }
+}
+
+@media (max-width: 640px) {
+  .filter-panel {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filter-panel .kws,
+  .filter-panel .filter-kw,
+  .filter-panel .filter-reset {
+    grid-column: 1 / -1;
+  }
+}
+
+.filter-panel label,
+.filter-panel select {
+  min-width: 0;
+  width: 100%;
+}
+
+.pr-photos {
+  position: relative;
+}
