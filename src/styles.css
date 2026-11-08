@@ -1456,6 +1456,7 @@ main > * {
   padding: 4px var(--pad) 12px;
   overflow-x: auto;
   scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--pad);
   scrollbar-width: thin;
 }
 

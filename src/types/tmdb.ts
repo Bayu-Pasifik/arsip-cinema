@@ -62,6 +62,7 @@ export interface MovieDetail extends Movie {
   credits?: { cast: CastMember[]; crew: CrewMember[] };
   videos?: { results: Video[] };
   recommendations?: { results: Movie[] };
+  similar?: { results: Movie[] };
 }
 
 export interface MovieListResponse {
