@@ -96,6 +96,7 @@ async function request<T>(path: string, params: Params = {}, signal?: AbortSigna
 const CATEGORY_PATH: Record<TmdbCategory, string> = {
   trending: '/trending/movie/week',
   trending_day: '/trending/movie/day',
+  trending_all: '/trending/all/week',
   popular: '/movie/popular',
   top_rated: '/movie/top_rated',
   now_playing: '/movie/now_playing',
@@ -107,7 +108,7 @@ const CATEGORY_PATH: Record<TmdbCategory, string> = {
   tv_on_the_air: '/tv/on_the_air',
 };
 
-export const CATEGORIES: readonly Category[] = ['trending', 'trending_day', 'popular', 'top_rated', 'now_playing', 'upcoming', 'favorites', 'watchlist'];
+export const CATEGORIES: readonly Category[] = ['trending', 'trending_day', 'trending_all', 'popular', 'top_rated', 'now_playing', 'upcoming', 'favorites', 'watchlist'];
 
 export const TV_CATEGORIES: readonly Category[] = ['tv_trending', 'tv_popular', 'tv_top_rated', 'tv_airing_today', 'tv_on_the_air', 'favorites', 'watchlist'];
 
@@ -129,6 +130,11 @@ function toPage(data: MovieListResponse, tv = false): MoviePage {
 }
 
 export async function fetchCategory(category: TmdbCategory, page = 1, signal?: AbortSignal): Promise<MoviePage> {
+  if (category === 'trending_all') {
+    // campuran film + serial (+ orang, dibuang): tiap item punya media_type
+    const data = await request<{ results: MultiRaw[]; page: number; total_pages: number }>(CATEGORY_PATH[category], { page }, signal);
+    return { movies: splitMulti(data.results, 0, 100).titles, page: data.page, totalPages: Math.min(data.total_pages, 500) };
+  }
   return toPage(await request<MovieListResponse>(CATEGORY_PATH[category], { page }, signal), isTvCategory(category));
 }
 

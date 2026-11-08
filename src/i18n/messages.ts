@@ -21,6 +21,7 @@ export const id = {
   // kategori
   'cat.trending': 'Trending',
   'cat.trending_day': 'Trending Hari Ini',
+  'cat.trending_all': 'Trending Film & Serial',
   'cat.popular': 'Popular',
   'cat.top_rated': 'Top Rated',
   'cat.now_playing': 'Now Playing',
@@ -346,6 +347,7 @@ export const en: Messages = {
 
   'cat.trending': 'Trending',
   'cat.trending_day': 'Trending Today',
+  'cat.trending_all': 'Trending Movies & Shows',
   'cat.popular': 'Popular',
   'cat.top_rated': 'Top Rated',
   'cat.now_playing': 'Now Playing',

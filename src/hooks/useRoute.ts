@@ -21,6 +21,7 @@ export type Route =
 const CATEGORIES: readonly Category[] = [
   'trending',
   'trending_day',
+  'trending_all',
   'popular',
   'top_rated',
   'now_playing',

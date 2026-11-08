@@ -14,6 +14,10 @@ describe('parseRoute', () => {
     expect(parseRoute('/browse/top_rated?q=dune')).toEqual({ name: 'browse', category: 'top_rated', q: 'dune', filters: NO_FILTERS });
   });
 
+  it('kategori trending_all (film + serial) valid', () => {
+    expect(parseRoute('/browse/trending_all')).toMatchObject({ category: 'trending_all' });
+  });
+
   it('kategori trending_day valid', () => {
     expect(parseRoute('/browse/trending_day')).toMatchObject({ category: 'trending_day' });
   });

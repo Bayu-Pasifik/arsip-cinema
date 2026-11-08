@@ -270,7 +270,7 @@ export interface MovieListResponse {
 }
 
 /** Kategori yang diambil dari TMDB. */
-export type TmdbCategory = 'trending' | 'trending_day' | 'popular' | 'top_rated' | 'now_playing' | 'upcoming' | TvCategory;
+export type TmdbCategory = 'trending' | 'trending_day' | 'trending_all' | 'popular' | 'top_rated' | 'now_playing' | 'upcoming' | TvCategory;
 /** Daftar lokal milik pengguna (localStorage). */
 export type CollectionKey = 'favorites' | 'watchlist';
 export type Category = TmdbCategory | CollectionKey;
