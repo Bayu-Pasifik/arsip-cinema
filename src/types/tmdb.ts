@@ -114,8 +114,8 @@ export interface MovieDetail extends Movie {
   overviewFallback?: boolean;
   credits?: { cast: CastMember[]; crew: CrewMember[] };
   videos?: { results: Video[] };
-  recommendations?: { results: Movie[] };
-  similar?: { results: Movie[] };
+  recommendations?: { results: Movie[]; page?: number; total_pages?: number };
+  similar?: { results: Movie[]; page?: number; total_pages?: number };
   images?: { backdrops: ImageInfo[]; posters: ImageInfo[]; logos: ImageInfo[] };
   reviews?: { results: Review[] };
   'watch/providers'?: { results: Record<string, WatchRegion> };

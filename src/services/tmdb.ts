@@ -134,6 +134,12 @@ export async function fetchCollectionMovies(id: number, signal?: AbortSignal): P
   return { movies, page: 1, totalPages: 1 };
 }
 
+export type RelatedKind = 'recommendations' | 'similar';
+
+export async function fetchRelated(id: number, kind: RelatedKind, page: number, signal?: AbortSignal): Promise<MoviePage> {
+  return toPage(await request<MovieListResponse>(`/movie/${id}/${kind}`, { page }, signal));
+}
+
 export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ id: number; name: string }> {
   return request<{ id: number; name: string }>(`/keyword/${id}`, {}, signal);
 }

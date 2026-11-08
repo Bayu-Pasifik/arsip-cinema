@@ -2428,3 +2428,10 @@ main > * {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
+
+.mv-more {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}

@@ -8,10 +8,14 @@ interface Props {
   title: string;
   movies: Movie[];
   onOpen: (id: number) => void;
+  /** jumlah kartu yang ditampilkan (default 14) */
+  limit?: number;
+  /** halaman berikutnya dari TMDB: tombol "muat lebih banyak" tampil bila hasMore */
+  more?: { hasMore: boolean; loading: boolean; error: string | null; onMore: () => void };
 }
 
 /** Carousel kartu film; klik membuka detail film tersebut. */
-export default function MovieRail({ id, title, movies, onOpen }: Props) {
+export default function MovieRail({ id, title, movies, onOpen, limit = 14, more }: Props) {
   const t = useT();
   if (movies.length === 0) return null;
   return (
@@ -20,7 +24,7 @@ export default function MovieRail({ id, title, movies, onOpen }: Props) {
         {title}
       </h3>
       <Carousel label={title}>
-        {movies.slice(0, 14).map((m) => {
+        {movies.slice(0, limit).map((m) => {
           const src = imageUrl(m.poster_path, 'poster', 'w185');
           const year = releaseYear(m.release_date);
           return (
@@ -44,6 +48,14 @@ export default function MovieRail({ id, title, movies, onOpen }: Props) {
           );
         })}
       </Carousel>
+      {more && (more.hasMore || more.error) && (
+        <div className="mv-more">
+          <button type="button" className="btn btn-ghost" onClick={more.onMore} disabled={more.loading}>
+            {more.loading ? t('more.loadingMore') : more.error ? t('more.retry') : t('more.loadMore')}
+          </button>
+          {more.error && <span className="dim">{more.error}</span>}
+        </div>
+      )}
     </section>
   );
 }

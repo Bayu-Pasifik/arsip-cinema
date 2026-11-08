@@ -3,6 +3,8 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { useReducedMotion } from '../hooks/useEnv';
+import { useRelatedPages } from '../hooks/useRelatedPages';
+import { appendUnique } from '../utils/movies';
 import { useT } from '../i18n';
 import type { MovieDetail } from '../types/tmdb';
 import { buildGallery } from '../utils/gallery';
@@ -81,11 +83,15 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
     { scope: root, dependencies: [reduced, detail?.id], revertOnUpdate: true },
   );
 
+  const detailId = detail?.id ?? -1;
+  const recPages = useRelatedPages(detailId, 'recommendations', detail?.recommendations?.page ?? 1, detail?.recommendations?.total_pages ?? 1);
+  const simPages = useRelatedPages(detailId, 'similar', detail?.similar?.page ?? 1, detail?.similar?.total_pages ?? 1);
+
   if (!detail) return null;
-  const recommendations = detail.recommendations?.results ?? [];
+  const recommendations = appendUnique(detail.recommendations?.results ?? [], recPages.extra);
   // "serupa" sering memuat film yang sudah ada di rekomendasi → buang duplikat
   const seen = new Set(recommendations.map((m) => m.id));
-  const similar = (detail.similar?.results ?? []).filter((m) => !seen.has(m.id));
+  const similar = appendUnique(detail.similar?.results ?? [], simPages.extra).filter((m) => !seen.has(m.id));
 
   const reviews = detail.reviews?.results ?? [];
   const providers = detail['watch/providers'];
@@ -121,8 +127,22 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
         onOpen={onOpenImage}
       />
       <ReviewList reviews={reviews} />
-      <MovieRail id="st-rec" title={t('more.recommendations')} movies={recommendations} onOpen={onOpenMovie} />
-      <MovieRail id="st-sim" title={t('more.similar')} movies={similar} onOpen={onOpenMovie} />
+      <MovieRail
+        id="st-rec"
+        title={t('more.recommendations')}
+        movies={recommendations}
+        onOpen={onOpenMovie}
+        limit={recPages.extra.length ? Infinity : 14}
+        more={{ hasMore: recPages.hasMore, loading: recPages.loading, error: recPages.error, onMore: recPages.loadMore }}
+      />
+      <MovieRail
+        id="st-sim"
+        title={t('more.similar')}
+        movies={similar}
+        onOpen={onOpenMovie}
+        limit={simPages.extra.length ? Infinity : 14}
+        more={{ hasMore: simPages.hasMore, loading: simPages.loading, error: simPages.error, onMore: simPages.loadMore }}
+      />
     </div>
   );
 }
