@@ -904,13 +904,15 @@ main > * {
 }
 
 .st-cast-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  display: flex;
   gap: 14px;
+  overflow: hidden; /* digeser lewat scroll cerita (scrollLeft) */
+  padding: 0 6px 8px 0;
 }
 
 .st-cast-card {
   display: flex;
+  flex: 0 0 calc((100% - 28px) / 3);
   flex-direction: column;
   gap: 2px;
   min-width: 0;
@@ -996,6 +998,10 @@ main > * {
   width: auto;
   transform: none;
   opacity: 1;
+}
+
+.story.is-static .st-cast-list {
+  overflow-x: auto;
 }
 
 .story.is-static .st-end {
@@ -1115,8 +1121,11 @@ main > * {
   }
 
   .st-cast-list {
-    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
+  }
+
+  .st-cast-card {
+    flex-basis: calc((100% - 20px) / 3);
   }
 
   .st-cast-role {
@@ -1403,8 +1412,11 @@ main > * {
   }
 
   .st-cast-list {
-    grid-template-columns: repeat(6, 1fr);
     gap: 8px;
+  }
+
+  .st-cast-card {
+    flex-basis: calc((100% - 40px) / 6);
   }
 
   .st-cast-card img,

@@ -70,7 +70,7 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
   const overview = detail?.overview || movie.overview || 'Sinopsis belum tersedia di TMDB.';
   const words = useMemo(() => overview.split(/\s+/).filter(Boolean), [overview]);
   const director = detail?.credits?.crew.find((c) => c.job === 'Director')?.name;
-  const cast = useMemo(() => (detail?.credits?.cast ?? []).slice(0, 6), [detail]);
+  const cast = useMemo(() => (detail?.credits?.cast ?? []).slice(0, 20), [detail]);
   const genres = detail?.genres ?? [];
   const trailer = useMemo(() => pickTrailer(detail?.videos?.results), [detail]);
   const rating = movie.vote_average;
@@ -205,15 +205,17 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
 
       // bab 4 — pemeran: kartu masuk bergantian
       fadeIn('.st-cast', 0.68);
-      if (q('.st-cast-card').length) {
-        tl.fromTo(
-          q('.st-cast-card'),
-          { opacity: 0, x: 70 },
-          { opacity: 1, x: 0, duration: 0.04, stagger: 0.025 },
-          0.7,
-        );
+      const castCards = q('.st-cast-card');
+      if (castCards.length) {
+        tl.fromTo(castCards, { opacity: 0, x: 70 }, { opacity: 1, x: 0, duration: 0.04, stagger: 0.008 }, 0.7);
+        // pemeran lebih banyak dari lebar kotak: geser strip mengikuti scroll agar semua terlihat
+        const list = scroller.querySelector<HTMLElement>('.st-cast-list');
+        const overflow = list ? list.scrollWidth - list.clientWidth : 0;
+        if (list && overflow > 4) {
+          tl.fromTo(list, { scrollLeft: 0 }, { scrollLeft: overflow, duration: 0.14, ease: 'none' }, 0.76);
+        }
       }
-      fadeOut('.st-cast', 0.9);
+      fadeOut('.st-cast', 0.92);
 
       // fallback tanpa WebGL: poster HTML mengikuti bab seperti poster 3D
       const flat = q('.st-flat-poster');
