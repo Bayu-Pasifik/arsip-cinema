@@ -1507,6 +1507,70 @@ main > * {
   scrollbar-width: thin;
 }
 
+/* rekomendasi & film serupa: carousel — scrollbar disembunyikan, tombol sebelumnya/berikutnya di tepi */
+.mv-carousel {
+  position: relative;
+}
+
+.mv-carousel .mv-list {
+  scrollbar-width: none;
+  scroll-snap-type: none; /* snap "proximity" menggagalkan scroll halus dari tombol */
+}
+
+.mv-carousel .mv-list::-webkit-scrollbar {
+  display: none;
+}
+
+.mv-nav {
+  position: absolute;
+  top: 110px; /* sejajar tengah poster */
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0 0 4px;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--ink);
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+  box-shadow: 3px 3px 0 rgba(18, 22, 28, 0.18);
+  cursor: pointer;
+  transition:
+    transform 0.2s,
+    opacity 0.2s;
+}
+
+.mv-nav:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+
+.mv-nav:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.mv-nav:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mv-prev {
+  left: 4px;
+}
+
+.mv-next {
+  right: 4px;
+}
+
+@media (hover: none) {
+  .mv-nav {
+    display: none; /* layar sentuh: geser dengan jari */
+  }
+}
+
 .mv-item {
   flex: 0 0 auto;
   width: 150px;
