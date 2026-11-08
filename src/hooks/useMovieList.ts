@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { demoMovies } from '../services/demo';
 import { isCollectionKey, type Collections } from '../services/collections';
 import { useLanguage } from '../services/language';
-import { errorMessage, fetchCategory, MAX_TOTAL, searchMovies, TmdbError, type MoviePage } from '../services/tmdb';
+import { discoverByGenre, errorMessage, fetchCategory, MAX_TOTAL, searchMovies, TmdbError, type MoviePage } from '../services/tmdb';
 import type { ListSource, Movie } from '../types/tmdb';
 import { appendUnique, canLoadMore } from '../utils/movies';
 
@@ -25,6 +25,7 @@ export type ListState =
 function sourceKey(s: ListSource): string {
   if (s.kind === 'category') return `c:${s.category}`;
   if (s.kind === 'search') return `s:${s.query}`;
+  if (s.kind === 'genre') return `g:${s.genre}`;
   return 'demo';
 }
 
@@ -55,7 +56,9 @@ export function useMovieList(source: ListSource, reloadToken: number, local: Col
   const fetchPage = (src: ListSource, page: number, signal: AbortSignal): Promise<MoviePage> =>
     src.kind === 'search'
       ? searchMovies(src.query, page, signal)
-      : fetchCategory(src.kind === 'category' && !isCollectionKey(src.category) ? src.category : 'trending', page, signal);
+      : src.kind === 'genre'
+        ? discoverByGenre(src.genre, page, signal)
+        : fetchCategory(src.kind === 'category' && !isCollectionKey(src.category) ? src.category : 'trending', page, signal);
 
   useEffect(() => {
     moreController.current?.abort();

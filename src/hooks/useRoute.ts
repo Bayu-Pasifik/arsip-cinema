@@ -4,12 +4,12 @@ import type { Category } from '../types/tmdb';
 /**
  * Router mini berbasis History API (tanpa dependensi):
  *   /                          pembuka
- *   /browse/:category?q=...    galeri (category: trending|popular|top_rated|now_playing|favorites|watchlist)
+ *   /browse/:category?q=...&genre=ID    galeri (category: trending|popular|top_rated|now_playing|favorites|watchlist)
  *   /movie/:id                 halaman detail film
  */
 export type Route =
   | { name: 'home' }
-  | { name: 'browse'; category: Category; q: string }
+  | { name: 'browse'; category: Category; q: string; genre: number | null }
   | { name: 'movie'; id: number };
 
 const CATEGORIES: readonly Category[] = ['trending', 'popular', 'top_rated', 'now_playing', 'favorites', 'watchlist'];
@@ -32,13 +32,24 @@ export function parseRoute(loc: string): Route {
   if (parts[0] === 'movie' && /^-?\d+$/.test(parts[1] ?? '')) return { name: 'movie', id: Number(parts[1]) };
   if (parts[0] === 'browse') {
     const c = parts[1] as Category;
-    return { name: 'browse', category: CATEGORIES.includes(c) ? c : 'trending', q: url.searchParams.get('q') ?? '' };
+    const g = url.searchParams.get('genre') ?? '';
+    return {
+      name: 'browse',
+      category: CATEGORIES.includes(c) ? c : 'trending',
+      q: url.searchParams.get('q') ?? '',
+      genre: /^[0-9]+$/.test(g) ? Number(g) : null,
+    };
   }
   return { name: 'home' };
 }
 
-export const browsePath = (category: Category, q = '') =>
-  `/browse/${category}${q.trim() ? `?q=${encodeURIComponent(q.trim())}` : ''}`;
+export const browsePath = (category: Category, q = '', genre: number | null = null) => {
+  const parts: string[] = [];
+  if (q.trim()) parts.push(`q=${encodeURIComponent(q.trim())}`);
+  if (genre !== null) parts.push(`genre=${genre}`);
+  const qs = parts.join('&');
+  return `/browse/${category}${qs ? `?${qs}` : ''}`;
+};
 export const moviePath = (id: number) => `/movie/${id}`;
 
 /** Tanda `from: 'app'` pada state history = entri ini dibuat oleh navigasi di dalam aplikasi. */

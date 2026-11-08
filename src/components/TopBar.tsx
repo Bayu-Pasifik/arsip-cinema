@@ -2,13 +2,16 @@ import { forwardRef } from 'react';
 import { LANGUAGES, setLanguage, useLanguage } from '../services/language';
 import { useT } from '../i18n';
 import { CATEGORIES } from '../services/tmdb';
-import type { Category } from '../types/tmdb';
+import type { Category, Genre } from '../types/tmdb';
 
 interface Props {
   category: Category;
   query: string;
   searching: boolean;
   searchActive: boolean;
+  genre: number | null;
+  genres: Genre[];
+  onGenre: (g: number | null) => void;
   onCategory: (c: Category) => void;
   onQuery: (q: string) => void;
   onHome: () => void;
@@ -17,7 +20,7 @@ interface Props {
 }
 
 const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
-  { category, query, searching, searchActive, onCategory, onQuery, onHome, counts },
+  { category, query, searching, searchActive, genre, genres, onGenre, onCategory, onQuery, onHome, counts },
   ref,
 ) {
   const language = useLanguage();
@@ -31,7 +34,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
       <nav className="cats" aria-label={t('top.categories')}>
         <ul>
           {CATEGORIES.map((c) => {
-            const active = !searchActive && c === category;
+            const active = !searchActive && genre === null && c === category;
             return (
               <li key={c}>
                 <button
@@ -54,6 +57,19 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
       </nav>
 
       <div className="tb-right">
+        {genres.length > 0 && (
+          <label className="lang genre">
+            <span className="sr-only">{t('top.genre')}</span>
+            <select value={genre ?? ''} onChange={(e) => onGenre(e.target.value ? Number(e.target.value) : null)}>
+              <option value="">{t('top.genreAll')}</option>
+              {genres.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <form className="search" role="search" onSubmit={(e) => e.preventDefault()}>
           <label htmlFor="q" className="sr-only">
             {t('top.searchLabel')}

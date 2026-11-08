@@ -147,6 +147,7 @@ export type Category = TmdbCategory | CollectionKey;
 export type ListSource =
   | { kind: 'category'; category: Category }
   | { kind: 'search'; query: string }
+  | { kind: 'genre'; genre: number }
   | { kind: 'demo' };
 
 export type TmdbErrorKind = 'missing-key' | 'auth' | 'rate-limit' | 'not-found' | 'network' | 'http';

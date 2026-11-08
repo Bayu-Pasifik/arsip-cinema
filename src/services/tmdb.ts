@@ -1,5 +1,6 @@
 import type {
   Category,
+  Genre,
   TmdbCategory,
   Movie,
   MovieDetail,
@@ -107,6 +108,21 @@ export async function fetchCategory(category: TmdbCategory, page = 1, signal?: A
 
 export async function searchMovies(query: string, page = 1, signal?: AbortSignal): Promise<MoviePage> {
   return toPage(await request<MovieListResponse>('/search/movie', { query, page, include_adult: 'false' }, signal));
+}
+
+export async function discoverByGenre(genre: number, page = 1, signal?: AbortSignal): Promise<MoviePage> {
+  return toPage(
+    await request<MovieListResponse>(
+      '/discover/movie',
+      { with_genres: genre, sort_by: 'popularity.desc', include_adult: 'false', page },
+      signal,
+    ),
+  );
+}
+
+export async function fetchGenres(signal?: AbortSignal): Promise<Genre[]> {
+  const data = await request<{ genres: Genre[] }>('/genre/movie/list', {}, signal);
+  return data.genres;
 }
 
 export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promise<MovieDetail> {

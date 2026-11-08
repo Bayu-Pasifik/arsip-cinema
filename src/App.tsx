@@ -11,6 +11,7 @@ import { SceneBoundary } from './scene/SceneBoundary';
 import { useWebGL } from './utils/webgl';
 import { useCompact, useDebounced, useReducedMotion } from './hooks/useEnv';
 import { useMovieList } from './hooks/useMovieList';
+import { useGenres } from './hooks/useGenres';
 import { isCollectionKey, useCollections } from './services/collections';
 import { browsePath, cameFromApp, moviePath, navigate, useRoute } from './hooks/useRoute';
 import { createStage } from './scene/stage';
@@ -42,6 +43,8 @@ export default function App() {
 
   const [category, setCategory] = useState<Category>(route.name === 'browse' ? route.category : 'trending');
   const [query, setQuery] = useState(route.name === 'browse' ? route.q : '');
+  const [genre, setGenre] = useState<number | null>(route.name === 'browse' ? route.genre : null);
+  const genres = useGenres();
   const [demo, setDemo] = useState(false);
   const [reload, setReload] = useState(0);
   const [index, setIndex] = useState(0);
@@ -54,11 +57,13 @@ export default function App() {
     ? { kind: 'demo' }
     : searchActive
       ? { kind: 'search', query: trimmed }
-      : { kind: 'category', category };
+      : genre !== null
+        ? { kind: 'genre', genre }
+        : { kind: 'category', category };
 
   const collections = useCollections();
   const list = useMovieList(source, reload, collections);
-  const inCollection = !demo && !searchActive && isCollectionKey(category);
+  const inCollection = !demo && !searchActive && genre === null && isCollectionKey(category);
 
   // Daftar baru → indeks fokus kembali ke 0 SEKARANG (saat render, sebelum efek berjalan), supaya prefetch halaman
   // berikutnya tidak membaca indeks lama dari daftar sebelumnya.
@@ -70,7 +75,11 @@ export default function App() {
   const movies = list.movies;
   const searching = !demo && (query.trim() !== trimmed || (searchActive && list.status === 'loading'));
   const urlQuery = searchActive ? trimmed : '';
-  const label = demo ? t('cat.demo') : searchActive ? t('cat.results', { query: trimmed }) : t(`cat.${category}`);
+  const label = demo ? t('cat.demo') : searchActive
+      ? t('cat.results', { query: trimmed })
+      : genre !== null
+        ? (genres.find((g) => g.id === genre)?.name ?? t('cat.genre'))
+        : t(`cat.${category}`);
 
   // ---- GSAP: keadaan awal + animasi pembuka -------------------------------
   const { contextSafe } = useGSAP(
@@ -144,13 +153,14 @@ export default function App() {
     // hanya terapkan bila berbeda: mencegah input pencarian "melompat" saat URL di-replace oleh debounce
     if (route.category !== category) setCategory(route.category);
     if (route.q.trim() !== urlQuery) setQuery(route.q);
+    if (route.genre !== genre) setGenre(route.genre);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [route]);
 
   // state pencarian → URL (replace, agar riwayat tidak penuh oleh tiap ketikan)
   useEffect(() => {
     if (route.name !== 'browse') return;
-    if (route.q.trim() !== urlQuery) navigate(browsePath(category, urlQuery), { replace: true });
+    if (route.q.trim() !== urlQuery) navigate(browsePath(category, urlQuery, genre), { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [urlQuery]);
 
@@ -189,8 +199,8 @@ export default function App() {
   const closeDetail = useCallback(() => {
     uiClosed.current = true;
     if (cameFromApp()) window.history.back();
-    else navigate(browsePath(category, urlQuery), { replace: true });
-  }, [category, urlQuery]);
+    else navigate(browsePath(category, urlQuery, genre), { replace: true });
+  }, [category, urlQuery, genre]);
 
   // ---- fokus poster ---------------------------------------------------------
   const goTo = useCallback(
@@ -330,8 +340,16 @@ export default function App() {
         query={query}
         searching={searching}
         searchActive={searchActive}
+        genre={genre}
+        genres={genres}
+        onGenre={(g) => {
+          setQuery('');
+          setGenre(g);
+          navigate(browsePath(category, '', g));
+        }}
         onCategory={(c) => {
           setQuery('');
+          setGenre(null);
           setCategory(c);
           navigate(browsePath(c));
         }}
@@ -341,7 +359,7 @@ export default function App() {
       />
 
       <main>
-        <Hero ref={heroRef} onEnter={() => navigate(browsePath(category, urlQuery))} />
+        <Hero ref={heroRef} onEnter={() => navigate(browsePath(category, urlQuery, genre))} />
 
         <Browse
           ref={browseRef}

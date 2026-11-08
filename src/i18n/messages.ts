@@ -26,6 +26,7 @@ export const id = {
   'cat.favorites': 'Favorit',
   'cat.watchlist': 'Watchlist',
   'cat.demo': 'Demo',
+  'cat.genre': 'Genre',
   'cat.results': 'Hasil “{query}”',
 
   // hero
@@ -45,6 +46,8 @@ export const id = {
   'top.searchPlaceholder': 'Cari judul film…',
   'top.searching': 'Mencari',
   'top.language': 'Bahasa (TMDB dan antarmuka)',
+  'top.genre': 'Cari menurut genre',
+  'top.genreAll': 'Semua genre',
 
   // jelajah
   'browse.demoTag': 'DEMO',
@@ -232,6 +235,7 @@ export const en: Messages = {
   'cat.favorites': 'Favorites',
   'cat.watchlist': 'Watchlist',
   'cat.demo': 'Demo',
+  'cat.genre': 'Genre',
   'cat.results': 'Results for “{query}”',
 
   'hero.tag': 'Film archive · TMDB data',
@@ -249,6 +253,8 @@ export const en: Messages = {
   'top.searchPlaceholder': 'Search movie titles…',
   'top.searching': 'Searching',
   'top.language': 'Language (TMDB data and interface)',
+  'top.genre': 'Browse by genre',
+  'top.genreAll': 'All genres',
 
   'browse.demoTag': 'DEMO',
   'browse.demoMeta': 'Local placeholder',
