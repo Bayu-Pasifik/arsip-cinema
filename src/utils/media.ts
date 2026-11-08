@@ -1,4 +1,4 @@
-import type { Movie, MovieDetail } from '../types/tmdb';
+import type { CreditMovie, Movie, MovieDetail } from '../types/tmdb';
 
 /**
  * Serial TV memakai bentuk data yang sama dengan film (judul, poster, rilis, rating) supaya seluruh UI bisa dipakai ulang.
@@ -93,4 +93,9 @@ export function normalizeTvDetail(raw: TvRaw & Loose): MovieDetail {
     seasons: list(r.seasons),
     networks: list(r.networks),
   };
+}
+
+/** Kredit serial TV seseorang (tv_credits) → bentuk kredit film, id ber-offset. */
+export function normalizeTvCredit(r: TvRaw & { character?: string; popularity?: number }): CreditMovie {
+  return { ...normalizeTv(r), popularity: r.popularity, character: r.character };
 }

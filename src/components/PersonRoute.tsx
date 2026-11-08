@@ -7,6 +7,7 @@ import { usePersonDetail } from '../hooks/usePersonDetail';
 import { imageUrl, releaseYear } from '../services/tmdb';
 import { formatDate } from '../utils/format';
 import { bioOptions, crewFilms, filmography } from '../utils/person';
+import { normalizeTvCredit } from '../utils/media';
 import type { CreditMovie } from '../types/tmdb';
 import BackButton from './BackButton';
 import BioTranslations from './BioTranslations';
@@ -87,6 +88,7 @@ export default function PersonRoute({ id, onClose, onOpenMovie }: Props) {
     .filter((ph) => ph.file_path !== p.profile_path)
     .sort((a, b) => b.vote_average - a.vote_average)
     .slice(0, 12);
+  const tvActed = filmography((p.tv_credits?.cast ?? []).map(normalizeTvCredit));
   const bios = bioOptions(p.translations?.translations);
   const directed = crewFilms(p.movie_credits?.crew, ['Director']);
   const facts: [string, string][] = [];
@@ -186,6 +188,7 @@ export default function PersonRoute({ id, onClose, onOpenMovie }: Props) {
           </section>
         )}
         <FilmGrid films={acted} label={t('person.acting')} role="character" onOpenMovie={onOpenMovie} />
+        <FilmGrid films={tvActed} label={t('person.tvActing')} role="character" onOpenMovie={onOpenMovie} />
         <FilmGrid films={directed} label={t('person.directing')} role="job" onOpenMovie={onOpenMovie} />
       </div>
     </div>

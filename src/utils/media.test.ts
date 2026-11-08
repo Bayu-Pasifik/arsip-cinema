@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isTvId, normalizeTv, normalizeTvDetail, rawId, tvId, TV_ID_OFFSET } from './media';
+import { isTvId, normalizeTv, normalizeTvCredit, normalizeTvDetail, rawId, tvId, TV_ID_OFFSET } from './media';
 
 describe('id TV', () => {
   it('bolak-balik dan tidak menyentuh id film/demo', () => {
@@ -59,5 +59,17 @@ describe('normalizeTvDetail', () => {
     expect(min.runtime).toBeNull();
     expect(min.genres).toEqual([]);
     expect(min.credits).toBeUndefined();
+  });
+});
+
+describe('normalizeTvCredit', () => {
+  it('membawa karakter dan popularitas dengan id ber-offset', () => {
+    expect(normalizeTvCredit({ id: 1396, name: 'Breaking Bad', character: 'Walter', popularity: 55 })).toMatchObject({
+      id: tvId(1396),
+      title: 'Breaking Bad',
+      character: 'Walter',
+      popularity: 55,
+      media: 'tv',
+    });
   });
 });

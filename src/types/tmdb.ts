@@ -255,6 +255,8 @@ export interface PersonDetail {
   profile_path: string | null;
   known_for_department?: string;
   movie_credits?: { cast: CreditMovie[]; crew: CreditMovie[] };
+  /** mentah dari TMDB (serial TV: name, first_air_date); dipetakan lewat normalizeTvCredit */
+  tv_credits?: { cast: { id: number; name: string; character?: string; popularity?: number; poster_path?: string | null; first_air_date?: string; vote_average?: number }[] };
   external_ids?: { imdb_id?: string | null };
   images?: { profiles: ImageInfo[] };
   translations?: { translations: PersonTranslation[] };
