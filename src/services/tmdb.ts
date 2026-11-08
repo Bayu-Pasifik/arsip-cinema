@@ -4,6 +4,7 @@ import type {
   PersonDetail,
   PersonSummary,
   CollectionSummary,
+  CompanySummary,
   CertificationMap,
   TmdbCategory,
   Movie,
@@ -207,6 +208,12 @@ export async function findByImdb(imdbId: string, signal?: AbortSignal): Promise<
   if (data.movie_results[0]) return { kind: 'movie', id: data.movie_results[0].id };
   if (data.person_results[0]) return { kind: 'person', id: data.person_results[0].id };
   return null;
+}
+
+/** Maksimal 3 studio yang cocok dengan `query`. */
+export async function searchCompanies(query: string, signal?: AbortSignal): Promise<CompanySummary[]> {
+  const data = await request<{ results: CompanySummary[] }>('/search/company', { query }, signal);
+  return data.results.slice(0, 3);
 }
 
 export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ id: number; name: string }> {

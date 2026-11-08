@@ -2681,3 +2681,9 @@ main > * {
     width: max-content;
   }
 }
+
+.people-item .people-logo {
+  object-fit: contain;
+  background: #fff;
+  padding: 3px;
+}
