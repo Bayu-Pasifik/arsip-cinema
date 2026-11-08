@@ -202,12 +202,15 @@ export default function MovieStory({ movie, reduced, onClose }: Props) {
     if (closing.current) return;
     closing.current = true;
     if (reduced || !root.current) return onClose();
-    gsap.to(root.current, {
-      clipPath: 'circle(0% at 50% 62%)',
-      duration: 0.6,
-      ease: 'power3.in',
-      onComplete: onClose,
-    });
+    // transisi keluar "tirai terangkat": satu gerakan mulus — halaman terangkat ke atas dengan tepi bawah melengkung,
+    // menyingkap arsip di belakangnya. (Sengaja berbeda dari transisi masuk yang berupa lingkaran membesar.)
+    const el = root.current;
+    gsap.killTweensOf(el);
+    gsap.set(el, { clipPath: 'inset(0% 0% 0% 0% round 0px 0px 0px 0px)', willChange: 'clip-path, transform' });
+    gsap
+      .timeline({ defaults: { ease: 'power2.inOut', duration: 0.75 }, onComplete: onClose })
+      .to(el, { clipPath: 'inset(0% 0% 100% 0% round 0px 0px 56px 56px)', yPercent: -7 }, 0)
+      .to(el.querySelectorAll('.story-dots, .story-progress, .story-close'), { opacity: 0, duration: 0.3, ease: 'none' }, 0);
   }, [onClose, reduced]);
 
   // Esc menutup; Tab dikurung di dalam halaman detail
