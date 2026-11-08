@@ -2,6 +2,7 @@ import type {
   Category,
   Genre,
   PersonDetail,
+  PersonSummary,
   TmdbCategory,
   Movie,
   MovieDetail,
@@ -125,6 +126,12 @@ export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ 
 export async function fetchGenres(signal?: AbortSignal): Promise<Genre[]> {
   const data = await request<{ genres: Genre[] }>('/genre/movie/list', {}, signal);
   return data.genres;
+}
+
+/** Maksimal 5 aktor/kru teratas yang cocok dengan `query`. */
+export async function searchPeople(query: string, signal?: AbortSignal): Promise<PersonSummary[]> {
+  const data = await request<{ results: PersonSummary[] }>('/search/person', { query, include_adult: 'false' }, signal);
+  return data.results.slice(0, 5);
 }
 
 export async function fetchPersonDetail(id: number, signal?: AbortSignal): Promise<PersonDetail> {

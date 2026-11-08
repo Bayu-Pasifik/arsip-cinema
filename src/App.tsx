@@ -359,6 +359,7 @@ export default function App() {
         query={query}
         searching={searching}
         searchActive={searchActive}
+        searchTerm={searchActive ? trimmed : ''}
         filters={filters}
         genres={genres}
         onFilters={(f) => {

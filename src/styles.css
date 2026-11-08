@@ -2345,3 +2345,64 @@ main > * {
 .filter-reset {
   justify-content: center;
 }
+
+/* ---------- hasil pencarian aktor/kru ---------- */
+.people {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 30;
+  width: max(100%, 260px);
+  padding: 6px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 6px 6px 0 rgba(18, 22, 28, 0.12);
+}
+
+.search:focus-within .people {
+  display: block;
+}
+
+.people-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  text-align: left;
+}
+
+.people-item:hover,
+.people-item:focus-visible {
+  background: var(--surface-2);
+}
+
+.people-item img,
+.people-ph {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--surface-2);
+}
+
+.people-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.people-dept {
+  font-size: 11px;
+  color: var(--muted);
+}

@@ -2,7 +2,9 @@ import { forwardRef, useEffect, useRef, useState } from 'react';
 import { LANGUAGES, setLanguage, useLanguage } from '../services/language';
 import { useT } from '../i18n';
 import { useKeywordName } from '../hooks/useKeywordName';
-import { CATEGORIES } from '../services/tmdb';
+import { usePeopleSearch } from '../hooks/usePeopleSearch';
+import { navigate, personPath } from '../hooks/useRoute';
+import { CATEGORIES, imageUrl } from '../services/tmdb';
 import type { Category, Genre } from '../types/tmdb';
 import { filterCount, hasFilters, NO_FILTERS, RATINGS, SORTS, type Filters, type SortKey } from '../utils/filters';
 
@@ -11,6 +13,8 @@ interface Props {
   query: string;
   searching: boolean;
   searchActive: boolean;
+  /** teks pencarian yang sudah di-debounce (kosong bila belum aktif) */
+  searchTerm: string;
   filters: Filters;
   genres: Genre[];
   onFilters: (f: Filters) => void;
@@ -25,7 +29,7 @@ const thisYear = new Date().getFullYear();
 const YEARS = Array.from({ length: thisYear + 1 - 1929 }, (_, i) => thisYear + 1 - i);
 
 const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
-  { category, query, searching, searchActive, filters, genres, onFilters, onCategory, onQuery, onHome, counts },
+  { category, query, searching, searchActive, searchTerm, filters, genres, onFilters, onCategory, onQuery, onHome, counts },
   ref,
 ) {
   const language = useLanguage();
@@ -33,6 +37,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const keywordName = useKeywordName(filters.keyword);
+  const people = usePeopleSearch(searchTerm);
   const filtered = hasFilters(filters);
   const count = filterCount(filters);
   const set = (patch: Partial<Filters>) => onFilters({ ...filters, ...patch });
@@ -180,6 +185,22 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
             spellCheck={false}
           />
           <span className={`spinner${searching ? ' on' : ''}`} role="status" aria-label={searching ? t('top.searching') : undefined} />
+          {people.length > 0 && (
+            <ul className="people" aria-label={t('top.people')}>
+              {people.map((p) => {
+                const src = imageUrl(p.profile_path, 'profile', 'w45');
+                return (
+                  <li key={p.id}>
+                    <button type="button" className="people-item" onClick={() => navigate(personPath(p.id))}>
+                      {src ? <img src={src} alt="" width={32} height={32} /> : <span className="people-ph" aria-hidden="true" />}
+                      <span className="people-name">{p.name}</span>
+                      {p.known_for_department && <span className="people-dept">{p.known_for_department}</span>}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </form>
 
         <label className="lang">

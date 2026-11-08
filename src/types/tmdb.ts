@@ -138,6 +138,14 @@ export interface CreditMovie extends Movie {
   job?: string;
 }
 
+/** Hasil /search/person. */
+export interface PersonSummary {
+  id: number;
+  name: string;
+  profile_path: string | null;
+  known_for_department?: string;
+}
+
 export interface PersonDetail {
   id: number;
   name: string;
