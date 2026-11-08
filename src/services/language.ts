@@ -40,6 +40,7 @@ function load(): string {
 }
 
 let current = load();
+if (typeof document !== 'undefined') document.documentElement.lang = current.split('-')[0];
 
 export const getLanguage = () => current;
 

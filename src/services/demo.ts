@@ -1,3 +1,4 @@
+import { translate } from '../i18n';
 import type { Movie } from '../types/tmdb';
 
 /**
@@ -7,9 +8,8 @@ import type { Movie } from '../types/tmdb';
 export function demoMovies(): Movie[] {
   return Array.from({ length: 10 }, (_, i) => ({
     id: -(i + 1),
-    title: `Slot Demo ${String(i + 1).padStart(2, '0')}`,
-    overview:
-      'Ini adalah placeholder lokal, bukan film nyata. Pasang VITE_TMDB_API_KEY untuk memuat data resmi TMDB.',
+    title: translate('demo.title', { n: String(i + 1).padStart(2, '0') }),
+    overview: translate('demo.overview'),
     poster_path: null,
     backdrop_path: null,
     release_date: '',

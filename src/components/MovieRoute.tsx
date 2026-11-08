@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { useT } from '../i18n';
 import { useMovieDetail } from '../hooks/useMovieDetail';
 import type { Movie } from '../types/tmdb';
 import BackButton from './BackButton';
@@ -21,6 +22,7 @@ interface Props {
  * bila tidak (tautan langsung / refresh), data diambil dari TMDB.
  */
 export default function MovieRoute({ id, movies, reduced, onClose, leaving, onLeft, onOpenMovie }: Props) {
+  const t = useT();
   // Ingat film terakhir yang ditemukan: bila film keluar dari daftar (mis. dihapus dari Favorit saat detail terbuka)
   // halaman detail tidak boleh dimuat ulang/berkedip.
   const cache = useRef<Movie | null>(null);
@@ -48,11 +50,11 @@ export default function MovieRoute({ id, movies, reduced, onClose, leaving, onLe
   return (
     <div className="route-status">
       {loading ? (
-        <StatusMessage kind="loading" title="Membuka film…" />
+        <StatusMessage kind="loading" title={t('status.opening')} />
       ) : (
-        <StatusMessage kind="error" title="Film tidak ditemukan">
-          <p>{state.status === 'error' ? state.message : 'Film ini tidak tersedia. Mungkin tautannya sudah tidak berlaku.'}</p>
-          <BackButton variant="dark" label="Kembali ke arsip" hint="Ke beranda" onClick={onClose} />
+        <StatusMessage kind="error" title={t('status.notFound')}>
+          <p>{state.status === 'error' ? state.message : t('status.notFoundBody')}</p>
+          <BackButton variant="dark" label={t('common.backToArchive')} hint={t('common.backToHome')} onClick={onClose} />
         </StatusMessage>
       )}
     </div>

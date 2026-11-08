@@ -1,4 +1,5 @@
 import { forwardRef, useEffect, useRef } from 'react';
+import { useT } from '../i18n';
 import { imageUrl, releaseYear } from '../services/tmdb';
 import CollectionButtons from './CollectionButtons';
 import type { Movie } from '../types/tmdb';
@@ -21,6 +22,7 @@ const Browse = forwardRef<HTMLDivElement, Props>(function Browse(
   { movies, index, reduced, label, hasMore, loadingMore, moreError, onLoadMore, onGo, onOpen },
   ref,
 ) {
+  const t = useT();
   const railRef = useRef<HTMLUListElement>(null);
   const movie = movies[index];
 
@@ -43,27 +45,27 @@ const Browse = forwardRef<HTMLDivElement, Props>(function Browse(
         <p className="eyebrow">
           {label} · {String(index + 1).padStart(2, '0')} / {String(movies.length).padStart(2, '0')}
           {hasMore ? '+' : ''}
-          {movie.demo && <span className="demo-tag">DEMO</span>}
+          {movie.demo && <span className="demo-tag">{t('browse.demoTag')}</span>}
         </p>
         <h2 className="caption-title" aria-live="polite">
           {movie.title}
         </h2>
         <p className="caption-meta">
           {movie.demo ? (
-            'Placeholder lokal'
+            t('browse.demoMeta')
           ) : (
             <>
               {releaseYear(movie.release_date)} · <span aria-hidden="true">★</span> {movie.vote_average.toFixed(1)}
-              <span className="sr-only"> dari 10</span>
+              <span className="sr-only">{t('common.outOf10')}</span>
             </>
           )}
         </p>
         <div className="caption-actions">
           <button type="button" className="btn btn-ghost" onClick={() => onGo(index - 1)} disabled={index === 0}>
-            <span aria-hidden="true">←</span> Sebelumnya
+            <span aria-hidden="true">←</span> {t('browse.prev')}
           </button>
           <button type="button" className="btn btn-primary" onClick={onOpen}>
-            Lihat detail
+            {t('browse.detail')}
           </button>
           <button
             type="button"
@@ -71,13 +73,13 @@ const Browse = forwardRef<HTMLDivElement, Props>(function Browse(
             onClick={() => onGo(index + 1)}
             disabled={index === movies.length - 1 && !hasMore}
           >
-            Berikutnya <span aria-hidden="true">→</span>
+            {t('browse.next')} <span aria-hidden="true">→</span>
           </button>
         </div>
         <CollectionButtons movie={movie} className="collect-caption" />
       </div>
 
-      <nav aria-label="Daftar film">
+      <nav aria-label={t('browse.list')}>
         <ul className="rail" ref={railRef}>
           {movies.map((m, i) => {
             const src = imageUrl(m.poster_path, 'poster', 'w185');
@@ -91,7 +93,7 @@ const Browse = forwardRef<HTMLDivElement, Props>(function Browse(
                   onClick={() => onGo(i)}
                 >
                   {src ? (
-                    <img src={src} alt={`Poster ${m.title}`} loading="lazy" width={185} height={278} />
+                    <img src={src} alt={t('browse.posterAlt', { title: m.title })} loading="lazy" width={185} height={278} />
                   ) : (
                     <span className="thumb-fallback" aria-hidden="true">
                       {m.title.slice(0, 2)}
@@ -108,7 +110,7 @@ const Browse = forwardRef<HTMLDivElement, Props>(function Browse(
                 className="thumb thumb-more"
                 onClick={onLoadMore}
                 disabled={loadingMore}
-                aria-label={moreError ? `Gagal memuat film berikutnya: ${moreError.replace(/.$/, '')}. Coba lagi` : 'Muat film berikutnya'}
+                aria-label={moreError ? t('browse.loadMoreFailed', { error: moreError.replace(/.$/, '') }) : t('browse.loadMore')}
               >
                 <span aria-hidden="true">{loadingMore ? '…' : moreError ? '↻' : '+'}</span>
               </button>
@@ -116,7 +118,7 @@ const Browse = forwardRef<HTMLDivElement, Props>(function Browse(
           )}
         </ul>
         <p className="sr-only" role="status" aria-live="polite">
-          {loadingMore ? 'Memuat film berikutnya…' : ''}
+          {loadingMore ? t('browse.loadingMore') : ''}
         </p>
       </nav>
     </div>

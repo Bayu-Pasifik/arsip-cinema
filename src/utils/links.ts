@@ -1,3 +1,4 @@
+import { translate } from '../i18n';
 import type { MovieDetail } from '../types/tmdb';
 
 export interface ExternalLink {
@@ -18,7 +19,7 @@ export function externalLinks(detail: MovieDetail | null): ExternalLink[] {
 
   const imdb = safe(detail.imdb_id) ?? safe(ext?.imdb_id);
   if (imdb) links.push({ label: 'IMDb', url: `https://www.imdb.com/title/${imdb}/` });
-  if (/^https?:\/\//.test(detail.homepage ?? '')) links.push({ label: 'Situs resmi', url: detail.homepage as string });
+  if (/^https?:\/\//.test(detail.homepage ?? '')) links.push({ label: translate('more.officialSite'), url: detail.homepage as string });
 
   const ig = safe(ext?.instagram_id);
   if (ig) links.push({ label: 'Instagram', url: `https://www.instagram.com/${ig}/` });

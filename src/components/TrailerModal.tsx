@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import gsap from 'gsap';
+import { useT } from '../i18n';
 import { youtubeEmbedUrl } from '../services/tmdb';
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
  * Esc / tombol Tutup / klik latar menutup; fokus dikurung di dalam dialog dan dikembalikan ke pemicu.
  */
 export default function TrailerModal({ title, videoKey, reduced, onClose }: Props) {
+  const t = useT();
   const root = useRef<HTMLDivElement>(null);
   const closeBtn = useRef<HTMLButtonElement>(null);
   const closing = useRef(false);
@@ -70,18 +72,18 @@ export default function TrailerModal({ title, videoKey, reduced, onClose }: Prop
       ref={root}
       role="dialog"
       aria-modal="true"
-      aria-label={`Trailer film ${title}`}
+      aria-label={t('trailer.dialog', { title })}
       onClick={(e) => {
         if (e.target === e.currentTarget) close();
       }}
     >
       <button type="button" className="btn trailer-close" ref={closeBtn} onClick={close}>
-        Tutup <span aria-hidden="true">✕</span>
+        {t('common.close')} <span aria-hidden="true">✕</span>
       </button>
       <div className="trailer-frame">
         <iframe
           src={src}
-          title={`Trailer ${title}`}
+          title={t('trailer.frame', { title })}
           allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
           referrerPolicy="strict-origin-when-cross-origin"
         />
@@ -92,7 +94,7 @@ export default function TrailerModal({ title, videoKey, reduced, onClose }: Prop
         target="_blank"
         rel="noopener noreferrer"
       >
-        Buka di YouTube
+        {t('trailer.youtube')}
       </a>
     </div>,
     document.body,

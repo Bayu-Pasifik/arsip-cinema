@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import gsap from 'gsap';
+import { useT } from '../i18n';
 import { imageUrl } from '../services/tmdb';
 
 export interface GalleryImage {
@@ -23,6 +24,7 @@ interface Props {
  * fokus dikurung di dalam dialog dan dikembalikan ke pemicu.
  */
 export default function ImageLightbox({ title, images, start, reduced, onClose }: Props) {
+  const t = useT();
   const root = useRef<HTMLDivElement>(null);
   const closeBtn = useRef<HTMLButtonElement>(null);
   const closing = useRef(false);
@@ -91,25 +93,25 @@ export default function ImageLightbox({ title, images, start, reduced, onClose }
       }}
     >
       <button type="button" className="btn lightbox-close" ref={closeBtn} onClick={close}>
-        Tutup <span aria-hidden="true">✕</span>
+        {t('common.close')} <span aria-hidden="true">✕</span>
       </button>
       <img
         key={cur.path}
         className="lightbox-img"
         src={src}
-        alt={`${cur.kind === 'backdrop' ? 'Adegan' : 'Poster'} film ${title}, gambar ${i + 1} dari ${n}`}
+        alt={t('more.imageAlt', { kind: t(cur.kind === 'backdrop' ? 'more.kindBackdrop' : 'more.kindPoster'), title, n: i + 1, total: n })}
         width={cur.width}
         height={cur.height}
       />
       {n > 1 && (
         <div className="lightbox-nav">
-          <button type="button" className="btn" onClick={() => step(-1)} aria-label="Gambar sebelumnya">
+          <button type="button" className="btn" onClick={() => step(-1)} aria-label={t('more.imagePrev')}>
             ←
           </button>
           <span aria-live="polite">
             {i + 1} / {n}
           </span>
-          <button type="button" className="btn" onClick={() => step(1)} aria-label="Gambar berikutnya">
+          <button type="button" className="btn" onClick={() => step(1)} aria-label={t('more.imageNext')}>
             →
           </button>
         </div>

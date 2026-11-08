@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useReducedMotion } from '../hooks/useEnv';
+import { useT } from '../i18n';
 
 interface Props {
   /** nama baris, dipakai pada label tombol (mis. "Galeri adegan") */
@@ -11,6 +12,7 @@ interface Props {
 
 /** Baris geser mendatar tanpa scrollbar, dengan tombol sebelumnya/berikutnya di tepi (disembunyikan di layar sentuh). */
 export default function Carousel({ label, className, children }: Props) {
+  const t = useT();
   const list = useRef<HTMLUListElement>(null);
   const reduced = useReducedMotion();
   const [edge, setEdge] = useState({ start: true, end: false });
@@ -58,7 +60,7 @@ export default function Carousel({ label, className, children }: Props) {
       <button
         type="button"
         className="mv-nav mv-prev"
-        aria-label={`${label}: sebelumnya`}
+        aria-label={t('more.carouselPrev', { label })}
         disabled={edge.start}
         onClick={() => page(-1)}
       >
@@ -70,7 +72,7 @@ export default function Carousel({ label, className, children }: Props) {
       <button
         type="button"
         className="mv-nav mv-next"
-        aria-label={`${label}: berikutnya`}
+        aria-label={t('more.carouselNext', { label })}
         disabled={edge.end}
         onClick={() => page(1)}
       >

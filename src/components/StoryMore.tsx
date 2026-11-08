@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { useReducedMotion } from '../hooks/useEnv';
+import { useT } from '../i18n';
 import type { MovieDetail } from '../types/tmdb';
 import { buildGallery } from '../utils/gallery';
 import { translationOptions } from '../utils/translations';
@@ -24,6 +25,7 @@ interface Props {
 
 /** Bagian di bawah cerita scroll: konten tambahan dari TMDB (tiap blok hanya tampil bila datanya ada). */
 export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
+  const t = useT();
   const gallery = useMemo(() => buildGallery(detail), [detail]);
   const root = useRef<HTMLDivElement>(null);
   const reduced = useReducedMotion();
@@ -104,23 +106,23 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
     <div className="story-more" ref={root}>
       <div className="more-head">
         <h2 className="more-head-title">
-          <span>Jelajahi lebih jauh</span>
+          <span>{t('more.title')}</span>
         </h2>
       </div>
       {providers && <WatchProviders region={providers.results?.[WATCH_REGION]} />}
       <KeywordChips keywords={keywords} />
       <TranslationsPanel options={translations} />
-      <ImageGallery id="st-gal" title="Galeri adegan" items={gallery.backdrops} offset={0} onOpen={onOpenImage} />
+      <ImageGallery id="st-gal" title={t('more.gallery')} items={gallery.backdrops} offset={0} onOpen={onOpenImage} />
       <ImageGallery
         id="st-pos"
-        title="Poster lainnya"
+        title={t('more.posters')}
         items={gallery.posters}
         offset={gallery.posterOffset}
         onOpen={onOpenImage}
       />
       <ReviewList reviews={reviews} />
-      <MovieRail id="st-rec" title="Rekomendasi untuk Anda" movies={recommendations} onOpen={onOpenMovie} />
-      <MovieRail id="st-sim" title="Film serupa" movies={similar} onOpen={onOpenMovie} />
+      <MovieRail id="st-rec" title={t('more.recommendations')} movies={recommendations} onOpen={onOpenMovie} />
+      <MovieRail id="st-sim" title={t('more.similar')} movies={similar} onOpen={onOpenMovie} />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import { useCompact } from '../hooks/useEnv';
+import { useT } from '../i18n';
 import { useMovieDetail } from '../hooks/useMovieDetail';
 import { imageUrl, pickTrailer, releaseYear } from '../services/tmdb';
 import type { Movie } from '../types/tmdb';
@@ -10,6 +11,7 @@ import { buildGallery } from '../utils/gallery';
 import { externalLinks } from '../utils/links';
 import { certification, theatricalDateId } from '../utils/releases';
 import { formatDate, formatMoney, formatRuntime, languageName, statusLabel } from '../utils/format';
+import { useLanguage } from '../services/language';
 import BackButton from './BackButton';
 import CollectionButtons from './CollectionButtons';
 import ImageLightbox from './ImageLightbox';
@@ -34,18 +36,20 @@ interface Props {
 }
 
 const CHAPTERS = [
-  { at: 0, label: 'Pembuka' },
-  { at: 0.2, label: 'Sinopsis' },
-  { at: 0.45, label: 'Penilaian' },
-  { at: 0.7, label: 'Pemeran' },
-  { at: 0.95, label: 'Penutup' },
-];
+  { at: 0, key: 'detail.ch.intro' },
+  { at: 0.2, key: 'detail.ch.synopsis' },
+  { at: 0.45, key: 'detail.ch.rating' },
+  { at: 0.7, key: 'detail.ch.cast' },
+  { at: 0.95, key: 'detail.ch.outro' },
+] as const;
 
 /**
  * Halaman detail film berbasis scroll: panggung 3D menempel (sticky) sementara satu timeline GSAP
  * di-scrub oleh ScrollTrigger. Progres yang sama menggerakkan poster, cincin rating, backdrop, dan teks.
  */
 export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, onOpenMovie }: Props) {
+  const t = useT();
+  const language = useLanguage();
   const compact = useCompact();
   const webgl = useWebGL();
   const root = useRef<HTMLDivElement>(null);
@@ -67,7 +71,7 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
   const state = useMovieDetail(movie.id);
   const detail = state.status === 'success' ? state.detail : null;
 
-  const overview = detail?.overview || movie.overview || 'Sinopsis belum tersedia di TMDB.';
+  const overview = detail?.overview || movie.overview || t('detail.noOverview');
   const words = useMemo(() => overview.split(/\s+/).filter(Boolean), [overview]);
   const director = detail?.credits?.crew.find((c) => c.job === 'Director')?.name;
   const cast = useMemo(() => (detail?.credits?.cast ?? []).slice(0, 20), [detail]);
@@ -88,16 +92,16 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
   const cert = certification(detail);
   const facts: [string, string][] = (
     [
-      ['Status', statusLabel(detail?.status)],
-      ['Rilis', formatDate(movie.release_date)],
-      ['Tayang di bioskop Indonesia', formatDate(theatricalDateId(detail) ?? undefined)],
-      ['Klasifikasi usia', cert ? `${cert.value} (${cert.region === 'ID' ? 'Indonesia' : 'AS'})` : ''],
-      ['Bahasa asli', languageName(detail?.original_language)],
-      ['Anggaran', formatMoney(detail?.budget)],
-      ['Pendapatan', formatMoney(detail?.revenue)],
-      ['Negara', (detail?.production_countries ?? []).map((c) => c.name).slice(0, 2).join(', ')],
-      ['Studio', (detail?.production_companies ?? []).map((c) => c.name).slice(0, 2).join(', ')],
-      ['Popularitas', detail?.popularity ? detail.popularity.toLocaleString('id-ID', { maximumFractionDigits: 0 }) : ''],
+      [t('fact.status'), statusLabel(detail?.status)],
+      [t('fact.release'), formatDate(movie.release_date)],
+      [t('fact.theatrical'), formatDate(theatricalDateId(detail) ?? undefined)],
+      [t('fact.certification'), cert ? `${cert.value} (${t(cert.region === 'ID' ? 'fact.certRegionID' : 'fact.certRegionUS')})` : ''],
+      [t('fact.language'), languageName(detail?.original_language)],
+      [t('fact.budget'), formatMoney(detail?.budget)],
+      [t('fact.revenue'), formatMoney(detail?.revenue)],
+      [t('fact.countries'), (detail?.production_countries ?? []).map((c) => c.name).slice(0, 2).join(', ')],
+      [t('fact.studios'), (detail?.production_companies ?? []).map((c) => c.name).slice(0, 2).join(', ')],
+      [t('fact.popularity'), detail?.popularity ? detail.popularity.toLocaleString(language, { maximumFractionDigits: 0 }) : ''],
     ] as [string, string][]
   ).filter(([, v]) => v);
   const collection = detail?.belongs_to_collection?.name;
@@ -245,10 +249,10 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
     const el = root.current;
     if (!el || reduced) return;
     const GROUPS: [string, string[]][] = [
-      ['Info', ['wp', 'kw', 'tr']],
-      ['Galeri', ['gal']],
-      ['Ulasan', ['rv-wrap']],
-      ['Film lain', ['mv']],
+      [t('detail.more.info'), ['wp', 'kw', 'tr']],
+      [t('detail.more.gallery'), ['gal']],
+      [t('detail.more.reviews'), ['rv-wrap']],
+      [t('detail.more.movies'), ['mv']],
     ];
     const secs = Array.from(el.querySelectorAll<HTMLElement>('.story-more > section'));
     setMore(
@@ -257,7 +261,7 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
         return hit ? [{ label, el: hit }] : [];
       }),
     );
-  }, [detail, reduced]);
+  }, [detail, reduced, t]);
 
   // progres sisi kiri = posisi scroll seluruh halaman; titik kanan ikut bab bawah saat cerita sudah lewat
   useEffect(() => {
@@ -361,21 +365,21 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
 
       {!reduced && (
         <>
-          <nav className="story-dots" aria-label="Bab halaman detail">
+          <nav className="story-dots" aria-label={t('detail.chapters')}>
             {CHAPTERS.map((c, i) => {
               // saat sudah melewati cerita: "Penutup" aktif sampai bab bawah pertama tercapai
               const on = past ? (activeMore < 0 ? i === CHAPTERS.length - 1 : false) : i === active;
               return (
                 <button
-                  key={c.label}
+                  key={c.key}
                   type="button"
                   className={`story-dot${on ? ' is-active' : ''}`}
-                  aria-label={c.label}
+                  aria-label={t(c.key)}
                   aria-current={on ? 'true' : undefined}
                   onClick={() => scrollToChapter(c.at)}
                 >
                   <span className="story-dot-label" aria-hidden="true">
-                    {c.label}
+                    {t(c.key)}
                   </span>
                 </button>
               );
@@ -413,8 +417,8 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
               className="sr-only"
               aria-label={
                 movie.poster_path
-                  ? `Poster film ${movie.title}${movie.release_date ? ` (${releaseYear(movie.release_date)})` : ''}`
-                  : `Film ${movie.title} tidak memiliki poster di TMDB`
+                  ? t('detail.posterLabel', { title: movie.title, year: movie.release_date ? ` (${releaseYear(movie.release_date)})` : '' })
+                  : t('detail.noPoster', { title: movie.title })
               }
             />
           )}
@@ -435,13 +439,13 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
             </div>
           )}
           {!reduced && !webgl && posterSrc && (
-            <img className="st-flat-poster" src={posterSrc} alt={`Poster film ${movie.title}`} width={342} height={513} />
+            <img className="st-flat-poster" src={posterSrc} alt={t('detail.posterLabel', { title: movie.title, year: '' })} width={342} height={513} />
           )}
 
           {/* 1 — hero */}
-          <section className="st-ch st-hero" aria-label="Judul">
+          <section className="st-ch st-hero" aria-label={t('detail.titleSection')}>
             <p className="tag st-hero-fade">
-              {movie.demo ? 'DEMO · bukan data TMDB' : `${releaseYear(movie.release_date)}${runtime ? ` · ${runtime}` : ''}${cert ? ` · ${cert.value}` : ''}`}
+              {movie.demo ? t('detail.demoTag') : `${releaseYear(movie.release_date)}${runtime ? ` · ${runtime}` : ''}${cert ? ` · ${cert.value}` : ''}`}
             </p>
             <h2 id="st-title" className="st-title">
               <span className="line-mask">
@@ -456,19 +460,19 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
             {detail?.tagline && <p className="st-tagline st-hero-fade">“{detail.tagline}”</p>}
             {trailer && (
               <button type="button" className="btn btn-primary st-trailer" aria-haspopup="dialog" onClick={() => setTrailerOpen(true)}>
-                <span aria-hidden="true">▶</span> Putar trailer
+                <span aria-hidden="true">▶</span> {t('detail.playTrailer')}
               </button>
             )}
             <CollectionButtons movie={movie} className="collect-story" />
             <p className="st-cue st-hero-fade" aria-hidden="true">
-              Gulir ↓
+              {t('detail.scroll')}
             </p>
           </section>
 
           {/* 2 — sinopsis */}
           <section className="st-ch st-syn" aria-labelledby="st-syn-h">
             <h3 id="st-syn-h" className="tag">
-              Sinopsis
+              {t('detail.synopsis')}
             </h3>
             <p className="st-overview">
               {words.map((w, i) => (
@@ -478,8 +482,8 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
               ))}
             </p>
             {detail?.overviewFallback && (
-              <p className="dim st-note" lang="en">
-                Sinopsis dalam bahasa Inggris — terjemahan Indonesia belum tersedia di TMDB.
+              <p className="dim st-note">
+                {t('detail.overviewFallback', { language: languageName(language.split('-')[0]) })}
               </p>
             )}
           </section>
@@ -487,15 +491,15 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
           {/* 3 — rating & fakta */}
           <section className="st-ch st-facts" aria-labelledby="st-facts-h">
             <h3 id="st-facts-h" className="tag">
-              Penilaian
+              {t('detail.rating')}
             </h3>
             <p className="st-rating">
               <span className="st-rating-num">{rating.toFixed(1)}</span>
               <span className="st-rating-of"> / 10</span>
-              <span className="sr-only"> rating pengguna TMDB</span>
+              <span className="sr-only">{t('detail.ratingSr')}</span>
             </p>
-            {movie.vote_count > 0 && <p className="dim">dari {movie.vote_count.toLocaleString('id-ID')} suara</p>}
-            <ul className="st-chips" aria-label="Genre dan fakta">
+            {movie.vote_count > 0 && <p className="dim">{t('detail.votes', { count: movie.vote_count.toLocaleString(language) })}</p>}
+            <ul className="st-chips" aria-label={t('detail.genresFacts')}>
               {runtime && <li className="st-chip">{runtime}</li>}
               {releaseYear(movie.release_date) !== '—' && <li className="st-chip">{releaseYear(movie.release_date)}</li>}
               {genres.map((g) => (
@@ -514,10 +518,10 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
                 ))}
               </dl>
             )}
-            {state.status === 'loading' && <p className="dim">Memuat detail tambahan…</p>}
+            {state.status === 'loading' && <p className="dim">{t('detail.loadingExtra')}</p>}
             {state.status === 'error' && (
               <p className="dp-error" role="alert">
-                Detail tambahan gagal dimuat: {state.message}
+                {t('detail.extraFailed', { error: state.message })}
               </p>
             )}
           </section>
@@ -525,21 +529,21 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
           {/* 4 — pemeran */}
           <section className="st-ch st-cast" aria-labelledby="st-cast-h">
             <h3 id="st-cast-h" className="tag">
-              Pemeran{director ? ` · Sutradara ${director}` : ''}
+              {t('detail.cast')}{director ? t('detail.director', { name: director }) : ''}
             </h3>
             {(writers || composer || cinematographer) && (
               <p className="dim st-crew">
                 {[
-                  writers && `Penulis: ${writers}`,
-                  composer && `Musik: ${composer}`,
-                  cinematographer && `Sinematografi: ${cinematographer}`,
+                  writers && t('detail.writers', { names: writers }),
+                  composer && t('detail.composer', { names: composer }),
+                  cinematographer && t('detail.cinematographer', { names: cinematographer }),
                 ]
                   .filter(Boolean)
                   .join(' · ')}
               </p>
             )}
             {cast.length === 0 ? (
-              <p className="dim">{state.status === 'loading' ? 'Memuat pemeran…' : 'Data pemeran belum tersedia.'}</p>
+              <p className="dim">{state.status === 'loading' ? t('detail.loadingCast') : t('detail.noCast')}</p>
             ) : (
               <ul className="st-cast-list">
                 {cast.map((c) => {
@@ -547,7 +551,7 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
                   return (
                     <li className="st-cast-card" key={c.id}>
                       {src ? (
-                        <img src={src} alt={`Foto ${c.name}`} loading="lazy" width={185} height={278} />
+                        <img src={src} alt={t('detail.photoAlt', { name: c.name })} loading="lazy" width={185} height={278} />
                       ) : (
                         <span className="st-cast-ph" aria-hidden="true">
                           {c.name.slice(0, 1)}
@@ -563,29 +567,29 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
           </section>
 
           {/* 5 — penutup */}
-          <section className="st-ch st-end" aria-label="Penutup">
+          <section className="st-ch st-end" aria-label={t('detail.outro')}>
             <p className="st-end-title">{movie.title}</p>
-            {collection && <p className="dim st-collection">Bagian dari {collection}</p>}
+            {collection && <p className="dim st-collection">{t('detail.collection', { name: collection })}</p>}
             {links.length > 0 && (
               <p className="st-links">
                 {links.map((l) => (
                   <a key={l.label} href={l.url} target="_blank" rel="noopener noreferrer">
                     {l.label} <span aria-hidden="true">↗</span>
-                    <span className="sr-only"> (tab baru)</span>
+                    <span className="sr-only">{t('common.newTab')}</span>
                   </a>
                 ))}
               </p>
             )}
             {trailer && (
               <button type="button" className="btn st-trailer-end" aria-haspopup="dialog" onClick={() => setTrailerOpen(true)}>
-                <span aria-hidden="true">▶</span> Putar trailer
+                <span aria-hidden="true">▶</span> {t('detail.playTrailer')}
               </button>
             )}
-            <BackButton variant="dark" label="Kembali ke arsip" hint="Tutup detail" onClick={close} />
+            <BackButton variant="dark" label={t('common.backToArchive')} hint={t('common.closeDetail')} onClick={close} />
           </section>
 
           {reduced && posterSrc && (
-            <img className="st-static-poster" src={posterSrc} alt={`Poster film ${movie.title}`} width={342} height={513} />
+            <img className="st-static-poster" src={posterSrc} alt={t('detail.posterLabel', { title: movie.title, year: '' })} width={342} height={513} />
           )}
         </div>
       </div>

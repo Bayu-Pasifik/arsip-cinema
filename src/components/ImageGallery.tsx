@@ -1,3 +1,4 @@
+import { useT } from '../i18n';
 import { imageUrl } from '../services/tmdb';
 import Carousel from './Carousel';
 import type { GalleryImage } from './ImageLightbox';
@@ -14,6 +15,7 @@ interface Props {
 
 /** Carousel thumbnail galeri; klik membuka lightbox pada gambar tersebut. (Animasi muncul diatur oleh StoryMore.) */
 export default function ImageGallery({ id, title, items, offset, onOpen }: Props) {
+  const t = useT();
   if (items.length === 0) return null;
   const kind = items[0].kind;
   return (
@@ -29,7 +31,7 @@ export default function ImageGallery({ id, title, items, offset, onOpen }: Props
               <button type="button" className="gal-btn" onClick={() => onOpen(offset + k)} aria-haspopup="dialog">
                 <img src={src ?? undefined} alt="" loading="lazy" width={img.width} height={img.height} />
                 <span className="sr-only">
-                  Buka gambar {k + 1} dari {items.length}
+                  {t('more.openImage', { n: k + 1, total: items.length })}
                 </span>
               </button>
             </li>

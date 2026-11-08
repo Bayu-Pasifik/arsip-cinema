@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useT } from '../i18n';
 import { isIn, toggleCollection, useCollections } from '../services/collections';
 import type { CollectionKey, Movie } from '../types/tmdb';
 
@@ -7,13 +8,12 @@ interface Props {
   className?: string;
 }
 
-const META: Record<CollectionKey, { label: string; on: string; off: string; icon: [string, string] }> = {
-  favorites: { label: 'Favorit', on: 'Dihapus dari Favorit', off: 'Ditambahkan ke Favorit', icon: ['♡', '♥'] },
-  watchlist: { label: 'Watchlist', on: 'Dihapus dari Watchlist', off: 'Ditambahkan ke Watchlist', icon: ['＋', '✓'] },
-};
+const ICONS: Record<CollectionKey, [string, string]> = { favorites: ['♡', '♥'], watchlist: ['＋', '✓'] };
+const KEYS = Object.keys(ICONS) as CollectionKey[];
 
 /** Tombol toggle Favorit & Watchlist untuk satu film (tersimpan lokal). Film demo tidak dapat disimpan. */
 export default function CollectionButtons({ movie, className = '' }: Props) {
+  const t = useT();
   const collections = useCollections();
   const [announce, setAnnounce] = useState('');
 
@@ -21,12 +21,12 @@ export default function CollectionButtons({ movie, className = '' }: Props) {
 
   const onToggle = (key: CollectionKey) => {
     const nowIn = toggleCollection(key, movie);
-    setAnnounce(`${movie.title}: ${nowIn ? META[key].off : META[key].on}`);
+    setAnnounce(`${movie.title}: ${t(nowIn ? `collect.${key}Off` : `collect.${key}On`)}`);
   };
 
   return (
-    <div className={`collect ${className}`.trim()} role="group" aria-label={`Simpan ${movie.title}`}>
-      {(Object.keys(META) as CollectionKey[]).map((key) => {
+    <div className={`collect ${className}`.trim()} role="group" aria-label={t('collect.save', { title: movie.title })}>
+      {KEYS.map((key) => {
         const active = isIn(collections, key, movie.id);
         return (
           <button
@@ -36,7 +36,7 @@ export default function CollectionButtons({ movie, className = '' }: Props) {
             aria-pressed={active}
             onClick={() => onToggle(key)}
           >
-            <span aria-hidden="true">{META[key].icon[active ? 1 : 0]}</span> {META[key].label}
+            <span aria-hidden="true">{ICONS[key][active ? 1 : 0]}</span> {t(`collect.${key}`)}
           </button>
         );
       })}

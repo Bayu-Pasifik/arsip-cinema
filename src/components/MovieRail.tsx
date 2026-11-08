@@ -1,3 +1,4 @@
+import { useT } from '../i18n';
 import { imageUrl, releaseYear } from '../services/tmdb';
 import type { Movie } from '../types/tmdb';
 import Carousel from './Carousel';
@@ -11,6 +12,7 @@ interface Props {
 
 /** Carousel kartu film; klik membuka detail film tersebut. */
 export default function MovieRail({ id, title, movies, onOpen }: Props) {
+  const t = useT();
   if (movies.length === 0) return null;
   return (
     <section className="mv" aria-labelledby={`${id}-h`}>
@@ -35,7 +37,7 @@ export default function MovieRail({ id, title, movies, onOpen }: Props) {
                 <span className="mv-meta">
                   {year !== '—' ? `${year} · ` : ''}
                   <span aria-hidden="true">★</span> {m.vote_average.toFixed(1)}
-                  <span className="sr-only"> dari 10</span>
+                  <span className="sr-only">{t('common.outOf10')}</span>
                 </span>
               </button>
             </li>

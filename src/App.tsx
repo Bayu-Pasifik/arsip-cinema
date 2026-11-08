@@ -14,7 +14,7 @@ import { useMovieList } from './hooks/useMovieList';
 import { isCollectionKey, useCollections } from './services/collections';
 import { browsePath, cameFromApp, moviePath, navigate, useRoute } from './hooks/useRoute';
 import { createStage } from './scene/stage';
-import { CATEGORY_LABEL } from './services/tmdb';
+import { useT } from './i18n';
 import type { Category, ListSource } from './types/tmdb';
 import { clamp } from './utils/format';
 
@@ -25,6 +25,7 @@ gsap.ticker.lagSmoothing(0);
 const ArchiveScene = lazy(() => import('./scene/ArchiveScene'));
 
 export default function App() {
+  const t = useT();
   const reduced = useReducedMotion();
   const compact = useCompact();
   const webgl = useWebGL();
@@ -69,7 +70,7 @@ export default function App() {
   const movies = list.movies;
   const searching = !demo && (query.trim() !== trimmed || (searchActive && list.status === 'loading'));
   const urlQuery = searchActive ? trimmed : '';
-  const label = demo ? 'Demo' : searchActive ? `Hasil “${trimmed}”` : CATEGORY_LABEL[category];
+  const label = demo ? t('cat.demo') : searchActive ? t('cat.results', { query: trimmed }) : t(`cat.${category}`);
 
   // ---- GSAP: keadaan awal + animasi pembuka -------------------------------
   const { contextSafe } = useGSAP(
@@ -154,8 +155,8 @@ export default function App() {
   }, [urlQuery]);
 
   useEffect(() => {
-    document.title = route.name === 'movie' ? 'Detail film — Arsip Sinema' : 'Arsip Sinema — Jelajah Film 3D';
-  }, [route]);
+    document.title = route.name === 'movie' ? t('page.title.movie') : t('page.title.home');
+  }, [route, t]);
 
   const openMovie = useCallback((id: number) => navigate(moviePath(id)), []);
   // Back/Forward browser: detail dilepas dari URL tanpa melalui tombol kita → pertahankan sebentar agar animasi keluar jalan.
@@ -358,63 +359,61 @@ export default function App() {
 
         <div className="status-layer">
           {list.status === 'loading' && movies.length === 0 && (
-            <StatusMessage kind="loading" title="Memuat arsip dari TMDB…" />
+            <StatusMessage kind="loading" title={t('status.loading')} />
           )}
           {list.status === 'error' && list.kind === 'missing-key' && (
-            <StatusMessage kind="no-key" title="Kunci TMDB belum dipasang">
+            <StatusMessage kind="no-key" title={t('status.noKey')}>
               <p>
-                Isi <code>VITE_TMDB_API_KEY</code> di berkas <code>.env</code> (lihat <code>.env.example</code>), lalu
-                jalankan ulang <code>npm run dev</code>.
+                {t('status.noKeyBody1')} <code>VITE_TMDB_API_KEY</code> {t('status.noKeyBody2')} <code>.env</code> {t('status.noKeyBody3')}{' '}
+                <code>.env.example</code>{t('status.noKeyBody4')} <code>npm run dev</code>.
               </p>
               <button type="button" className="btn btn-ghost" onClick={() => setDemo(true)}>
-                Lihat antarmuka dengan placeholder demo
+                {t('status.demoButton')}
               </button>
             </StatusMessage>
           )}
           {list.status === 'error' && list.kind !== 'missing-key' && (
-            <StatusMessage kind="error" title="Gagal memuat film">
+            <StatusMessage kind="error" title={t('status.error')}>
               <p>{list.message}</p>
               <button type="button" className="btn btn-primary" onClick={() => setReload((n) => n + 1)}>
-                Coba lagi
+                {t('status.retry')}
               </button>
             </StatusMessage>
           )}
           {list.status === 'success' && movies.length === 0 && inCollection && (
-            <StatusMessage kind="empty" title={category === 'favorites' ? 'Belum ada film favorit' : 'Watchlist masih kosong'}>
+            <StatusMessage kind="empty" title={category === 'favorites' ? t('status.emptyFavorites') : t('status.emptyWatchlist')}>
               <p>
                 {category === 'favorites'
-                  ? 'Tekan tombol ♡ Favorit pada film yang Anda suka, lalu kembali ke sini.'
-                  : 'Tekan tombol ＋ Watchlist pada film yang ingin Anda tonton nanti.'}
+                  ? t('status.emptyFavoritesBody')
+                  : t('status.emptyWatchlistBody')}
               </p>
               <button type="button" className="btn btn-primary" onClick={() => navigate(browsePath('trending'))}>
-                Jelajahi film
+                {t('status.explore')}
               </button>
             </StatusMessage>
           )}
           {list.status === 'success' && movies.length === 0 && !inCollection && (
-            <StatusMessage kind="empty" title={`Tidak ada hasil untuk “${trimmed}”`}>
-              <p>Coba judul lain atau periksa ejaan.</p>
+            <StatusMessage kind="empty" title={t('status.noResults', { query: trimmed })}>
+              <p>{t('status.noResultsBody')}</p>
             </StatusMessage>
           )}
         </div>
 
         <p className="sr-only" role="status" aria-live="polite">
-          {list.status === 'loading' ? 'Memuat film…' : ''}
+          {list.status === 'loading' ? t('status.loadingShort') : ''}
         </p>
       </main>
 
       {!webgl && (
         <p className="gl-notice" role="status">
-          Mode 2D · WebGL tidak tersedia
-          <span className="sr-only">
-            . Adegan 3D diganti tampilan datar di perangkat atau browser ini; semua fitur tetap berfungsi.
-          </span>
+          {t('status.mode2d')}
+          <span className="sr-only">{t('status.mode2dSr')}</span>
         </p>
       )}
 
       {demo && (
         <p className="demo-banner" role="note">
-          MODE DEMO — placeholder lokal, bukan data TMDB.
+          {t('status.demoBanner')}
         </p>
       )}
 

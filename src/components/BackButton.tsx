@@ -1,4 +1,5 @@
 import type { PointerEvent, Ref } from 'react';
+import { useT } from '../i18n';
 
 interface Props {
   onClick: () => void;
@@ -15,7 +16,10 @@ interface Props {
  * Tombol kembali 3D: prisma yang berputar ke muka kedua saat disorot/fokus, miring mengikuti kursor,
  * dan "tenggelam" saat ditekan. Semua gerak dimatikan lewat prefers-reduced-motion (lihat styles.css).
  */
-export default function BackButton({ onClick, label = 'Kembali', hint = 'Ke arsip', variant = 'light', buttonRef, className = '' }: Props) {
+export default function BackButton({ onClick, label: labelProp, hint: hintProp, variant = 'light', buttonRef, className = '' }: Props) {
+  const t = useT();
+  const label = labelProp ?? t('common.back');
+  const hint = hintProp ?? t('common.backHint');
   const onMove = (e: PointerEvent<HTMLButtonElement>) => {
     if (e.pointerType !== 'mouse') return;
     const el = e.currentTarget;

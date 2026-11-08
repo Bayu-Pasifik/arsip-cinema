@@ -8,6 +8,7 @@ import type {
   TmdbErrorKind,
   Video,
 } from '../types/tmdb';
+import { translate } from '../i18n';
 import { getLanguage } from './language';
 
 const API_BASE = 'https://api.themoviedb.org/3';
@@ -43,7 +44,7 @@ type Params = Record<string, string | number | undefined>;
 
 async function request<T>(path: string, params: Params = {}, signal?: AbortSignal): Promise<T> {
   if (!hasApiKey) {
-    throw new TmdbError('missing-key', 'VITE_TMDB_API_KEY belum diisi.');
+    throw new TmdbError('missing-key', translate('error.missingKey'));
   }
   const url = new URL(API_BASE + path);
   // Bahasa data dipilih pengguna (lihat language.ts). Bila terjemahan kosong, TMDB mengembalikan teks kosong atau judul asli.
@@ -61,19 +62,19 @@ async function request<T>(path: string, params: Params = {}, signal?: AbortSigna
     });
   } catch (err) {
     if ((err as Error).name === 'AbortError') throw err;
-    throw new TmdbError('network', 'Tidak dapat terhubung ke TMDB. Periksa koneksi internet Anda.');
+    throw new TmdbError('network', translate('error.network'));
   }
 
   if (!res.ok) {
-    if (res.status === 401) throw new TmdbError('auth', 'Kunci API TMDB ditolak (401).', 401);
-    if (res.status === 404) throw new TmdbError('not-found', 'Data tidak ditemukan (404).', 404);
-    if (res.status === 429) throw new TmdbError('rate-limit', 'Terlalu banyak permintaan ke TMDB (429).', 429);
-    throw new TmdbError('http', `TMDB mengembalikan status ${res.status}.`, res.status);
+    if (res.status === 401) throw new TmdbError('auth', translate('error.auth'), 401);
+    if (res.status === 404) throw new TmdbError('not-found', translate('error.notFound'), 404);
+    if (res.status === 429) throw new TmdbError('rate-limit', translate('error.rateLimit'), 429);
+    throw new TmdbError('http', translate('error.http', { status: res.status }), res.status);
   }
   try {
     return (await res.json()) as T;
   } catch {
-    throw new TmdbError('http', 'Respons TMDB tidak dapat dibaca.', res.status);
+    throw new TmdbError('http', translate('error.parse'), res.status);
   }
 }
 
@@ -84,14 +85,7 @@ const CATEGORY_PATH: Record<TmdbCategory, string> = {
   now_playing: '/movie/now_playing',
 };
 
-export const CATEGORY_LABEL: Record<Category, string> = {
-  trending: 'Trending',
-  popular: 'Popular',
-  top_rated: 'Top Rated',
-  now_playing: 'Now Playing',
-  favorites: 'Favorit',
-  watchlist: 'Watchlist',
-};
+export const CATEGORIES: readonly Category[] = ['trending', 'popular', 'top_rated', 'now_playing', 'favorites', 'watchlist'];
 
 /** Batas total film yang dimuat per daftar (5 halaman TMDB × 20), agar jumlah tekstur dan elemen DOM tetap wajar. */
 export const MAX_TOTAL = 100;
@@ -133,7 +127,7 @@ export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promis
   const enData = detail.translations?.translations.find((t) => t.iso_639_1 === 'en' && t.data.overview)?.data;
   if (!detail.overview && enData?.overview) {
     result = { ...detail, overview: enData.overview, overviewFallback: true, tagline: detail.tagline || enData.tagline || '' };
-  } else if (!detail.overview) {
+  } else if (!detail.overview && base !== 'en') {
     try {
       const en = await request<MovieDetail>(`/movie/${id}`, { language: 'en-US' }, signal);
       if (en.overview) result = { ...detail, overview: en.overview, overviewFallback: true, tagline: detail.tagline || en.tagline };
@@ -215,5 +209,5 @@ export function releaseYear(date: string): string {
 
 export function errorMessage(err: unknown): string {
   if (err instanceof TmdbError) return err.message;
-  return 'Terjadi kesalahan tak terduga.';
+  return translate('error.unknown');
 }
