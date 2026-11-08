@@ -425,6 +425,7 @@ export default function App() {
           movies={movies}
           reduced={reduced}
           onClose={closeDetail}
+          onOpenMovie={openMovie}
           leaving={detailId === null}
           onLeft={clearGhost}
         />

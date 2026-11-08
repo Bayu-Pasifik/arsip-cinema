@@ -150,7 +150,7 @@ describe('fetchMovieDetail', () => {
     expect(d.overview).toBe('Halo');
     expect(d.overviewFallback).toBeUndefined();
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(new URL(String(fetchMock.mock.calls[0][0])).searchParams.get('append_to_response')).toBe('credits,videos');
+    expect(new URL(String(fetchMock.mock.calls[0][0])).searchParams.get('append_to_response')).toBe('credits,videos,recommendations');
   });
 
   it('sinopsis kosong → ambil en-US sebagai cadangan dan beri penanda', async () => {

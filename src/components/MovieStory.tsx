@@ -9,6 +9,7 @@ import type { Movie } from '../types/tmdb';
 import { formatDate, formatMoney, formatRuntime, languageName, statusLabel } from '../utils/format';
 import BackButton from './BackButton';
 import CollectionButtons from './CollectionButtons';
+import StoryMore from './StoryMore';
 import TrailerModal from './TrailerModal';
 import type { StoryProgress } from '../scene/StoryScene';
 import { SceneBoundary } from '../scene/SceneBoundary';
@@ -24,6 +25,8 @@ interface Props {
   onClose: () => void;
   leaving?: boolean;
   onLeft?: () => void;
+  /** buka detail film lain (mis. dari baris rekomendasi) */
+  onOpenMovie: (id: number) => void;
 }
 
 const CHAPTERS = [
@@ -38,7 +41,7 @@ const CHAPTERS = [
  * Halaman detail film berbasis scroll: panggung 3D menempel (sticky) sementara satu timeline GSAP
  * di-scrub oleh ScrollTrigger. Progres yang sama menggerakkan poster, cincin rating, backdrop, dan teks.
  */
-export default function MovieStory({ movie, reduced, onClose, leaving, onLeft }: Props) {
+export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, onOpenMovie }: Props) {
   const compact = useCompact();
   const webgl = useWebGL();
   const root = useRef<HTMLDivElement>(null);
@@ -48,6 +51,7 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft }:
   const closing = useRef(false);
   const progress = useMemo<StoryProgress>(() => ({ p: 0 }), []);
   const [active, setActive] = useState(0);
+  const [past, setPast] = useState(false);
   const [trailerOpen, setTrailerOpen] = useState(false);
   const trailerOpenRef = useRef(false);
   trailerOpenRef.current = trailerOpen;
@@ -142,6 +146,15 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft }:
             setActive((cur) => (cur === idx ? cur : idx));
           },
         },
+      });
+
+      // cerita selesai & bagian "lainnya" mulai terlihat → sembunyikan titik bab dan bilah progres
+      ScrollTrigger.create({
+        trigger: trk,
+        scroller,
+        start: 'bottom 75%',
+        onEnter: () => setPast(true),
+        onLeaveBack: () => setPast(false),
       });
 
       const fadeIn = (sel: string, at: number, dur = 0.04) =>
@@ -287,7 +300,7 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft }:
 
       {!reduced && (
         <>
-          <nav className="story-dots" aria-label="Bab halaman detail">
+          <nav className={`story-dots${past ? ' is-hidden' : ''}`} aria-label="Bab halaman detail">
             {CHAPTERS.map((c, i) => (
               <button
                 key={c.label}
@@ -303,7 +316,7 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft }:
               </button>
             ))}
           </nav>
-          <div className="story-progress" aria-hidden="true">
+          <div className={`story-progress${past ? ' is-hidden' : ''}`} aria-hidden="true">
             <span ref={bar} />
           </div>
         </>
@@ -500,6 +513,7 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft }:
           )}
         </div>
       </div>
+      <StoryMore detail={detail} onOpenMovie={onOpenMovie} />
       {trailerOpen && trailer && (
         <TrailerModal title={movie.title} videoKey={trailer.key} reduced={reduced} onClose={() => setTrailerOpen(false)} />
       )}

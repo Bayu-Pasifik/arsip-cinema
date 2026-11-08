@@ -61,6 +61,7 @@ export interface MovieDetail extends Movie {
   overviewFallback?: boolean;
   credits?: { cast: CastMember[]; crew: CrewMember[] };
   videos?: { results: Video[] };
+  recommendations?: { results: Movie[] };
 }
 
 export interface MovieListResponse {
