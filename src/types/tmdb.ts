@@ -40,6 +40,22 @@ export interface Video {
   published_at: string;
 }
 
+export interface WatchProvider {
+  provider_id: number;
+  provider_name: string;
+  logo_path: string | null;
+}
+
+/** Ketersediaan film di satu negara (data JustWatch lewat TMDB). */
+export interface WatchRegion {
+  link?: string;
+  flatrate?: WatchProvider[];
+  rent?: WatchProvider[];
+  buy?: WatchProvider[];
+  free?: WatchProvider[];
+  ads?: WatchProvider[];
+}
+
 export interface Review {
   id: string;
   author: string;
@@ -82,6 +98,7 @@ export interface MovieDetail extends Movie {
   similar?: { results: Movie[] };
   images?: { backdrops: ImageInfo[]; posters: ImageInfo[]; logos: ImageInfo[] };
   reviews?: { results: Review[] };
+  'watch/providers'?: { results: Record<string, WatchRegion> };
 }
 
 export interface MovieListResponse {

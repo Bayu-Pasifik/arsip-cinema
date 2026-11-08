@@ -119,7 +119,7 @@ export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promis
   const detail = await request<MovieDetail>(
     `/movie/${id}`,
     {
-      append_to_response: 'credits,videos,recommendations,similar,images,reviews',
+      append_to_response: 'credits,videos,recommendations,similar,images,reviews,watch/providers',
       include_video_language: 'id,en,null',
       include_image_language: 'id,en,null',
     },
@@ -147,11 +147,12 @@ export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promis
   return result;
 }
 
-type ImageKind = 'poster' | 'backdrop' | 'profile';
+type ImageKind = 'poster' | 'backdrop' | 'profile' | 'logo';
 const SIZES: Record<ImageKind, readonly string[]> = {
   poster: ['w185', 'w342', 'w500', 'w780'],
   backdrop: ['w300', 'w780', 'w1280'],
   profile: ['w45', 'w185', 'h632'],
+  logo: ['w45', 'w92', 'w154', 'w185'],
 };
 
 /** Mengembalikan URL gambar TMDB; `size` harus salah satu ukuran resmi untuk jenis tersebut. */

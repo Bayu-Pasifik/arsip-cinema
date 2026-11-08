@@ -29,6 +29,7 @@ describe('URL gambar', () => {
     expect(t.imageUrl('/a.jpg', 'poster', 'w500')).toBe('https://image.tmdb.org/t/p/w500/a.jpg');
     expect(t.imageUrl('/a.jpg', 'poster', 'w999')).toBe('https://image.tmdb.org/t/p/w342/a.jpg');
     expect(t.imageUrl('/a.jpg', 'profile', 'w185')).toBe('https://image.tmdb.org/t/p/w185/a.jpg');
+    expect(t.imageUrl('/l.png', 'logo', 'w92')).toBe('https://image.tmdb.org/t/p/w92/l.png');
     expect(t.imageUrl(null, 'backdrop', 'w780')).toBeNull();
   });
 
@@ -150,7 +151,7 @@ describe('fetchMovieDetail', () => {
     expect(d.overview).toBe('Halo');
     expect(d.overviewFallback).toBeUndefined();
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(new URL(String(fetchMock.mock.calls[0][0])).searchParams.get('append_to_response')).toBe('credits,videos,recommendations,similar,images,reviews');
+    expect(new URL(String(fetchMock.mock.calls[0][0])).searchParams.get('append_to_response')).toBe('credits,videos,recommendations,similar,images,reviews,watch/providers');
   });
 
   it('sinopsis kosong → ambil en-US sebagai cadangan dan beri penanda', async () => {

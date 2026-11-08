@@ -4,6 +4,7 @@ import { buildGallery } from '../utils/gallery';
 import ImageGallery from './ImageGallery';
 import MovieRail from './MovieRail';
 import ReviewList from './ReviewList';
+import WatchProviders, { WATCH_REGION } from './WatchProviders';
 
 interface Props {
   detail: MovieDetail | null;
@@ -22,13 +23,15 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
   const similar = (detail.similar?.results ?? []).filter((m) => !seen.has(m.id));
 
   const reviews = detail.reviews?.results ?? [];
+  const providers = detail['watch/providers'];
 
-  if (recommendations.length === 0 && similar.length === 0 && gallery.all.length === 0 && reviews.length === 0) {
+  if (!providers && recommendations.length === 0 && similar.length === 0 && gallery.all.length === 0 && reviews.length === 0) {
     return null;
   }
 
   return (
     <div className="story-more">
+      {providers && <WatchProviders region={providers.results?.[WATCH_REGION]} />}
       <ImageGallery id="st-gal" title="Galeri adegan" items={gallery.backdrops} offset={0} onOpen={onOpenImage} />
       <ImageGallery
         id="st-pos"
