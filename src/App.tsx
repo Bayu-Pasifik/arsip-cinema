@@ -108,6 +108,7 @@ export default function App() {
             filters.keyword !== null ? (keywordName ?? `#${filters.keyword}`) : null,
             filters.company !== null ? (companyName ?? `#${filters.company}`) : null,
             filters.cast !== null ? (castName ?? `#${filters.cast}`) : null,
+            filters.cert,
           ]
             .filter(Boolean)
             .join(' · ') || t('cat.filtered')

@@ -153,6 +153,9 @@ export interface CollectionSummary {
   poster_path: string | null;
 }
 
+/** /certification/movie/list: sertifikasi usia per negara. */
+export type CertificationMap = Record<string, { certification: string; meaning: string; order: number }[]>;
+
 export interface PersonDetail {
   id: number;
   name: string;

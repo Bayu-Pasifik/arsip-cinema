@@ -4,6 +4,7 @@ import type {
   PersonDetail,
   PersonSummary,
   CollectionSummary,
+  CertificationMap,
   TmdbCategory,
   Movie,
   MovieDetail,
@@ -186,6 +187,10 @@ export async function fetchPeople(kind: PeopleKind, page: number, signal?: Abort
 export async function searchCollections(query: string, signal?: AbortSignal): Promise<CollectionSummary[]> {
   const data = await request<{ results: CollectionSummary[] }>('/search/collection', { query }, signal);
   return data.results.slice(0, 3);
+}
+
+export async function fetchCertifications(signal?: AbortSignal): Promise<CertificationMap> {
+  return (await request<{ certifications: CertificationMap }>('/certification/movie/list', {}, signal)).certifications;
 }
 
 export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ id: number; name: string }> {

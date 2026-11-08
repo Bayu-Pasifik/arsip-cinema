@@ -5,6 +5,7 @@ import { useT } from '../i18n';
 import { useKeywordName } from '../hooks/useKeywordName';
 import { useCompanyName } from '../hooks/useCompanyName';
 import { usePersonName } from '../hooks/usePersonName';
+import { useCertifications } from '../hooks/useCertifications';
 import KeywordSearch from './KeywordSearch';
 import { useCollectionName } from '../hooks/useCollectionName';
 import { usePeopleSearch } from '../hooks/usePeopleSearch';
@@ -50,6 +51,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
   const region = useRegion();
   const regions = useWatchRegions();
   const providers = useProviders(region);
+  const certs = useCertifications(region);
   const collectionName = useCollectionName(filters.collection);
   const companyName = useCompanyName(filters.company);
   const castName = usePersonName(filters.cast);
@@ -174,6 +176,19 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
                   ))}
                 </select>
               </label>
+              {(certs.length > 0 || filters.cert !== null) && (
+                <label>
+                  <span>{t('filter.cert', { country: regionName(region) })}</span>
+                  <select value={filters.cert ?? ''} onChange={(e) => set({ cert: e.target.value || null })}>
+                    <option value="">{t('filter.certAny')}</option>
+                    {(filters.cert !== null && !certs.includes(filters.cert) ? [filters.cert, ...certs] : certs).map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
               {providers.length > 0 && (
                 <label>
                   <span>{t('filter.provider')}</span>
