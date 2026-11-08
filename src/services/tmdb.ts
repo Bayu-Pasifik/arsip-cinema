@@ -276,6 +276,12 @@ export async function fetchEpisodeGroups(id: number, signal?: AbortSignal): Prom
 
 export const fetchEpisodeGroup = (groupId: string, signal?: AbortSignal) => request<EpisodeGroup>(`/tv/episode_group/${encodeURIComponent(groupId)}`, {}, signal);
 
+/** Episode serial yang tayang di bioskop; `id` = id ber-offset. */
+export async function fetchScreened(id: number, signal?: AbortSignal): Promise<{ season_number: number; episode_number: number }[]> {
+  const data = await request<{ results?: { season_number: number; episode_number: number }[] }>(`/tv/${rawId(id)}/screened_theatrically`, {}, signal);
+  return data.results ?? [];
+}
+
 export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ id: number; name: string }> {
   return request<{ id: number; name: string }>(`/keyword/${id}`, {}, signal);
 }

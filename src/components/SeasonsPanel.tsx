@@ -1,6 +1,7 @@
 import { useId, useState } from 'react';
 import { useT } from '../i18n';
 import { useEpisodeGroup, useEpisodeGroups } from '../hooks/useEpisodeGroups';
+import { screenedKey, useScreened } from '../hooks/useScreened';
 import { useSeason } from '../hooks/useSeason';
 import { navigate, personPath } from '../hooks/useRoute';
 import { imageUrl } from '../services/tmdb';
@@ -28,8 +29,9 @@ function People({ label, people }: { label: string; people: Person[] }) {
 }
 
 /** Daftar episode; `withSeason` menambah penanda S{musim}E{episode} (untuk urutan alternatif yang melintasi musim). */
-function EpisodeList({ episodes, withSeason = false }: { episodes: Episode[]; withSeason?: boolean }) {
+function EpisodeList({ episodes, showId, withSeason = false }: { episodes: Episode[]; showId: number; withSeason?: boolean }) {
   const t = useT();
+  const screened = useScreened(showId);
   return (
     <ol className="ss-list">
       {episodes.map((e) => {
@@ -44,6 +46,9 @@ function EpisodeList({ episodes, withSeason = false }: { episodes: Episode[]; wi
                 <span className="dim">{withSeason && e.season_number !== undefined ? `S${e.season_number}E${e.episode_number}` : `${e.episode_number}.`}</span> {e.name}
               </p>
               {meta && <p className="dim ss-meta">{meta}</p>}
+              {e.season_number !== undefined && screened.has(screenedKey(e.season_number, e.episode_number)) && (
+                <p className="ss-badge">{t('more.screened')}</p>
+              )}
               {(e.overview || hasEpisodeCredits(credits)) && (
                 <details>
                   <summary>{t('more.episodeDetails')}</summary>
@@ -96,7 +101,7 @@ function SeasonExtras({ cast, posters }: { cast: Person[]; posters: ImageInfo[] 
 }
 
 /** Episode satu urutan alternatif (episode group), dikelompokkan menurut bagian di dalamnya. */
-function GroupView({ groupId }: { groupId: string }) {
+function GroupView({ groupId, showId }: { groupId: string; showId: number }) {
   const t = useT();
   const state = useEpisodeGroup(groupId);
   if (state.status === 'loading') return <p className="dim">{t('more.loadingEpisodes')}</p>;
@@ -109,7 +114,7 @@ function GroupView({ groupId }: { groupId: string }) {
       {parts.map((g) => (
         <div key={g.id} className="ss-part">
           <h4 className="wp-label">{g.name}</h4>
-          <EpisodeList episodes={g.episodes} withSeason />
+          <EpisodeList episodes={g.episodes} showId={showId} withSeason />
         </div>
       ))}
     </>
@@ -152,7 +157,7 @@ export default function SeasonsPanel({ id, seasons }: { id: number; seasons: TvS
 
       {groupId ? (
         <div aria-live="polite">
-          <GroupView groupId={groupId} />
+          <GroupView groupId={groupId} showId={id} />
         </div>
       ) : (
         <>
@@ -175,7 +180,7 @@ export default function SeasonsPanel({ id, seasons }: { id: number; seasons: TvS
             {state.status === 'loading' && <p className="dim">{t('more.loadingEpisodes')}</p>}
             {state.status === 'error' && <p className="dim">{state.message}</p>}
             {state.status === 'success' &&
-              (state.season.episodes.length === 0 ? <p className="dim">{t('more.noEpisodes')}</p> : <EpisodeList episodes={state.season.episodes} />)}
+              (state.season.episodes.length === 0 ? <p className="dim">{t('more.noEpisodes')}</p> : <EpisodeList episodes={state.season.episodes} showId={id} />)}
           </div>
         </>
       )}
