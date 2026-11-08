@@ -2769,3 +2769,17 @@ main > * {
     transform: translateY(18px);
   }
 }
+
+/* ---------- saklar Film / Serial TV ---------- */
+.mode {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  background: var(--surface);
+}
+
+.mode .pill {
+  min-height: 38px;
+}

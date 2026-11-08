@@ -1,12 +1,13 @@
 import { useMemo, useSyncExternalStore } from 'react';
 import type { Category } from '../types/tmdb';
+import { isTvId, rawId, tvId } from '../utils/media';
 import { filterParts, NO_FILTERS, parseFilters, type Filters } from '../utils/filters';
 
 /**
  * Router mini berbasis History API (tanpa dependensi):
  *   /                          pembuka
  *   /browse/:category?q=...&genre=&year=&rating=&sort=&keyword=    galeri (category: trending|popular|top_rated|now_playing|favorites|watchlist)
- *   /movie/:id                 halaman detail film
+ *   /movie/:id, /tv/:id        halaman detail film / serial TV
  *   /people                   aktor/kru populer dan trending
  *   /person/:id                profil aktor/kru dan filmografi
  */
@@ -17,7 +18,21 @@ export type Route =
   | { name: 'person'; id: number }
   | { name: 'people' };
 
-const CATEGORIES: readonly Category[] = ['trending', 'trending_day', 'popular', 'top_rated', 'now_playing', 'upcoming', 'favorites', 'watchlist'];
+const CATEGORIES: readonly Category[] = [
+  'trending',
+  'trending_day',
+  'popular',
+  'top_rated',
+  'now_playing',
+  'upcoming',
+  'tv_trending',
+  'tv_popular',
+  'tv_top_rated',
+  'tv_airing_today',
+  'tv_on_the_air',
+  'favorites',
+  'watchlist',
+];
 const listeners = new Set<() => void>();
 
 const snapshot = () => window.location.pathname + window.location.search;
@@ -35,6 +50,7 @@ export function parseRoute(loc: string): Route {
   const url = new URL(loc, 'http://local');
   const parts = url.pathname.split('/').filter(Boolean);
   if (parts[0] === 'movie' && /^-?\d+$/.test(parts[1] ?? '')) return { name: 'movie', id: Number(parts[1]) };
+  if (parts[0] === 'tv' && /^[0-9]+$/.test(parts[1] ?? '')) return { name: 'movie', id: tvId(Number(parts[1])) };
   if (parts[0] === 'person' && /^[0-9]+$/.test(parts[1] ?? '')) return { name: 'person', id: Number(parts[1]) };
   if (parts[0] === 'people') return { name: 'people' };
   if (parts[0] === 'browse') {
@@ -56,7 +72,8 @@ export const browsePath = (category: Category, q = '', filters: Filters = NO_FIL
   const qs = parts.join('&');
   return `/browse/${category}${qs ? `?${qs}` : ''}`;
 };
-export const moviePath = (id: number) => `/movie/${id}`;
+/** Film: /movie/:id. Serial TV (id ber-offset): /tv/:id dengan id asli TMDB. */
+export const moviePath = (id: number) => (isTvId(id) ? `/tv/${rawId(id)}` : `/movie/${id}`);
 export const personPath = (id: number) => `/person/${id}`;
 export const PEOPLE_PATH = '/people';
 

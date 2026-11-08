@@ -107,8 +107,10 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage, onPlayVide
 
   const reviews = detail.reviews?.results ?? [];
   const providers = detail['watch/providers'];
-  const keywords = detail.keywords?.keywords ?? [];
-  const companies = detail.production_companies ?? [];
+  // kata kunci/studio/koleksi/daftar memakai /discover film: disembunyikan untuk serial TV
+  const tv = detail.media === 'tv';
+  const keywords = tv ? [] : (detail.keywords?.keywords ?? []);
+  const companies = tv ? [] : (detail.production_companies ?? []);
   const videos = videoGroups(detail.videos?.results, pickTrailer(detail.videos?.results)?.key ?? null);
   const crewEmpty = crewGroups(detail.credits?.crew).length === 0;
   const translations = translationOptions(detail.translations?.translations);
@@ -119,8 +121,8 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage, onPlayVide
     companies.length === 0 &&
     crewEmpty &&
     videos.length === 0 &&
-    (detail.lists?.results.length ?? 0) === 0 &&
-    (detail.alternative_titles?.titles.length ?? 0) === 0 &&
+    (tv || (detail.lists?.results.length ?? 0) === 0) &&
+    (tv || (detail.alternative_titles?.titles.length ?? 0) === 0) &&
     translations.length === 0 &&
     recommendations.length === 0 &&
     similar.length === 0 &&
@@ -140,8 +142,8 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage, onPlayVide
       <VideoList groups={videos} onPlay={onPlayVideo} />
       <KeywordChips keywords={keywords} />
       <CompanyChips companies={companies} />
-      <AlternativeTitles titles={detail.alternative_titles?.titles ?? []} current={detail.title} />
-      <TmdbLists lists={detail.lists?.results ?? []} />
+      {!tv && <AlternativeTitles titles={detail.alternative_titles?.titles ?? []} current={detail.title} />}
+      {!tv && <TmdbLists lists={detail.lists?.results ?? []} />}
       <TranslationsPanel options={translations} />
       <ImageGallery id="st-gal" title={t('more.gallery')} items={gallery.backdrops} offset={0} onOpen={onOpenImage} />
       <ImageGallery

@@ -1,6 +1,7 @@
 import type { CrewMember } from '../types/tmdb';
 
 export const CREW_ROLES = [
+  { key: 'creator', jobs: ['Creator'] },
   { key: 'director', jobs: ['Director'] },
   { key: 'writing', jobs: ['Screenplay', 'Writer', 'Story'] },
   { key: 'producer', jobs: ['Producer'] },

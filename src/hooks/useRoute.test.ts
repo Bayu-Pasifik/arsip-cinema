@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { browsePath, moviePath, parseRoute } from './useRoute';
 
 import { NO_FILTERS } from '../utils/filters';
+import { tvId } from '../utils/media';
 
 describe('parseRoute', () => {
   it('/ → home', () => {
@@ -19,6 +20,13 @@ describe('parseRoute', () => {
 
   it('kategori upcoming valid', () => {
     expect(parseRoute('/browse/upcoming')).toMatchObject({ category: 'upcoming' });
+  });
+
+  it('/tv/:id memakai id ber-offset dan moviePath membaliknya', () => {
+    expect(parseRoute('/tv/1396')).toEqual({ name: 'movie', id: tvId(1396) });
+    expect(moviePath(tvId(1396))).toBe('/tv/1396');
+    expect(moviePath(603)).toBe('/movie/603');
+    expect(parseRoute('/browse/tv_popular')).toMatchObject({ category: 'tv_popular' });
   });
 
   it('/people', () => {

@@ -3,7 +3,7 @@ import { findByImdb, hasApiKey } from '../services/tmdb';
 import { isImdbId } from '../utils/imdb';
 
 /** Bila `term` adalah ID IMDb (tt…/nm…), cari padanannya di TMDB (/find) dan panggil `onFound`. */
-export function useImdbJump(term: string, onFound: (target: { kind: 'movie' | 'person'; id: number }) => void): void {
+export function useImdbJump(term: string, onFound: (target: { kind: 'movie' | 'tv' | 'person'; id: number }) => void): void {
   useEffect(() => {
     if (!hasApiKey || !isImdbId(term)) return;
     const c = new AbortController();

@@ -9,6 +9,8 @@ export interface Movie {
   vote_count: number;
   /** true bila item berasal dari data demo lokal (bukan TMDB) */
   demo?: boolean;
+  /** 'tv' = serial TV (id ber-offset, lihat utils/media.ts); kosong = film */
+  media?: 'tv';
 }
 
 export interface Genre {
@@ -100,6 +102,16 @@ export interface TmdbList {
   item_count: number;
 }
 
+export interface TvSeason {
+  id: number;
+  season_number: number;
+  name: string;
+  episode_count: number;
+  air_date?: string | null;
+  poster_path?: string | null;
+  overview?: string;
+}
+
 export interface AlternativeTitle {
   iso_3166_1: string;
   title: string;
@@ -136,6 +148,11 @@ export interface MovieDetail extends Movie {
   translations?: { translations: Translation[] };
   alternative_titles?: { titles: AlternativeTitle[] };
   lists?: { results: TmdbList[] };
+  /** khusus serial TV */
+  number_of_seasons?: number;
+  number_of_episodes?: number;
+  seasons?: TvSeason[];
+  networks?: { id: number; name: string; logo_path: string | null }[];
   external_ids?: {
     imdb_id?: string | null;
     facebook_id?: string | null;
@@ -223,7 +240,7 @@ export interface MovieListResponse {
 }
 
 /** Kategori yang diambil dari TMDB. */
-export type TmdbCategory = 'trending' | 'trending_day' | 'popular' | 'top_rated' | 'now_playing' | 'upcoming';
+export type TmdbCategory = 'trending' | 'trending_day' | 'popular' | 'top_rated' | 'now_playing' | 'upcoming' | TvCategory;
 /** Daftar lokal milik pengguna (localStorage). */
 export type CollectionKey = 'favorites' | 'watchlist';
 export type Category = TmdbCategory | CollectionKey;
@@ -232,9 +249,11 @@ import type { Filters } from '../utils/filters';
 
 export type ListSource =
   | { kind: 'category'; category: Category }
-  | { kind: 'search'; query: string }
+  | { kind: 'search'; query: string; media?: 'tv' }
   | { kind: 'discover'; filters: Filters }
   | { kind: 'collection'; id: number }
   | { kind: 'demo' };
 
 export type TmdbErrorKind = 'missing-key' | 'auth' | 'rate-limit' | 'not-found' | 'network' | 'http';
+
+export type TvCategory = 'tv_trending' | 'tv_popular' | 'tv_top_rated' | 'tv_airing_today' | 'tv_on_the_air';

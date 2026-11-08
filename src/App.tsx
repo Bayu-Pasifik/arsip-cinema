@@ -26,6 +26,8 @@ import { languageName } from './utils/format';
 import { isCollectionKey, useCollections } from './services/collections';
 import { browsePath, cameFromApp, moviePath, navigate, personPath, useRoute } from './hooks/useRoute';
 import { createStage } from './scene/stage';
+import { isTvCategory } from './services/tmdb';
+import { tvId } from './utils/media';
 import { useT } from './i18n';
 import type { Category, ListSource } from './types/tmdb';
 import { clamp } from './utils/format';
@@ -56,6 +58,7 @@ export default function App() {
   const overlayOpen = detailId !== null || personId !== null || peopleOpen;
 
   const [category, setCategory] = useState<Category>(route.name === 'browse' ? route.category : 'trending');
+  const [mode, setMode] = useState<'movie' | 'tv'>(isTvCategory(category) ? 'tv' : 'movie');
   const [query, setQuery] = useState(route.name === 'browse' ? route.q : '');
   const [filters, setFilters] = useState<Filters>(route.name === 'browse' ? route.filters : NO_FILTERS);
   const genres = useGenres();
@@ -77,7 +80,7 @@ export default function App() {
   const source: ListSource = demo
     ? { kind: 'demo' }
     : searchActive
-      ? { kind: 'search', query: trimmed }
+      ? { kind: 'search', query: trimmed, media: mode === 'tv' ? 'tv' : undefined }
       : filters.collection !== null
         ? { kind: 'collection', id: filters.collection }
         : filtered
@@ -87,7 +90,7 @@ export default function App() {
   // tempel ID IMDb (tt…/nm…) di kotak cari → langsung buka film/orangnya
   useImdbJump(trimmed, (hit) => {
     setQuery('');
-    navigate(hit.kind === 'movie' ? moviePath(hit.id) : personPath(hit.id));
+    navigate(hit.kind === 'person' ? personPath(hit.id) : moviePath(hit.kind === 'tv' ? tvId(hit.id) : hit.id));
   });
 
   const collections = useCollections();
@@ -197,7 +200,10 @@ export default function App() {
   useEffect(() => {
     if (route.name !== 'browse') return;
     // hanya terapkan bila berbeda: mencegah input pencarian "melompat" saat URL di-replace oleh debounce
-    if (route.category !== category) setCategory(route.category);
+    if (route.category !== category) {
+      setCategory(route.category);
+      if (!isCollectionKey(route.category)) setMode(isTvCategory(route.category) ? 'tv' : 'movie');
+    }
     if (route.q.trim() !== urlQuery) setQuery(route.q);
     if (!sameFilters(route.filters, filters)) setFilters(route.filters);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -392,6 +398,15 @@ export default function App() {
         searching={searching}
         searchActive={searchActive}
         searchTerm={searchActive ? trimmed : ''}
+        mode={mode}
+        onMode={(m) => {
+          const c: Category = m === 'tv' ? 'tv_trending' : 'trending';
+          setQuery('');
+          setFilters(NO_FILTERS);
+          setMode(m);
+          setCategory(c);
+          navigate(browsePath(c));
+        }}
         filters={filters}
         genres={genres}
         onFilters={(f) => {

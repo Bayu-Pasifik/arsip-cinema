@@ -96,6 +96,8 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
   const facts: [string, string][] = (
     [
       [t('fact.status'), statusLabel(detail?.status)],
+      [t('fact.seasons'), detail?.number_of_seasons ? t('fact.seasonsValue', { seasons: detail.number_of_seasons, episodes: detail.number_of_episodes ?? 0 }) : ''],
+      [t('fact.networks'), (detail?.networks ?? []).map((n) => n.name).slice(0, 2).join(', ')],
       [t('fact.release'), formatDate(movie.release_date)],
       [t('fact.theatrical'), formatDate(theatricalDateId(detail) ?? undefined)],
       [t('fact.certification'), cert ? `${cert.value} (${t(cert.region === 'ID' ? 'fact.certRegionID' : 'fact.certRegionUS')})` : ''],

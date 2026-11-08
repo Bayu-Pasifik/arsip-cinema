@@ -18,6 +18,7 @@ import type {
 } from '../types/tmdb';
 import { translate } from '../i18n';
 import { discoverParams, type Filters } from '../utils/filters';
+import { isTvId, normalizeTv, normalizeTvDetail, rawId, type TvRaw } from '../utils/media';
 import type { RemoteLanguage } from '../utils/languages';
 import { getLanguage } from './language';
 import { getRegion } from './region';
@@ -96,9 +97,18 @@ const CATEGORY_PATH: Record<TmdbCategory, string> = {
   top_rated: '/movie/top_rated',
   now_playing: '/movie/now_playing',
   upcoming: '/movie/upcoming',
+  tv_trending: '/trending/tv/week',
+  tv_popular: '/tv/popular',
+  tv_top_rated: '/tv/top_rated',
+  tv_airing_today: '/tv/airing_today',
+  tv_on_the_air: '/tv/on_the_air',
 };
 
 export const CATEGORIES: readonly Category[] = ['trending', 'trending_day', 'popular', 'top_rated', 'now_playing', 'upcoming', 'favorites', 'watchlist'];
+
+export const TV_CATEGORIES: readonly Category[] = ['tv_trending', 'tv_popular', 'tv_top_rated', 'tv_airing_today', 'tv_on_the_air', 'favorites', 'watchlist'];
+
+export const isTvCategory = (c: string): boolean => c.startsWith('tv_');
 
 /** Batas total film yang dimuat per daftar (5 halaman TMDB × 20), agar jumlah tekstur dan elemen DOM tetap wajar. */
 export const MAX_TOTAL = 100;
@@ -109,17 +119,22 @@ export interface MoviePage {
   totalPages: number;
 }
 
-function toPage(data: MovieListResponse): MoviePage {
-  // TMDB membatasi page maksimum 500
-  return { movies: data.results, page: data.page, totalPages: Math.min(data.total_pages, 500) };
+function toPage(data: MovieListResponse, tv = false): MoviePage {
+  // TMDB membatasi page maksimum 500; serial TV dipetakan ke bentuk film (lihat utils/media.ts)
+  const movies = tv ? (data.results as unknown as TvRaw[]).map(normalizeTv) : data.results;
+  return { movies, page: data.page, totalPages: Math.min(data.total_pages, 500) };
 }
 
 export async function fetchCategory(category: TmdbCategory, page = 1, signal?: AbortSignal): Promise<MoviePage> {
-  return toPage(await request<MovieListResponse>(CATEGORY_PATH[category], { page }, signal));
+  return toPage(await request<MovieListResponse>(CATEGORY_PATH[category], { page }, signal), isTvCategory(category));
 }
 
 export async function searchMovies(query: string, page = 1, signal?: AbortSignal): Promise<MoviePage> {
   return toPage(await request<MovieListResponse>('/search/movie', { query, page, include_adult: 'false' }, signal));
+}
+
+export async function searchTv(query: string, page = 1, signal?: AbortSignal): Promise<MoviePage> {
+  return toPage(await request<MovieListResponse>('/search/tv', { query, page, include_adult: 'false' }, signal), true);
 }
 
 export async function discoverMovies(filters: Filters, page = 1, signal?: AbortSignal): Promise<MoviePage> {
@@ -145,7 +160,8 @@ export async function fetchCollectionMovies(id: number, signal?: AbortSignal): P
 export type RelatedKind = 'recommendations' | 'similar';
 
 export async function fetchRelated(id: number, kind: RelatedKind, page: number, signal?: AbortSignal): Promise<MoviePage> {
-  return toPage(await request<MovieListResponse>(`/movie/${id}/${kind}`, { page }, signal));
+  const tv = isTvId(id);
+  return toPage(await request<MovieListResponse>(`/${tv ? 'tv' : 'movie'}/${rawId(id)}/${kind}`, { page }, signal), tv);
 }
 
 export const fetchLanguages = (signal?: AbortSignal) => request<RemoteLanguage[]>('/configuration/languages', {}, signal);
@@ -200,13 +216,14 @@ export const fetchCountries = (signal?: AbortSignal) =>
   request<{ iso_3166_1: string; english_name: string; native_name: string }[]>('/configuration/countries', {}, signal);
 
 /** Cari film/orang TMDB dari ID IMDb (/find). null bila tidak ada padanannya. */
-export async function findByImdb(imdbId: string, signal?: AbortSignal): Promise<{ kind: 'movie' | 'person'; id: number } | null> {
-  const data = await request<{ movie_results: { id: number }[]; person_results: { id: number }[] }>(
+export async function findByImdb(imdbId: string, signal?: AbortSignal): Promise<{ kind: 'movie' | 'tv' | 'person'; id: number } | null> {
+  const data = await request<{ movie_results: { id: number }[]; tv_results?: { id: number }[]; person_results: { id: number }[] }>(
     `/find/${imdbId}`,
     { external_source: 'imdb_id' },
     signal,
   );
   if (data.movie_results[0]) return { kind: 'movie', id: data.movie_results[0].id };
+  if (data.tv_results?.[0]) return { kind: 'tv', id: data.tv_results[0].id };
   if (data.person_results[0]) return { kind: 'person', id: data.person_results[0].id };
   return null;
 }
@@ -249,15 +266,26 @@ export async function fetchPersonDetail(id: number, signal?: AbortSignal): Promi
 export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promise<MovieDetail> {
   const base = getLanguage().split('-')[0];
   const mediaLangs = [...new Set([base, 'en', 'null'])].join(',');
-  const detail = await request<MovieDetail>(
-    `/movie/${id}`,
-    {
-      append_to_response: 'credits,videos,recommendations,similar,images,reviews,watch/providers,release_dates,keywords,external_ids,translations,alternative_titles,lists',
-      include_video_language: mediaLangs,
-      include_image_language: mediaLangs,
-    },
-    signal,
-  );
+  const tv = isTvId(id);
+  const rid = rawId(id);
+  const path = tv ? '/tv' : '/movie';
+  const mediaParams = { include_video_language: mediaLangs, include_image_language: mediaLangs };
+  const detail = tv
+    ? normalizeTvDetail(
+        await request<TvRaw & Record<string, unknown>>(
+          `/tv/${rid}`,
+          { append_to_response: 'credits,videos,recommendations,similar,images,reviews,watch/providers,content_ratings,keywords,external_ids,translations', ...mediaParams },
+          signal,
+        ),
+      )
+    : await request<MovieDetail>(
+        `/movie/${rid}`,
+        {
+          append_to_response: 'credits,videos,recommendations,similar,images,reviews,watch/providers,release_dates,keywords,external_ids,translations,alternative_titles,lists',
+          ...mediaParams,
+        },
+        signal,
+      );
   // Banyak film belum punya sinopsis/tagline bahasa Indonesia: ambil versi en-US sebagai cadangan (diberi label di UI).
   let result = detail;
   // Terjemahan sudah ikut di respons (append_to_response) → pakai versi Inggris dari sana tanpa request tambahan.
@@ -266,7 +294,7 @@ export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promis
     result = { ...detail, overview: enData.overview, overviewFallback: true, tagline: detail.tagline || enData.tagline || '' };
   } else if (!detail.overview && base !== 'en') {
     try {
-      const en = await request<MovieDetail>(`/movie/${id}`, { language: 'en-US' }, signal);
+      const en = await request<MovieDetail>(`${path}/${rid}`, { language: 'en-US' }, signal);
       if (en.overview) result = { ...detail, overview: en.overview, overviewFallback: true, tagline: detail.tagline || en.tagline };
     } catch (err) {
       if ((err as Error).name === 'AbortError') throw err;
@@ -275,7 +303,7 @@ export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promis
   // Ulasan TMDB difilter menurut `language`; hampir semuanya berbahasa Inggris, jadi daftar id-ID biasanya kosong.
   if (result.reviews && result.reviews.results.length === 0) {
     try {
-      const en = await request<{ results: Review[] }>(`/movie/${id}/reviews`, { language: 'en-US' }, signal);
+      const en = await request<{ results: Review[] }>(`${path}/${rid}/reviews`, { language: 'en-US' }, signal);
       if (en.results?.length) result = { ...result, reviews: { results: en.results } };
     } catch (err) {
       if ((err as Error).name === 'AbortError') throw err;

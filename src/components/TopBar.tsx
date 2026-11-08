@@ -12,7 +12,7 @@ import { usePeopleSearch } from '../hooks/usePeopleSearch';
 import { useCollectionSearch } from '../hooks/useCollectionSearch';
 import { useCompanySearch } from '../hooks/useCompanySearch';
 import { navigate, PEOPLE_PATH, personPath } from '../hooks/useRoute';
-import { CATEGORIES, imageUrl } from '../services/tmdb';
+import { CATEGORIES, imageUrl, TV_CATEGORIES } from '../services/tmdb';
 import { setRegion, useRegion } from '../services/region';
 import { useProviders, useWatchRegions } from '../hooks/useWatchProviders';
 import { languageName, regionName } from '../utils/format';
@@ -40,6 +40,9 @@ interface Props {
   searchActive: boolean;
   /** teks pencarian yang sudah di-debounce (kosong bila belum aktif) */
   searchTerm: string;
+  /** jenis tontonan: film atau serial TV */
+  mode: 'movie' | 'tv';
+  onMode: (m: 'movie' | 'tv') => void;
   filters: Filters;
   genres: Genre[];
   onFilters: (f: Filters) => void;
@@ -54,7 +57,7 @@ const thisYear = new Date().getFullYear();
 const YEARS = Array.from({ length: thisYear + 1 - 1929 }, (_, i) => thisYear + 1 - i);
 
 const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
-  { category, query, searching, searchActive, searchTerm, filters, genres, onFilters, onCategory, onQuery, onHome, counts },
+  { category, query, searching, searchActive, searchTerm, mode, onMode, filters, genres, onFilters, onCategory, onQuery, onHome, counts },
   ref,
 ) {
   const language = useLanguage();
@@ -75,8 +78,8 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
   const castName = usePersonName(filters.cast);
   const crewName = usePersonName(filters.crew);
   const people = usePeopleSearch(searchTerm);
-  const collections = useCollectionSearch(searchTerm);
-  const companies = useCompanySearch(searchTerm);
+  const collections = useCollectionSearch(mode === 'movie' ? searchTerm : '');
+  const companies = useCompanySearch(mode === 'movie' ? searchTerm : '');
   const filtered = hasFilters(filters);
   const count = filterCount(filters);
   const set = (patch: Partial<Filters>) => onFilters({ ...filters, ...patch });
@@ -106,7 +109,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
 
       <nav className="cats" aria-label={t('top.categories')}>
         <ul>
-          {CATEGORIES.map((c) => {
+          {(mode === 'tv' ? TV_CATEGORIES : CATEGORIES).map((c) => {
             const active = !searchActive && !filtered && c === category;
             return (
               <li key={c}>
@@ -130,9 +133,17 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
       </nav>
 
       <div className="tb-right">
+        <div className="mode" role="group" aria-label={t('mode.label')}>
+          {(['movie', 'tv'] as const).map((m) => (
+            <button key={m} type="button" className={`pill${m === mode ? ' is-active' : ''}`} aria-pressed={m === mode} onClick={() => m !== mode && onMode(m)}>
+              {t(`mode.${m}`)}
+            </button>
+          ))}
+        </div>
         <button type="button" className="pill" onClick={() => navigate(PEOPLE_PATH)}>
           {t('people.nav')}
         </button>
+        {mode === 'movie' && (
         <div className="filter-wrap" ref={panelRef}>
           <button
             type="button"
@@ -339,6 +350,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
             </div>
           )}
         </div>
+        )}
 
         <form className="search" role="search" onSubmit={(e) => e.preventDefault()}>
           <label htmlFor="q" className="sr-only">
@@ -349,7 +361,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
             type="search"
             value={query}
             onChange={(e) => onQuery(e.target.value)}
-            placeholder={t('top.searchPlaceholder')}
+            placeholder={mode === 'tv' ? t('top.searchPlaceholderTv') : t('top.searchPlaceholder')}
             autoComplete="off"
             spellCheck={false}
           />

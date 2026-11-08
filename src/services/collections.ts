@@ -27,6 +27,7 @@ export function toSaved(m: Movie): Movie {
     release_date: m.release_date ?? '',
     vote_average: m.vote_average ?? 0,
     vote_count: m.vote_count ?? 0,
+    ...(m.media === 'tv' ? { media: 'tv' as const } : {}),
   };
 }
 
