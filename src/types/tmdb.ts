@@ -150,6 +150,9 @@ export interface SeasonDetail {
   name: string;
   season_number: number;
   episodes: Episode[];
+  /** ikut di respons lewat append_to_response */
+  credits?: { cast: CastMember[] };
+  images?: { posters: ImageInfo[] };
 }
 
 export interface AlternativeTitle {

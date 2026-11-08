@@ -257,8 +257,14 @@ export async function searchCompanies(query: string, signal?: AbortSignal): Prom
 }
 
 /** Episode satu musim; `id` = id ber-offset serial (lihat utils/media.ts). */
-export const fetchSeason = (id: number, season: number, signal?: AbortSignal) =>
-  request<SeasonDetail>(`/tv/${rawId(id)}/season/${season}`, {}, signal);
+export function fetchSeason(id: number, season: number, signal?: AbortSignal): Promise<SeasonDetail> {
+  const base = getLanguage().split('-')[0];
+  return request<SeasonDetail>(
+    `/tv/${rawId(id)}/season/${season}`,
+    { append_to_response: 'credits,images', include_image_language: [...new Set([base, 'en', 'null'])].join(',') },
+    signal,
+  );
+}
 
 export const fetchNetwork = (id: number, signal?: AbortSignal) => request<NetworkDetail>(`/network/${id}`, {}, signal);
 

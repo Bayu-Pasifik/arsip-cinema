@@ -4,7 +4,7 @@ import { useEpisodeGroup, useEpisodeGroups } from '../hooks/useEpisodeGroups';
 import { useSeason } from '../hooks/useSeason';
 import { navigate, personPath } from '../hooks/useRoute';
 import { imageUrl } from '../services/tmdb';
-import type { Episode, TvSeason } from '../types/tmdb';
+import type { Episode, ImageInfo, TvSeason } from '../types/tmdb';
 import { formatDate, formatRuntime } from '../utils/format';
 import { episodeCredits, hasEpisodeCredits, type Person } from '../utils/episodes';
 import { defaultSeason } from '../utils/seasons';
@@ -64,6 +64,34 @@ function EpisodeList({ episodes, withSeason = false }: { episodes: Episode[]; wi
         );
       })}
     </ol>
+  );
+}
+
+/** Pemeran musim (maksimal 10, bisa diklik) dan deretan poster musim; keduanya dari respons musim. */
+function SeasonExtras({ cast, posters }: { cast: Person[]; posters: ImageInfo[] }) {
+  const t = useT();
+  const shown = [...posters].sort((a, b) => b.vote_average - a.vote_average).slice(0, 6);
+  return (
+    <>
+      <People label={t('more.seasonCast')} people={cast} />
+      {shown.length > 1 && (
+        <ul className="filter-posters ss-posters">
+          {shown.map((p) => {
+            const thumb = imageUrl(p.file_path, 'poster', 'w92');
+            const full = imageUrl(p.file_path, 'poster', 'original');
+            if (!thumb || !full) return null;
+            return (
+              <li key={p.file_path}>
+                <a href={full} target="_blank" rel="noopener noreferrer">
+                  <img src={thumb} alt="" loading="lazy" width={46} height={69} />
+                  <span className="sr-only">{t('common.newTab')}</span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </>
   );
 }
 
@@ -139,6 +167,9 @@ export default function SeasonsPanel({ id, seasons }: { id: number; seasons: TvS
             ))}
           </select>
           {current?.overview && <p className="dim ss-overview">{current.overview}</p>}
+          {state.status === 'success' && (
+            <SeasonExtras cast={(state.season.credits?.cast ?? []).slice(0, 10).map((c) => ({ id: c.id, name: c.name }))} posters={state.season.images?.posters ?? []} />
+          )}
 
           <div aria-live="polite">
             {state.status === 'loading' && <p className="dim">{t('more.loadingEpisodes')}</p>}

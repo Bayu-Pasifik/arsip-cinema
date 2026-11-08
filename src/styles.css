@@ -2949,3 +2949,9 @@ main > * {
   border: 1px solid var(--line);
   object-fit: cover;
 }
+
+.ss-posters {
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
