@@ -7,6 +7,7 @@ import { useMovieDetail } from '../hooks/useMovieDetail';
 import { imageUrl, pickTrailer, releaseYear } from '../services/tmdb';
 import type { Movie } from '../types/tmdb';
 import { formatRuntime } from '../utils/format';
+import BackButton from './BackButton';
 import CollectionButtons from './CollectionButtons';
 import TrailerModal from './TrailerModal';
 import type { StoryProgress } from '../scene/StoryScene';
@@ -243,9 +244,8 @@ export default function MovieStory({ movie, reduced, onClose }: Props) {
       aria-modal="true"
       aria-labelledby="st-title"
     >
-      <button type="button" className="story-close btn" ref={closeBtn} onClick={close}>
-        Kembali <span aria-hidden="true">✕</span>
-      </button>
+      <BackButton className="story-close" buttonRef={closeBtn} onClick={close} />
+
 
       {!reduced && (
         <>
@@ -411,9 +411,7 @@ export default function MovieStory({ movie, reduced, onClose }: Props) {
                 <span aria-hidden="true">▶</span> Putar trailer
               </button>
             )}
-            <button type="button" className="btn btn-primary" onClick={close}>
-              Kembali ke arsip <span aria-hidden="true">←</span>
-            </button>
+            <BackButton variant="dark" label="Kembali ke arsip" hint="Tutup detail" onClick={close} />
           </section>
 
           {reduced && posterSrc && (

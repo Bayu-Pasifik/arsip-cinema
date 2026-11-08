@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { useMovieDetail } from '../hooks/useMovieDetail';
 import type { Movie } from '../types/tmdb';
+import BackButton from './BackButton';
 import MovieStory from './MovieStory';
 import StatusMessage from './StatusMessage';
 
@@ -37,9 +38,7 @@ export default function MovieRoute({ id, movies, reduced, onClose }: Props) {
       ) : (
         <StatusMessage kind="error" title="Film tidak ditemukan">
           <p>{state.status === 'error' ? state.message : 'Film ini tidak tersedia. Mungkin tautannya sudah tidak berlaku.'}</p>
-          <button type="button" className="btn btn-primary" onClick={onClose}>
-            Kembali ke arsip
-          </button>
+          <BackButton variant="dark" label="Kembali ke arsip" hint="Ke beranda" onClick={onClose} />
         </StatusMessage>
       )}
     </div>

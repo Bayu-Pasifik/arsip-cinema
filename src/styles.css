@@ -524,11 +524,167 @@ main > * {
   display: none;
 }
 
-.story-close {
+.back3d.story-close {
   position: fixed;
   top: 18px;
   right: var(--pad);
   z-index: 6;
+}
+
+/* ---------- tombol kembali 3D (prisma: muka depan → muka bawah) ---------- */
+.back3d {
+  --h: 46px;
+  --d: 23px; /* setengah tinggi = kedalaman prisma */
+  position: relative;
+  display: inline-block;
+  height: var(--h);
+  min-width: 132px;
+  padding: 0;
+  border: 0;
+  background: none;
+  perspective: 700px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* bayangan di lantai, mengecil saat tombol "terangkat" */
+.back3d::after {
+  content: '';
+  position: absolute;
+  left: 10%;
+  right: 10%;
+  bottom: -10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(18, 22, 28, 0.28);
+  filter: blur(6px);
+  transition:
+    transform 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2),
+    opacity 0.45s;
+}
+
+.back3d-box {
+  position: absolute;
+  inset: 0;
+  display: block;
+  transform-style: preserve-3d;
+  transform: translateZ(calc(var(--d) * -1)) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.55s cubic-bezier(0.2, 0.9, 0.3, 1.25);
+}
+
+.back3d-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 0 22px;
+  border-radius: 99px;
+  border: 1px solid var(--ink);
+  white-space: nowrap;
+  backface-visibility: hidden;
+  overflow: hidden;
+}
+
+.back3d-front {
+  background: var(--surface);
+  color: var(--ink);
+  transform: translateZ(var(--d));
+}
+
+.back3d-under {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  transform: rotateX(-90deg) translateZ(var(--d));
+}
+
+.back3d-dark .back3d-front {
+  background: var(--ink);
+  color: #fff;
+}
+
+.back3d-dark .back3d-under {
+  background: var(--accent);
+}
+
+/* kilau yang mengikuti kursor */
+.back3d-front::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--gx, 50%) 0%, rgba(255, 255, 255, 0.55), transparent 55%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.back3d-arrow {
+  display: inline-block;
+  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+
+.back3d:hover .back3d-box {
+  transform: translateZ(calc(var(--d) * -1)) rotateX(calc(90deg + var(--rx, 0deg))) rotateY(var(--ry, 0deg));
+}
+
+.back3d:hover .back3d-front::before {
+  opacity: 1;
+}
+
+.back3d:hover .back3d-front .back3d-arrow {
+  transform: translateX(-4px);
+}
+
+.back3d:hover::after {
+  transform: scaleX(0.8);
+  opacity: 0.6;
+}
+
+/* ditekan: prisma tenggelam ke dalam */
+.back3d:active .back3d-box {
+  transition-duration: 0.12s;
+  transform: translateZ(calc(var(--d) * -1 - 8px)) rotateX(90deg) scale(0.97);
+}
+
+.back3d:focus-visible {
+  outline: none;
+}
+
+.back3d:focus-visible .back3d-face {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .back3d {
+    perspective: none;
+  }
+
+  .back3d-box {
+    transform: none !important;
+    transform-style: flat;
+  }
+
+  .back3d-front {
+    position: relative;
+    transform: none;
+  }
+
+  .back3d-under,
+  .back3d::after {
+    display: none;
+  }
+
+  .back3d:hover .back3d-front {
+    background: var(--surface-2);
+  }
+
+  .back3d-dark:hover .back3d-front {
+    background: #2c3644;
+  }
 }
 
 .story-dots {
