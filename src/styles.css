@@ -2406,3 +2406,15 @@ main > * {
   font-size: 11px;
   color: var(--muted);
 }
+
+.kw-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+}
+
+.kw-btn:hover {
+  text-decoration: underline;
+}
