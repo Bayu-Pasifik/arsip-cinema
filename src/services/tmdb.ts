@@ -196,6 +196,18 @@ export async function fetchCertifications(signal?: AbortSignal): Promise<Certifi
 export const fetchCountries = (signal?: AbortSignal) =>
   request<{ iso_3166_1: string; english_name: string; native_name: string }[]>('/configuration/countries', {}, signal);
 
+/** Cari film/orang TMDB dari ID IMDb (/find). null bila tidak ada padanannya. */
+export async function findByImdb(imdbId: string, signal?: AbortSignal): Promise<{ kind: 'movie' | 'person'; id: number } | null> {
+  const data = await request<{ movie_results: { id: number }[]; person_results: { id: number }[] }>(
+    `/find/${imdbId}`,
+    { external_source: 'imdb_id' },
+    signal,
+  );
+  if (data.movie_results[0]) return { kind: 'movie', id: data.movie_results[0].id };
+  if (data.person_results[0]) return { kind: 'person', id: data.person_results[0].id };
+  return null;
+}
+
 export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ id: number; name: string }> {
   return request<{ id: number; name: string }>(`/keyword/${id}`, {}, signal);
 }

@@ -14,6 +14,7 @@ import { useWebGL } from './utils/webgl';
 import { useCompact, useDebounced, useReducedMotion } from './hooks/useEnv';
 import { useMovieList } from './hooks/useMovieList';
 import { useGenres } from './hooks/useGenres';
+import { useImdbJump } from './hooks/useImdbJump';
 import { useKeywordName } from './hooks/useKeywordName';
 import { useCompanyName } from './hooks/useCompanyName';
 import { usePersonName } from './hooks/usePersonName';
@@ -80,6 +81,12 @@ export default function App() {
         : filtered
           ? { kind: 'discover', filters }
           : { kind: 'category', category };
+
+  // tempel ID IMDb (tt…/nm…) di kotak cari → langsung buka film/orangnya
+  useImdbJump(trimmed, (hit) => {
+    setQuery('');
+    navigate(hit.kind === 'movie' ? moviePath(hit.id) : personPath(hit.id));
+  });
 
   const collections = useCollections();
   const list = useMovieList(source, reload, collections);
