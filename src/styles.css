@@ -2660,3 +2660,24 @@ main > * {
   font-size: 12px;
   white-space: nowrap;
 }
+
+/* layar menengah: kategori turun ke baris kedua agar kontrol di kanan tidak terdorong keluar */
+@media (min-width: 901px) and (max-width: 1440px) {
+  .topbar {
+    grid-template-columns: 1fr auto;
+    row-gap: 10px;
+  }
+
+  .cats {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: start;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .cats ul {
+    width: max-content;
+  }
+}
