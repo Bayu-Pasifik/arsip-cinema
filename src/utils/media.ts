@@ -133,3 +133,6 @@ function tvCrew(agg: { crew?: AggCrew[] } | undefined, credits: { crew?: unknown
   if (agg?.crew?.length) return agg.crew.flatMap((c) => (c.jobs ?? []).map((j) => ({ id: c.id, name: c.name, job: j.job })));
   return list<CrewMember>(credits?.crew);
 }
+
+/** Item termasuk jenis tontonan (mode) (film atau serial TV)? */
+export const inMode = (m: { media?: 'tv' }, mode: 'movie' | 'tv'): boolean => (m.media === 'tv') === (mode === 'tv');

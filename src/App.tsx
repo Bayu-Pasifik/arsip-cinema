@@ -28,7 +28,7 @@ import { isCollectionKey, useCollections } from './services/collections';
 import { browsePath, cameFromApp, moviePath, navigate, personPath, useRoute } from './hooks/useRoute';
 import { createStage } from './scene/stage';
 import { isTvCategory } from './services/tmdb';
-import { tvId } from './utils/media';
+import { inMode, tvId } from './utils/media';
 import { useT } from './i18n';
 import type { Category, ListSource } from './types/tmdb';
 import { clamp } from './utils/format';
@@ -101,12 +101,14 @@ export default function App() {
 
   // Daftar baru → indeks fokus kembali ke 0 SEKARANG (saat render, sebelum efek berjalan), supaya prefetch halaman
   // berikutnya tidak membaca indeks lama dari daftar sebelumnya.
-  const [seenGeneration, setSeenGeneration] = useState(list.generation);
-  if (seenGeneration !== list.generation) {
-    setSeenGeneration(list.generation);
+  // Favorit/Watchlist ditampilkan menurut saklar Film / Serial TV: berganti jenis = daftar baru (fokus kembali ke awal)
+  const generation = list.generation + (inCollection && mode === 'tv' ? 0.5 : 0);
+  const [seenGeneration, setSeenGeneration] = useState(generation);
+  if (seenGeneration !== generation) {
+    setSeenGeneration(generation);
     setIndex(0);
   }
-  const movies = list.movies;
+  const movies = useMemo(() => (inCollection ? list.movies.filter((m) => inMode(m, mode)) : list.movies), [inCollection, list.movies, mode]);
   const searching = !demo && (query.trim() !== trimmed || (searchActive && list.status === 'loading'));
   const urlQuery = searchActive ? trimmed : '';
   const label = demo ? t('cat.demo') : searchActive
@@ -305,7 +307,7 @@ export default function App() {
     return () => {
       tween.kill();
     };
-  }, [list.generation, listReady, reduced, stage]);
+  }, [generation, listReady, reduced, stage]);
 
   // prefetch halaman berikutnya saat fokus mendekati akhir daftar yang sudah dimuat
   const { hasMore, loadingMore, moreError, loadMore } = list;
@@ -403,10 +405,12 @@ export default function App() {
         searchTerm={searchActive ? trimmed : ''}
         mode={mode}
         onMode={(m) => {
+          setMode(m);
+          // di Favorit/Watchlist saklar hanya menyaring jenis isi daftar
+          if (isCollectionKey(category) && !searchActive && !filtered) return;
           const c: Category = m === 'tv' ? 'tv_trending' : 'trending';
           setQuery('');
           setFilters(NO_FILTERS);
-          setMode(m);
           setCategory(c);
           navigate(browsePath(c));
         }}
@@ -424,7 +428,10 @@ export default function App() {
           navigate(browsePath(c));
         }}
         onQuery={setQuery}
-        counts={{ favorites: collections.favorites.length, watchlist: collections.watchlist.length }}
+        counts={{
+          favorites: collections.favorites.filter((m) => inMode(m, mode)).length,
+          watchlist: collections.watchlist.filter((m) => inMode(m, mode)).length,
+        }}
         onHome={() => navigate('/')}
       />
 

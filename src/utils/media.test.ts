@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isTvId, normalizeTv, normalizeTvCredit, normalizeTvDetail, rawId, tvId, TV_ID_OFFSET } from './media';
+import { inMode, isTvId, normalizeTv, normalizeTvCredit, normalizeTvDetail, rawId, tvId, TV_ID_OFFSET } from './media';
 
 describe('id TV', () => {
   it('bolak-balik dan tidak menyentuh id film/demo', () => {
@@ -82,5 +82,14 @@ describe('normalizeTvCredit', () => {
       popularity: 55,
       media: 'tv',
     });
+  });
+});
+
+describe('inMode', () => {
+  it('memisahkan film dan serial', () => {
+    expect(inMode({}, 'movie')).toBe(true);
+    expect(inMode({}, 'tv')).toBe(false);
+    expect(inMode({ media: 'tv' }, 'tv')).toBe(true);
+    expect(inMode({ media: 'tv' }, 'movie')).toBe(false);
   });
 });
