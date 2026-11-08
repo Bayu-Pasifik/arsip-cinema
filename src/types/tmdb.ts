@@ -123,6 +123,8 @@ export interface Episode {
   runtime?: number | null;
   vote_average: number;
   still_path?: string | null;
+  crew?: { id: number; name: string; job: string }[];
+  guest_stars?: { id: number; name: string; character: string }[];
 }
 
 export interface SeasonDetail {

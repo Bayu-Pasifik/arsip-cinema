@@ -5,6 +5,26 @@ import { imageUrl } from '../services/tmdb';
 import type { TvSeason } from '../types/tmdb';
 import { formatDate, formatRuntime } from '../utils/format';
 import { defaultSeason } from '../utils/seasons';
+import { episodeCredits, hasEpisodeCredits, type Person } from '../utils/episodes';
+import { navigate, personPath } from '../hooks/useRoute';
+
+function People({ label, people }: { label: string; people: Person[] }) {
+  const t = useT();
+  if (people.length === 0) return null;
+  return (
+    <p className="ss-credit">
+      <span className="dim">{label}: </span>
+      {people.map((p, i) => (
+        <span key={p.id}>
+          {i > 0 && ', '}
+          <button type="button" className="kw-btn" onClick={() => navigate(personPath(p.id))} aria-label={t('detail.openPerson', { name: p.name })}>
+            {p.name}
+          </button>
+        </span>
+      ))}
+    </p>
+  );
+}
 
 /** Daftar musim dan episode serial TV; episode dimuat saat musim dipilih. `id` = id ber-offset. */
 export default function SeasonsPanel({ id, seasons }: { id: number; seasons: TvSeason[] }) {
@@ -42,6 +62,7 @@ export default function SeasonsPanel({ id, seasons }: { id: number; seasons: TvS
             <ol className="ss-list">
               {state.season.episodes.map((e) => {
                 const still = imageUrl(e.still_path ?? null, 'backdrop', 'w300');
+                const credits = episodeCredits(e);
                 const meta = [formatDate(e.air_date ?? undefined), e.runtime ? formatRuntime(e.runtime) : ''].filter(Boolean).join(' · ');
                 return (
                   <li key={e.id} className="ss-ep">
@@ -51,10 +72,13 @@ export default function SeasonsPanel({ id, seasons }: { id: number; seasons: TvS
                         <span className="dim">{e.episode_number}.</span> {e.name}
                       </p>
                       {meta && <p className="dim ss-meta">{meta}</p>}
-                      {e.overview && (
+                      {(e.overview || hasEpisodeCredits(credits)) && (
                         <details>
-                          <summary>{t('more.synopsis')}</summary>
-                          <p>{e.overview}</p>
+                          <summary>{t('more.episodeDetails')}</summary>
+                          {e.overview && <p>{e.overview}</p>}
+                          <People label={t('crew.director')} people={credits.directors} />
+                          <People label={t('crew.writing')} people={credits.writers} />
+                          <People label={t('more.guestStars')} people={credits.guests} />
                         </details>
                       )}
                     </div>
