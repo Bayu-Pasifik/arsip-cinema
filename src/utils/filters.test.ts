@@ -5,12 +5,13 @@ const parse = (qs: string) => parseFilters(new URLSearchParams(qs));
 
 describe('parseFilters', () => {
   it('membaca semua filter valid', () => {
-    expect(parse('genre=28&year=1999&rating=7&sort=revenue.desc&keyword=9715')).toEqual({
+    expect(parse('genre=28&year=1999&rating=7&sort=revenue.desc&keyword=9715&collection=10')).toEqual({
       genre: 28,
       year: 1999,
       rating: 7,
       sort: 'revenue.desc',
       keyword: 9715,
+      collection: 10,
     });
   });
   it('mengabaikan nilai tak valid', () => {

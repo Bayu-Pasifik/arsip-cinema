@@ -119,6 +119,21 @@ export async function discoverMovies(filters: Filters, page = 1, signal?: AbortS
   return toPage(await request<MovieListResponse>('/discover/movie', { ...discoverParams(filters, today), page }, signal));
 }
 
+interface Collection {
+  id: number;
+  name: string;
+  parts: Movie[];
+}
+
+export const fetchCollection = (id: number, signal?: AbortSignal) => request<Collection>(`/collection/${id}`, {}, signal);
+
+/** Seluruh film satu koleksi (satu halaman), berurutan menurut tanggal rilis. */
+export async function fetchCollectionMovies(id: number, signal?: AbortSignal): Promise<MoviePage> {
+  const c = await fetchCollection(id, signal);
+  const movies = [...c.parts].sort((a, b) => (a.release_date || '9999').localeCompare(b.release_date || '9999'));
+  return { movies, page: 1, totalPages: 1 };
+}
+
 export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ id: number; name: string }> {
   return request<{ id: number; name: string }>(`/keyword/${id}`, {}, signal);
 }

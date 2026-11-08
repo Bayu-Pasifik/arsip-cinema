@@ -2,6 +2,7 @@ import { forwardRef, useEffect, useRef, useState } from 'react';
 import { LANGUAGES, setLanguage, useLanguage } from '../services/language';
 import { useT } from '../i18n';
 import { useKeywordName } from '../hooks/useKeywordName';
+import { useCollectionName } from '../hooks/useCollectionName';
 import { usePeopleSearch } from '../hooks/usePeopleSearch';
 import { navigate, personPath } from '../hooks/useRoute';
 import { CATEGORIES, imageUrl } from '../services/tmdb';
@@ -37,6 +38,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const keywordName = useKeywordName(filters.keyword);
+  const collectionName = useCollectionName(filters.collection);
   const people = usePeopleSearch(searchTerm);
   const filtered = hasFilters(filters);
   const count = filterCount(filters);
@@ -158,6 +160,14 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
                 <p className="filter-kw">
                   <span lang="en">{t('filter.keyword', { name: keywordName ?? `#${filters.keyword}` })}</span>
                   <button type="button" className="filter-x" onClick={() => set({ keyword: null })} aria-label={t('filter.removeKeyword')}>
+                    ×
+                  </button>
+                </p>
+              )}
+              {filters.collection !== null && (
+                <p className="filter-kw">
+                  <span>{t('filter.collection', { name: collectionName ?? `#${filters.collection}` })}</span>
+                  <button type="button" className="filter-x" onClick={() => set({ collection: null })} aria-label={t('filter.removeCollection')}>
                     ×
                   </button>
                 </p>

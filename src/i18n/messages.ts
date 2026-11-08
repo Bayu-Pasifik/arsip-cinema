@@ -28,6 +28,7 @@ export const id = {
   'cat.watchlist': 'Watchlist',
   'cat.demo': 'Demo',
   'cat.filtered': 'Hasil filter',
+  'cat.collection': 'Koleksi',
   'cat.results': 'Hasil “{query}”',
 
   // hero
@@ -60,6 +61,8 @@ export const id = {
   'filter.sort': 'Urutkan',
   'filter.keyword': 'Kata kunci: {name}',
   'filter.removeKeyword': 'Hapus kata kunci',
+  'filter.collection': 'Koleksi: {name}',
+  'filter.removeCollection': 'Hapus koleksi',
   'filter.reset': 'Atur ulang',
   'sort.popularity.desc': 'Terpopuler',
   'sort.vote_average.desc': 'Rating tertinggi',
@@ -161,6 +164,7 @@ export const id = {
   'person.openMovie': 'Buka detail {title}',
   'detail.outro': 'Penutup',
   'detail.collection': 'Bagian dari {name}',
+  'detail.collectionBrowse': 'Lihat semua film {name}',
 
   // fakta
   'fact.status': 'Status',
@@ -268,6 +272,7 @@ export const en: Messages = {
   'cat.watchlist': 'Watchlist',
   'cat.demo': 'Demo',
   'cat.filtered': 'Filtered results',
+  'cat.collection': 'Collection',
   'cat.results': 'Results for “{query}”',
 
   'hero.tag': 'Film archive · TMDB data',
@@ -298,6 +303,8 @@ export const en: Messages = {
   'filter.sort': 'Sort by',
   'filter.keyword': 'Keyword: {name}',
   'filter.removeKeyword': 'Remove keyword',
+  'filter.collection': 'Collection: {name}',
+  'filter.removeCollection': 'Remove collection',
   'filter.reset': 'Reset',
   'sort.popularity.desc': 'Most popular',
   'sort.vote_average.desc': 'Highest rated',
@@ -395,6 +402,7 @@ export const en: Messages = {
   'person.openMovie': 'Open details of {title}',
   'detail.outro': 'Outro',
   'detail.collection': 'Part of {name}',
+  'detail.collectionBrowse': 'See all films in {name}',
 
   'fact.status': 'Status',
   'fact.release': 'Released',

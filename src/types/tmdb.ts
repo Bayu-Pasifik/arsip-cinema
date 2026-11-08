@@ -180,6 +180,7 @@ export type ListSource =
   | { kind: 'category'; category: Category }
   | { kind: 'search'; query: string }
   | { kind: 'discover'; filters: Filters }
+  | { kind: 'collection'; id: number }
   | { kind: 'demo' };
 
 export type TmdbErrorKind = 'missing-key' | 'auth' | 'rate-limit' | 'not-found' | 'network' | 'http';

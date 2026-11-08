@@ -14,6 +14,7 @@ import { useCompact, useDebounced, useReducedMotion } from './hooks/useEnv';
 import { useMovieList } from './hooks/useMovieList';
 import { useGenres } from './hooks/useGenres';
 import { useKeywordName } from './hooks/useKeywordName';
+import { useCollectionName } from './hooks/useCollectionName';
 import { hasFilters, NO_FILTERS, sameFilters, type Filters } from './utils/filters';
 import { isCollectionKey, useCollections } from './services/collections';
 import { browsePath, cameFromApp, moviePath, navigate, useRoute } from './hooks/useRoute';
@@ -51,6 +52,7 @@ export default function App() {
   const [filters, setFilters] = useState<Filters>(route.name === 'browse' ? route.filters : NO_FILTERS);
   const genres = useGenres();
   const keywordName = useKeywordName(filters.keyword);
+  const collectionName = useCollectionName(filters.collection);
   const filtered = hasFilters(filters);
   const [demo, setDemo] = useState(false);
   const [reload, setReload] = useState(0);
@@ -64,9 +66,11 @@ export default function App() {
     ? { kind: 'demo' }
     : searchActive
       ? { kind: 'search', query: trimmed }
-      : filtered
-        ? { kind: 'discover', filters }
-        : { kind: 'category', category };
+      : filters.collection !== null
+        ? { kind: 'collection', id: filters.collection }
+        : filtered
+          ? { kind: 'discover', filters }
+          : { kind: 'category', category };
 
   const collections = useCollections();
   const list = useMovieList(source, reload, collections);
@@ -84,7 +88,9 @@ export default function App() {
   const urlQuery = searchActive ? trimmed : '';
   const label = demo ? t('cat.demo') : searchActive
       ? t('cat.results', { query: trimmed })
-      : filtered
+      : filters.collection !== null
+        ? (collectionName ?? t('cat.collection'))
+        : filtered
         ? [
             genres.find((g) => g.id === filters.genre)?.name,
             filters.year,

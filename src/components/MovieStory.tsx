@@ -5,7 +5,8 @@ import { useGSAP } from '@gsap/react';
 import { useCompact } from '../hooks/useEnv';
 import { useT } from '../i18n';
 import { useMovieDetail } from '../hooks/useMovieDetail';
-import { navigate, personPath } from '../hooks/useRoute';
+import { browsePath, navigate, personPath } from '../hooks/useRoute';
+import { NO_FILTERS } from '../utils/filters';
 import { imageUrl, pickTrailer, releaseYear } from '../services/tmdb';
 import type { Movie } from '../types/tmdb';
 import { buildGallery } from '../utils/gallery';
@@ -106,6 +107,7 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
     ] as [string, string][]
   ).filter(([, v]) => v);
   const collection = detail?.belongs_to_collection?.name;
+  const collectionId = detail?.belongs_to_collection?.id;
   const links = externalLinks(detail);
 
   // fokus: simpan pemicu, pindah ke tombol tutup, kembalikan saat selesai
@@ -572,7 +574,22 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
           {/* 5 — penutup */}
           <section className="st-ch st-end" aria-label={t('detail.outro')}>
             <p className="st-end-title">{movie.title}</p>
-            {collection && <p className="dim st-collection">{t('detail.collection', { name: collection })}</p>}
+            {collection && (
+              <p className="dim st-collection">
+                {collectionId ? (
+                  <button
+                    type="button"
+                    className="st-collection-btn"
+                    onClick={() => navigate(browsePath('trending', '', { ...NO_FILTERS, collection: collectionId }))}
+                    aria-label={t('detail.collectionBrowse', { name: collection })}
+                  >
+                    {t('detail.collection', { name: collection })} →
+                  </button>
+                ) : (
+                  t('detail.collection', { name: collection })
+                )}
+              </p>
+            )}
             {links.length > 0 && (
               <p className="st-links">
                 {links.map((l) => (

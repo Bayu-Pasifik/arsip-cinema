@@ -2418,3 +2418,13 @@ main > * {
 .kw-btn:hover {
   text-decoration: underline;
 }
+
+.st-collection-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

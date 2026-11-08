@@ -9,9 +9,11 @@ export interface Filters {
   rating: number | null;
   sort: SortKey | null;
   keyword: number | null;
+  /** id koleksi/franchise: daftar film koleksi itu (tidak memakai /discover) */
+  collection: number | null;
 }
 
-export const NO_FILTERS: Filters = { genre: null, year: null, rating: null, sort: null, keyword: null };
+export const NO_FILTERS: Filters = { genre: null, year: null, rating: null, sort: null, keyword: null, collection: null };
 
 export const RATINGS = [5, 6, 7, 8] as const;
 
@@ -35,6 +37,7 @@ export function parseFilters(params: URLSearchParams): Filters {
     rating: int(params.get('rating'), 1, 9),
     sort: (SORTS as readonly string[]).includes(sort ?? '') ? (sort as SortKey) : null,
     keyword: int(params.get('keyword'), 1, 99999999),
+    collection: int(params.get('collection'), 1, 99999999),
   };
 }
 
@@ -46,6 +49,7 @@ export function filterParts(f: Filters): string[] {
   if (f.rating !== null) parts.push(`rating=${f.rating}`);
   if (f.sort !== null) parts.push(`sort=${f.sort}`);
   if (f.keyword !== null) parts.push(`keyword=${f.keyword}`);
+  if (f.collection !== null) parts.push(`collection=${f.collection}`);
   return parts;
 }
 
