@@ -56,6 +56,9 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
   const progress = useMemo<StoryProgress>(() => ({ p: 0 }), []);
   const [active, setActive] = useState(0);
   const [past, setPast] = useState(false);
+  // bab tambahan untuk bagian di bawah cerita (Info, Galeri, Ulasan, Film lain) agar progres tetap ada sampai paling bawah
+  const [more, setMore] = useState<{ label: string; el: HTMLElement }[]>([]);
+  const [activeMore, setActiveMore] = useState(-1);
   const [trailerOpen, setTrailerOpen] = useState(false);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const modalOpenRef = useRef(false);
@@ -149,7 +152,6 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
           scrub: 0.8,
           onUpdate: (self) => {
             progress.p = self.progress;
-            if (bar.current) bar.current.style.transform = `scaleY(${self.progress})`;
             const idx = CHAPTERS.reduce((a, c, i) => (self.progress >= c.at - 0.02 ? i : a), 0);
             setActive((cur) => (cur === idx ? cur : idx));
           },
@@ -236,6 +238,55 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
     { scope: root, dependencies: [reduced, webgl, words.length, cast.length, genres.length, rating], revertOnUpdate: true },
   );
 
+  // kumpulkan bagian di bawah cerita sebagai bab tambahan (berdasarkan kelas bagian)
+  useEffect(() => {
+    const el = root.current;
+    if (!el || reduced) return;
+    const GROUPS: [string, string[]][] = [
+      ['Info', ['wp', 'kw', 'tr']],
+      ['Galeri', ['gal']],
+      ['Ulasan', ['rv-wrap']],
+      ['Film lain', ['mv']],
+    ];
+    const secs = Array.from(el.querySelectorAll<HTMLElement>('.story-more > section'));
+    setMore(
+      GROUPS.flatMap(([label, cls]) => {
+        const hit = secs.find((s) => cls.some((c) => s.classList.contains(c)));
+        return hit ? [{ label, el: hit }] : [];
+      }),
+    );
+  }, [detail, reduced]);
+
+  // progres sisi kiri = posisi scroll seluruh halaman; titik kanan ikut bab bawah saat cerita sudah lewat
+  useEffect(() => {
+    const el = root.current;
+    if (!el || reduced) return;
+    const onScroll = () => {
+      const max = el.scrollHeight - el.clientHeight;
+      if (bar.current) bar.current.style.transform = `scaleY(${max > 0 ? Math.min(1, el.scrollTop / max) : 0})`;
+      const line = el.getBoundingClientRect().top + el.clientHeight * 0.4;
+      let idx = -1;
+      more.forEach((m, i) => {
+        if (m.el.getBoundingClientRect().top <= line) idx = i;
+      });
+      setActiveMore((cur) => (cur === idx ? cur : idx));
+    };
+    onScroll();
+    el.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => {
+      el.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
+  }, [more, reduced]);
+
+  const scrollToMore = (target: HTMLElement) => {
+    const el = root.current;
+    if (!el) return;
+    const top = target.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop - 24;
+    el.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' });
+  };
+
   const scrollToChapter = (at: number) => {
     const el = root.current;
     const trk = track.current;
@@ -308,23 +359,44 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
 
       {!reduced && (
         <>
-          <nav className={`story-dots${past ? ' is-hidden' : ''}`} aria-label="Bab halaman detail">
-            {CHAPTERS.map((c, i) => (
-              <button
-                key={c.label}
-                type="button"
-                className={`story-dot${i === active ? ' is-active' : ''}`}
-                aria-label={c.label}
-                aria-current={i === active ? 'true' : undefined}
-                onClick={() => scrollToChapter(c.at)}
-              >
-                <span className="story-dot-label" aria-hidden="true">
-                  {c.label}
-                </span>
-              </button>
-            ))}
+          <nav className="story-dots" aria-label="Bab halaman detail">
+            {CHAPTERS.map((c, i) => {
+              // saat sudah melewati cerita: "Penutup" aktif sampai bab bawah pertama tercapai
+              const on = past ? (activeMore < 0 ? i === CHAPTERS.length - 1 : false) : i === active;
+              return (
+                <button
+                  key={c.label}
+                  type="button"
+                  className={`story-dot${on ? ' is-active' : ''}`}
+                  aria-label={c.label}
+                  aria-current={on ? 'true' : undefined}
+                  onClick={() => scrollToChapter(c.at)}
+                >
+                  <span className="story-dot-label" aria-hidden="true">
+                    {c.label}
+                  </span>
+                </button>
+              );
+            })}
+            {more.map((m, i) => {
+              const on = past && i === activeMore;
+              return (
+                <button
+                  key={m.label}
+                  type="button"
+                  className={`story-dot${on ? ' is-active' : ''}`}
+                  aria-label={m.label}
+                  aria-current={on ? 'true' : undefined}
+                  onClick={() => scrollToMore(m.el)}
+                >
+                  <span className="story-dot-label" aria-hidden="true">
+                    {m.label}
+                  </span>
+                </button>
+              );
+            })}
           </nav>
-          <div className={`story-progress${past ? ' is-hidden' : ''}`} aria-hidden="true">
+          <div className="story-progress" aria-hidden="true">
             <span ref={bar} />
           </div>
         </>

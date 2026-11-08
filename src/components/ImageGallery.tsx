@@ -11,7 +11,7 @@ interface Props {
   onOpen: (index: number) => void;
 }
 
-/** Baris thumbnail galeri; klik membuka lightbox pada gambar tersebut. */
+/** Baris thumbnail galeri; klik membuka lightbox pada gambar tersebut. (Animasi muncul diatur oleh StoryMore.) */
 export default function ImageGallery({ id, title, items, offset, onOpen }: Props) {
   if (items.length === 0) return null;
   return (

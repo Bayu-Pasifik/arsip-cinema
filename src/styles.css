@@ -1445,8 +1445,55 @@ main > * {
   grid-template-columns: minmax(0, 1fr);
   gap: 40px;
   padding: 56px var(--pad) 80px;
-  overflow: hidden; /* rail-list memakai margin negatif untuk "bleed" ke tepi layar */
+  overflow-x: clip; /* rail-list memakai margin negatif untuk "bleed" ke tepi layar */
   background: var(--bg);
+}
+
+/* sambungan halus dari panggung cerita ke bagian "lainnya": tepi atas memudar, bukan terpotong */
+.story-more::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -96px;
+  height: 96px;
+  background: linear-gradient(to bottom, transparent, var(--bg));
+  pointer-events: none;
+}
+
+.more-head {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+
+.more-head-title {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(28px, 4vw, 52px);
+  letter-spacing: -0.02em;
+  overflow: hidden;
+}
+
+.more-head-title span {
+  display: inline-block;
+}
+
+/* garis tipis di bawah judul bagian; memanjang saat bagian muncul (--sec-line diatur GSAP) */
+.story-more .tag::after {
+  content: '';
+  display: block;
+  height: 2px;
+  width: var(--sec-line, 100%);
+  margin-top: 10px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+}
+
+.more-head::after {
+  content: '';
+  height: 2px;
+  width: min(var(--sec-line, 100%), 320px);
+  background: linear-gradient(90deg, var(--accent), transparent);
 }
 
 .mv-list {
@@ -1709,8 +1756,15 @@ main > * {
 
 .gal-btn:hover img,
 .gal-btn:focus-visible img {
-  transform: translateY(-4px);
-  box-shadow: 6px 8px 0 rgba(18, 22, 28, 0.16);
+  transform: translateY(-6px) rotate(-1deg) scale(1.03);
+  box-shadow: 6px 10px 0 rgba(18, 22, 28, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gal-btn:hover img,
+  .gal-btn:focus-visible img {
+    transform: none;
+  }
 }
 
 .gal-btn:focus-visible {
