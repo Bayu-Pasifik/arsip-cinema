@@ -17,6 +17,10 @@ describe('parseRoute', () => {
     expect(parseRoute('/browse/upcoming')).toMatchObject({ category: 'upcoming' });
   });
 
+  it('/people', () => {
+    expect(parseRoute('/people')).toEqual({ name: 'people' });
+  });
+
   it('/person/:id', () => {
     expect(parseRoute('/person/287')).toEqual({ name: 'person', id: 287 });
     expect(parseRoute('/person/abc')).toEqual({ name: 'home' });

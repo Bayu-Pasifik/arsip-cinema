@@ -7,13 +7,15 @@ import { filterParts, NO_FILTERS, parseFilters, type Filters } from '../utils/fi
  *   /                          pembuka
  *   /browse/:category?q=...&genre=&year=&rating=&sort=&keyword=    galeri (category: trending|popular|top_rated|now_playing|favorites|watchlist)
  *   /movie/:id                 halaman detail film
+ *   /people                   aktor/kru populer dan trending
  *   /person/:id                profil aktor/kru dan filmografi
  */
 export type Route =
   | { name: 'home' }
   | { name: 'browse'; category: Category; q: string; filters: Filters }
   | { name: 'movie'; id: number }
-  | { name: 'person'; id: number };
+  | { name: 'person'; id: number }
+  | { name: 'people' };
 
 const CATEGORIES: readonly Category[] = ['trending', 'popular', 'top_rated', 'now_playing', 'upcoming', 'favorites', 'watchlist'];
 const listeners = new Set<() => void>();
@@ -34,6 +36,7 @@ export function parseRoute(loc: string): Route {
   const parts = url.pathname.split('/').filter(Boolean);
   if (parts[0] === 'movie' && /^-?\d+$/.test(parts[1] ?? '')) return { name: 'movie', id: Number(parts[1]) };
   if (parts[0] === 'person' && /^[0-9]+$/.test(parts[1] ?? '')) return { name: 'person', id: Number(parts[1]) };
+  if (parts[0] === 'people') return { name: 'people' };
   if (parts[0] === 'browse') {
     const c = parts[1] as Category;
     return {
@@ -55,6 +58,7 @@ export const browsePath = (category: Category, q = '', filters: Filters = NO_FIL
 };
 export const moviePath = (id: number) => `/movie/${id}`;
 export const personPath = (id: number) => `/person/${id}`;
+export const PEOPLE_PATH = '/people';
 
 /** Tanda `from: 'app'` pada state history = entri ini dibuat oleh navigasi di dalam aplikasi. */
 export function navigate(to: string, opts: { replace?: boolean } = {}) {

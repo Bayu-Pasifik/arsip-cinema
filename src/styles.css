@@ -2475,3 +2475,22 @@ main > * {
 .pr-all {
   margin-top: 18px;
 }
+
+.pe-title {
+  margin-top: 24px;
+}
+
+.pe-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 28px;
+}
+
+.pe-tabs .pill {
+  border: 1px solid var(--line);
+}
+
+.pe-grid {
+  margin-top: 0;
+}

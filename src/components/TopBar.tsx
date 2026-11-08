@@ -8,7 +8,7 @@ import { usePersonName } from '../hooks/usePersonName';
 import KeywordSearch from './KeywordSearch';
 import { useCollectionName } from '../hooks/useCollectionName';
 import { usePeopleSearch } from '../hooks/usePeopleSearch';
-import { navigate, personPath } from '../hooks/useRoute';
+import { navigate, PEOPLE_PATH, personPath } from '../hooks/useRoute';
 import { CATEGORIES, imageUrl } from '../services/tmdb';
 import { setRegion, useRegion } from '../services/region';
 import { useProviders, useWatchRegions } from '../hooks/useWatchProviders';
@@ -106,6 +106,9 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
       </nav>
 
       <div className="tb-right">
+        <button type="button" className="pill" onClick={() => navigate(PEOPLE_PATH)}>
+          {t('people.nav')}
+        </button>
         <div className="filter-wrap" ref={panelRef}>
           <button
             type="button"

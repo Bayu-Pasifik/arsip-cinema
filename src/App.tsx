@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import Browse from './components/Browse';
 import MovieRoute from './components/MovieRoute';
+import PeopleRoute from './components/PeopleRoute';
 import PersonRoute from './components/PersonRoute';
 import Hero from './components/Hero';
 import StatusMessage from './components/StatusMessage';
@@ -21,7 +22,7 @@ import { useRegion } from './services/region';
 import { useCollectionName } from './hooks/useCollectionName';
 import { hasFilters, NO_FILTERS, sameFilters, type Filters } from './utils/filters';
 import { isCollectionKey, useCollections } from './services/collections';
-import { browsePath, cameFromApp, moviePath, navigate, useRoute } from './hooks/useRoute';
+import { browsePath, cameFromApp, moviePath, navigate, personPath, useRoute } from './hooks/useRoute';
 import { createStage } from './scene/stage';
 import { useT } from './i18n';
 import type { Category, ListSource } from './types/tmdb';
@@ -49,7 +50,8 @@ export default function App() {
   const entered = route.name !== 'home';
   const detailId = route.name === 'movie' ? route.id : null;
   const personId = route.name === 'person' ? route.id : null;
-  const overlayOpen = detailId !== null || personId !== null;
+  const peopleOpen = route.name === 'people';
+  const overlayOpen = detailId !== null || personId !== null || peopleOpen;
 
   const [category, setCategory] = useState<Category>(route.name === 'browse' ? route.category : 'trending');
   const [query, setQuery] = useState(route.name === 'browse' ? route.q : '');
@@ -470,6 +472,8 @@ export default function App() {
           {t('status.demoBanner')}
         </p>
       )}
+
+      {peopleOpen && <PeopleRoute onClose={closePerson} onOpenPerson={(id) => navigate(personPath(id))} />}
 
       {personId !== null && <PersonRoute key={personId} id={personId} onClose={closePerson} onOpenMovie={openMovie} />}
 

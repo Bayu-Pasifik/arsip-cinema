@@ -173,6 +173,14 @@ export const fetchCompany = (id: number, signal?: AbortSignal) => request<{ id: 
 export const fetchPersonName = async (id: number, signal?: AbortSignal) =>
   (await request<{ name: string }>(`/person/${id}`, {}, signal)).name;
 
+export type PeopleKind = 'popular' | 'trending';
+
+export async function fetchPeople(kind: PeopleKind, page: number, signal?: AbortSignal): Promise<{ people: PersonSummary[]; page: number; totalPages: number }> {
+  const path = kind === 'popular' ? '/person/popular' : '/trending/person/week';
+  const data = await request<{ results: PersonSummary[]; page: number; total_pages: number }>(path, { page }, signal);
+  return { people: data.results, page: data.page, totalPages: Math.min(data.total_pages, 500) };
+}
+
 export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ id: number; name: string }> {
   return request<{ id: number; name: string }>(`/keyword/${id}`, {}, signal);
 }
