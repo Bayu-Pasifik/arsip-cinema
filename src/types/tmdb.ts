@@ -40,6 +40,13 @@ export interface Video {
   published_at: string;
 }
 
+export interface ReleaseDate {
+  certification?: string;
+  /** 1 Premiere, 2 Bioskop terbatas, 3 Bioskop, 4 Digital, 5 Fisik, 6 TV */
+  type: number;
+  release_date: string;
+}
+
 export interface WatchProvider {
   provider_id: number;
   provider_name: string;
@@ -99,6 +106,7 @@ export interface MovieDetail extends Movie {
   images?: { backdrops: ImageInfo[]; posters: ImageInfo[]; logos: ImageInfo[] };
   reviews?: { results: Review[] };
   'watch/providers'?: { results: Record<string, WatchRegion> };
+  release_dates?: { results: { iso_3166_1: string; release_dates: ReleaseDate[] }[] };
 }
 
 export interface MovieListResponse {

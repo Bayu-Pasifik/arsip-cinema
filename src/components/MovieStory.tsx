@@ -7,6 +7,7 @@ import { useMovieDetail } from '../hooks/useMovieDetail';
 import { imageUrl, pickTrailer, releaseYear } from '../services/tmdb';
 import type { Movie } from '../types/tmdb';
 import { buildGallery } from '../utils/gallery';
+import { certification, theatricalDateId } from '../utils/releases';
 import { formatDate, formatMoney, formatRuntime, languageName, statusLabel } from '../utils/format';
 import BackButton from './BackButton';
 import CollectionButtons from './CollectionButtons';
@@ -80,10 +81,13 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
   const composer = crewBy('Original Music Composer');
   const cinematographer = crewBy('Director of Photography');
   const originalTitle = detail?.original_title && detail.original_title !== movie.title ? detail.original_title : '';
+  const cert = certification(detail);
   const facts: [string, string][] = (
     [
       ['Status', statusLabel(detail?.status)],
       ['Rilis', formatDate(movie.release_date)],
+      ['Tayang di bioskop Indonesia', formatDate(theatricalDateId(detail) ?? undefined)],
+      ['Klasifikasi usia', cert ? `${cert.value} (${cert.region === 'ID' ? 'Indonesia' : 'AS'})` : ''],
       ['Bahasa asli', languageName(detail?.original_language)],
       ['Anggaran', formatMoney(detail?.budget)],
       ['Pendapatan', formatMoney(detail?.revenue)],
@@ -363,7 +367,7 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
           {/* 1 — hero */}
           <section className="st-ch st-hero" aria-label="Judul">
             <p className="tag st-hero-fade">
-              {movie.demo ? 'DEMO · bukan data TMDB' : `${releaseYear(movie.release_date)}${runtime ? ` · ${runtime}` : ''}`}
+              {movie.demo ? 'DEMO · bukan data TMDB' : `${releaseYear(movie.release_date)}${runtime ? ` · ${runtime}` : ''}${cert ? ` · ${cert.value}` : ''}`}
             </p>
             <h2 id="st-title" className="st-title">
               <span className="line-mask">

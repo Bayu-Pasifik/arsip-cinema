@@ -119,7 +119,7 @@ export async function fetchMovieDetail(id: number, signal?: AbortSignal): Promis
   const detail = await request<MovieDetail>(
     `/movie/${id}`,
     {
-      append_to_response: 'credits,videos,recommendations,similar,images,reviews,watch/providers',
+      append_to_response: 'credits,videos,recommendations,similar,images,reviews,watch/providers,release_dates',
       include_video_language: 'id,en,null',
       include_image_language: 'id,en,null',
     },
