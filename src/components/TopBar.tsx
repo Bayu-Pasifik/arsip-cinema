@@ -4,6 +4,7 @@ import { useLanguages } from '../hooks/useLanguages';
 import { useT } from '../i18n';
 import { useKeywordName } from '../hooks/useKeywordName';
 import { useCompanyName } from '../hooks/useCompanyName';
+import { usePersonName } from '../hooks/usePersonName';
 import KeywordSearch from './KeywordSearch';
 import { useCollectionName } from '../hooks/useCollectionName';
 import { usePeopleSearch } from '../hooks/usePeopleSearch';
@@ -50,6 +51,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
   const providers = useProviders(region);
   const collectionName = useCollectionName(filters.collection);
   const companyName = useCompanyName(filters.company);
+  const castName = usePersonName(filters.cast);
   const people = usePeopleSearch(searchTerm);
   const filtered = hasFilters(filters);
   const count = filterCount(filters);
@@ -197,6 +199,14 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
                 <p className="filter-kw">
                   <span lang="en">{t('filter.keyword', { name: keywordName ?? `#${filters.keyword}` })}</span>
                   <button type="button" className="filter-x" onClick={() => set({ keyword: null })} aria-label={t('filter.removeKeyword')}>
+                    ×
+                  </button>
+                </p>
+              )}
+              {filters.cast !== null && (
+                <p className="filter-kw">
+                  <span>{t('filter.cast', { name: castName ?? `#${filters.cast}` })}</span>
+                  <button type="button" className="filter-x" onClick={() => set({ cast: null })} aria-label={t('filter.removeCast')}>
                     ×
                   </button>
                 </p>

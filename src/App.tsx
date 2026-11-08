@@ -15,6 +15,7 @@ import { useMovieList } from './hooks/useMovieList';
 import { useGenres } from './hooks/useGenres';
 import { useKeywordName } from './hooks/useKeywordName';
 import { useCompanyName } from './hooks/useCompanyName';
+import { usePersonName } from './hooks/usePersonName';
 import { useProviders } from './hooks/useWatchProviders';
 import { useRegion } from './services/region';
 import { useCollectionName } from './hooks/useCollectionName';
@@ -58,6 +59,7 @@ export default function App() {
   const keywordName = useKeywordName(filters.keyword);
   const collectionName = useCollectionName(filters.collection);
   const companyName = useCompanyName(filters.company);
+  const castName = usePersonName(filters.cast);
   const filtered = hasFilters(filters);
   const [demo, setDemo] = useState(false);
   const [reload, setReload] = useState(0);
@@ -103,6 +105,7 @@ export default function App() {
             filters.rating !== null ? `★ ${filters.rating}+` : null,
             filters.keyword !== null ? (keywordName ?? `#${filters.keyword}`) : null,
             filters.company !== null ? (companyName ?? `#${filters.company}`) : null,
+            filters.cast !== null ? (castName ?? `#${filters.cast}`) : null,
           ]
             .filter(Boolean)
             .join(' · ') || t('cat.filtered')

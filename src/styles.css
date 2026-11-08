@@ -2471,3 +2471,7 @@ main > * {
   max-height: calc(100vh - 110px);
   overflow-y: auto;
 }
+
+.pr-all {
+  margin-top: 18px;
+}

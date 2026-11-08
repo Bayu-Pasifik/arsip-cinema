@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 import { useT } from '../i18n';
+import { browsePath, navigate } from '../hooks/useRoute';
+import { NO_FILTERS } from '../utils/filters';
 import { useLanguage } from '../services/language';
 import { usePersonDetail } from '../hooks/usePersonDetail';
 import { imageUrl, releaseYear } from '../services/tmdb';
@@ -123,6 +125,13 @@ export default function PersonRoute({ id, onClose, onOpenMovie }: Props) {
                 <p className="dim">{t('person.noBio')}</p>
               )}
             </div>
+            <button
+              type="button"
+              className="btn btn-primary pr-all"
+              onClick={() => navigate(browsePath('trending', '', { ...NO_FILTERS, cast: p.id }))}
+            >
+              {t('person.allFilms', { name: p.name })}
+            </button>
             <p className="pr-links">
               {imdb && (
                 <a href={`https://www.imdb.com/name/${imdb}`} target="_blank" rel="noopener noreferrer">

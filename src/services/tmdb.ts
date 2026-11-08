@@ -170,6 +170,9 @@ export async function searchKeywords(query: string, signal?: AbortSignal): Promi
 
 export const fetchCompany = (id: number, signal?: AbortSignal) => request<{ id: number; name: string }>(`/company/${id}`, {}, signal);
 
+export const fetchPersonName = async (id: number, signal?: AbortSignal) =>
+  (await request<{ name: string }>(`/person/${id}`, {}, signal)).name;
+
 export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ id: number; name: string }> {
   return request<{ id: number; name: string }>(`/keyword/${id}`, {}, signal);
 }
