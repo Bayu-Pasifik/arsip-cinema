@@ -186,6 +186,9 @@ export async function fetchRelated(id: number, kind: RelatedKind, page: number, 
   return toPage(await request<MovieListResponse>(`/${tv ? 'tv' : 'movie'}/${rawId(id)}/${kind}`, { page }, signal), tv);
 }
 
+/** Kode lokal terjemahan utama TMDB (mis. "pt-PT", "id-ID"). */
+export const fetchPrimaryTranslations = (signal?: AbortSignal) => request<string[]>('/configuration/primary_translations', {}, signal);
+
 export const fetchLanguages = (signal?: AbortSignal) => request<RemoteLanguage[]>('/configuration/languages', {}, signal);
 
 /** Kode negara yang punya data penyedia tontonan. */

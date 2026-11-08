@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isLanguageCode, mergeLanguages } from './languages';
+import { isLanguageCode, mergeLanguages, nativeLabel } from './languages';
 
 const curated = [
   { code: 'id-ID', label: 'Indonesia' },
@@ -31,6 +31,18 @@ describe('mergeLanguages', () => {
     const r = mergeLanguages(curated, remote);
     expect(r.find((l) => l.code === 'sv')?.label).toBe('svenska (Swedish)');
     expect(r.find((l) => l.code === 'af')?.label).toBe('Afrikaans');
+  });
+  it('primary_translations: hanya kode yang punya terjemahan, varian ikut, kurasi tidak digandakan', () => {
+    const r = mergeLanguages(curated, remote, ['id-ID', 'ja-JP', 'pt-PT', 'sv-SE', 'xx-XX', 'bukan-kode', 'sv-SE']);
+    expect(r.map((l) => l.code)).toEqual(['id-ID', 'ja-JP', ...r.slice(2).map((l) => l.code)]);
+    expect(r.slice(2).map((l) => l.code).sort()).toEqual(['pt-PT', 'sv-SE']);
+  });
+  it('primary kosong jatuh ke daftar /configuration/languages', () => {
+    expect(mergeLanguages(curated, remote, []).map((l) => l.code)).toEqual(['id-ID', 'ja-JP', 'af', 'sv']);
+  });
+  it('nativeLabel selalu mengembalikan teks', () => {
+    expect(nativeLabel('sv-SE').length).toBeGreaterThan(0);
+    expect(nativeLabel('???')).toBe('???');
   });
   it('tanpa data remote = daftar kurasi', () => {
     expect(mergeLanguages(curated, [])).toEqual(curated);
