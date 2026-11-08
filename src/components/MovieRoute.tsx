@@ -10,13 +10,16 @@ interface Props {
   movies: Movie[];
   reduced: boolean;
   onClose: () => void;
+  /** URL sudah meninggalkan detail (Back browser): jalankan animasi keluar lalu panggil onLeft */
+  leaving?: boolean;
+  onLeft?: () => void;
 }
 
 /**
  * Menyediakan data film untuk rute /movie/:id. Bila film ada di daftar yang sedang dimuat, dipakai langsung;
  * bila tidak (tautan langsung / refresh), data diambil dari TMDB.
  */
-export default function MovieRoute({ id, movies, reduced, onClose }: Props) {
+export default function MovieRoute({ id, movies, reduced, onClose, leaving, onLeft }: Props) {
   // Ingat film terakhir yang ditemukan: bila film keluar dari daftar (mis. dihapus dari Favorit saat detail terbuka)
   // halaman detail tidak boleh dimuat ulang/berkedip.
   const cache = useRef<Movie | null>(null);
@@ -25,10 +28,15 @@ export default function MovieRoute({ id, movies, reduced, onClose }: Props) {
   const found = inList ?? (cache.current?.id === id ? cache.current : null);
   const state = useMovieDetail(found ? null : id);
 
-  if (found) return <MovieStory key={found.id} movie={found} reduced={reduced} onClose={onClose} />;
-  if (state.status === 'success') {
-    return <MovieStory key={state.detail.id} movie={state.detail} reduced={reduced} onClose={onClose} />;
+  if (found) {
+    return <MovieStory key={found.id} movie={found} reduced={reduced} onClose={onClose} leaving={leaving} onLeft={onLeft} />;
   }
+  if (state.status === 'success') {
+    return (
+      <MovieStory key={state.detail.id} movie={state.detail} reduced={reduced} onClose={onClose} leaving={leaving} onLeft={onLeft} />
+    );
+  }
+  if (leaving) return null;
 
   const loading = id > 0 && (state.status === 'idle' || state.status === 'loading');
   return (

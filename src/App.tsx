@@ -158,7 +158,35 @@ export default function App() {
   }, [route]);
 
   const openMovie = useCallback((id: number) => navigate(moviePath(id)), []);
+  // Back/Forward browser: detail dilepas dari URL tanpa melalui tombol kita → pertahankan sebentar agar animasi keluar jalan.
+  // Id terakhir yang dibuka (ref, diperbarui di efek): saat detailId jadi null, instance detail yang sama tetap dirender
+  // pada frame yang sama sehingga tidak ada kedipan/remount sebelum animasi keluar.
+  const lastDetail = useRef<number | null>(null);
+  const uiClosed = useRef(false);
+  const [exited, setExited] = useState<number | null>(null);
+  const [session, setSession] = useState(0);
+  const ghostId =
+    detailId === null && lastDetail.current !== null && lastDetail.current !== exited && !uiClosed.current && !reduced
+      ? lastDetail.current
+      : null;
+  const ghostShown = useRef(false);
+  useEffect(() => {
+    if (detailId !== null) {
+      // Forward saat animasi keluar masih jalan: instance lama sedang memudar → buang, pasang detail baru
+      if (ghostShown.current) setSession((s) => s + 1);
+      lastDetail.current = detailId;
+      uiClosed.current = false;
+      setExited(null);
+    }
+  }, [detailId]);
+  // dideklarasikan SETELAH efek di atas: efek itu harus membaca nilai render sebelumnya
+  useEffect(() => {
+    ghostShown.current = ghostId !== null;
+  }, [ghostId]);
+  const clearGhost = useCallback(() => setExited(lastDetail.current), []);
+
   const closeDetail = useCallback(() => {
+    uiClosed.current = true;
     if (cameFromApp()) window.history.back();
     else navigate(browsePath(category, urlQuery), { replace: true });
   }, [category, urlQuery]);
@@ -390,7 +418,17 @@ export default function App() {
         </p>
       )}
 
-      {detailId !== null && <MovieRoute id={detailId} movies={movies} reduced={reduced} onClose={closeDetail} />}
+      {(detailId ?? ghostId) !== null && (
+        <MovieRoute
+          key={session}
+          id={(detailId ?? ghostId) as number}
+          movies={movies}
+          reduced={reduced}
+          onClose={closeDetail}
+          leaving={detailId === null}
+          onLeft={clearGhost}
+        />
+      )}
     </div>
   );
 }

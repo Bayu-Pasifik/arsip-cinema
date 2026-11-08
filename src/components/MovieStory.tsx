@@ -22,6 +22,8 @@ interface Props {
   movie: Movie;
   reduced: boolean;
   onClose: () => void;
+  leaving?: boolean;
+  onLeft?: () => void;
 }
 
 const CHAPTERS = [
@@ -36,7 +38,7 @@ const CHAPTERS = [
  * Halaman detail film berbasis scroll: panggung 3D menempel (sticky) sementara satu timeline GSAP
  * di-scrub oleh ScrollTrigger. Progres yang sama menggerakkan poster, cincin rating, backdrop, dan teks.
  */
-export default function MovieStory({ movie, reduced, onClose }: Props) {
+export default function MovieStory({ movie, reduced, onClose, leaving, onLeft }: Props) {
   const compact = useCompact();
   const webgl = useWebGL();
   const root = useRef<HTMLDivElement>(null);
@@ -198,20 +200,30 @@ export default function MovieStory({ movie, reduced, onClose }: Props) {
     el.scrollTo({ top: at * max, behavior: reduced ? 'auto' : 'smooth' });
   };
 
-  const close = useCallback(() => {
-    if (closing.current) return;
-    closing.current = true;
-    if (reduced || !root.current) return onClose();
-    // transisi keluar "tirai terangkat": satu gerakan mulus — halaman terangkat ke atas dengan tepi bawah melengkung,
-    // menyingkap arsip di belakangnya. (Sengaja berbeda dari transisi masuk yang berupa lingkaran membesar.)
-    const el = root.current;
-    gsap.killTweensOf(el);
-    gsap.set(el, { clipPath: 'inset(0% 0% 0% 0% round 0px 0px 0px 0px)', willChange: 'clip-path, transform' });
-    gsap
-      .timeline({ defaults: { ease: 'power2.inOut', duration: 0.75 }, onComplete: onClose })
-      .to(el, { clipPath: 'inset(0% 0% 100% 0% round 0px 0px 56px 56px)', yPercent: -7 }, 0)
-      .to(el.querySelectorAll('.story-dots, .story-progress, .story-close'), { opacity: 0, duration: 0.3, ease: 'none' }, 0);
-  }, [onClose, reduced]);
+  const animateOut = useCallback(
+    (done: () => void) => {
+      if (closing.current) return;
+      closing.current = true;
+      if (reduced || !root.current) return done();
+      // transisi keluar "tirai terangkat": satu gerakan mulus — halaman terangkat ke atas dengan tepi bawah melengkung,
+      // menyingkap arsip di belakangnya. (Sengaja berbeda dari transisi masuk yang berupa lingkaran membesar.)
+      const el = root.current;
+      gsap.killTweensOf(el);
+      gsap.set(el, { clipPath: 'inset(0% 0% 0% 0% round 0px 0px 0px 0px)', willChange: 'clip-path, transform' });
+      gsap
+        .timeline({ defaults: { ease: 'power2.inOut', duration: 0.75 }, onComplete: done })
+        .to(el, { clipPath: 'inset(0% 0% 100% 0% round 0px 0px 56px 56px)', yPercent: -7 }, 0)
+        .to(el.querySelectorAll('.story-dots, .story-progress, .story-close'), { opacity: 0, duration: 0.3, ease: 'none' }, 0);
+    },
+    [reduced],
+  );
+
+  const close = useCallback(() => animateOut(onClose), [animateOut, onClose]);
+
+  // Back/Forward browser sudah mengubah URL: mainkan animasi keluar, lalu minta induk melepas halaman ini
+  useEffect(() => {
+    if (leaving) animateOut(() => onLeft?.());
+  }, [leaving, animateOut, onLeft]);
 
   // Esc menutup; Tab dikurung di dalam halaman detail
   useEffect(() => {
