@@ -85,9 +85,10 @@ const CATEGORY_PATH: Record<TmdbCategory, string> = {
   popular: '/movie/popular',
   top_rated: '/movie/top_rated',
   now_playing: '/movie/now_playing',
+  upcoming: '/movie/upcoming',
 };
 
-export const CATEGORIES: readonly Category[] = ['trending', 'popular', 'top_rated', 'now_playing', 'favorites', 'watchlist'];
+export const CATEGORIES: readonly Category[] = ['trending', 'popular', 'top_rated', 'now_playing', 'upcoming', 'favorites', 'watchlist'];
 
 /** Batas total film yang dimuat per daftar (5 halaman TMDB × 20), agar jumlah tekstur dan elemen DOM tetap wajar. */
 export const MAX_TOTAL = 100;

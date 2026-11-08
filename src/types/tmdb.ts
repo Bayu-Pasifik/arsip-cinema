@@ -161,7 +161,7 @@ export interface MovieListResponse {
 }
 
 /** Kategori yang diambil dari TMDB. */
-export type TmdbCategory = 'trending' | 'popular' | 'top_rated' | 'now_playing';
+export type TmdbCategory = 'trending' | 'popular' | 'top_rated' | 'now_playing' | 'upcoming';
 /** Daftar lokal milik pengguna (localStorage). */
 export type CollectionKey = 'favorites' | 'watchlist';
 export type Category = TmdbCategory | CollectionKey;

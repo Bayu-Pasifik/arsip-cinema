@@ -11,6 +11,10 @@ describe('parseRoute', () => {
     expect(parseRoute('/browse/top_rated?q=dune')).toEqual({ name: 'browse', category: 'top_rated', q: 'dune', genre: null });
   });
 
+  it('kategori upcoming valid', () => {
+    expect(parseRoute('/browse/upcoming')).toMatchObject({ category: 'upcoming' });
+  });
+
   it('/person/:id', () => {
     expect(parseRoute('/person/287')).toEqual({ name: 'person', id: 287 });
     expect(parseRoute('/person/abc')).toEqual({ name: 'home' });

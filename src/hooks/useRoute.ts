@@ -14,7 +14,7 @@ export type Route =
   | { name: 'movie'; id: number }
   | { name: 'person'; id: number };
 
-const CATEGORIES: readonly Category[] = ['trending', 'popular', 'top_rated', 'now_playing', 'favorites', 'watchlist'];
+const CATEGORIES: readonly Category[] = ['trending', 'popular', 'top_rated', 'now_playing', 'upcoming', 'favorites', 'watchlist'];
 const listeners = new Set<() => void>();
 
 const snapshot = () => window.location.pathname + window.location.search;
