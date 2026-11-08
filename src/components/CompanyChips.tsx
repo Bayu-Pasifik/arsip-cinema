@@ -1,5 +1,6 @@
 import { useT } from '../i18n';
 import { browsePath, navigate } from '../hooks/useRoute';
+import type { Category } from '../types/tmdb';
 import { NO_FILTERS } from '../utils/filters';
 
 interface Company {
@@ -8,7 +9,7 @@ interface Company {
 }
 
 /** Studio/perusahaan produksi film; klik = jelajahi film dari studio itu. */
-export default function CompanyChips({ companies }: { companies: Company[] }) {
+export default function CompanyChips({ companies, category = 'trending' }: { companies: Company[]; category?: Category }) {
   const t = useT();
   if (companies.length === 0) return null;
   return (
@@ -22,7 +23,7 @@ export default function CompanyChips({ companies }: { companies: Company[] }) {
             <button
               type="button"
               className="kw-btn"
-              onClick={() => navigate(browsePath('trending', '', { ...NO_FILTERS, company: c.id }))}
+              onClick={() => navigate(browsePath(category, '', { ...NO_FILTERS, company: c.id }))}
               aria-label={t('more.studioBrowse', { name: c.name })}
             >
               {c.name}

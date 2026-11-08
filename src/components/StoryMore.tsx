@@ -110,10 +110,10 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage, onPlayVide
 
   const reviews = detail.reviews?.results ?? [];
   const providers = detail['watch/providers'];
-  // kata kunci/studio/koleksi/daftar memakai /discover film: disembunyikan untuk serial TV
+  // koleksi, judul alternatif, dan daftar TMDB hanya ada untuk film; kata kunci dan studio juga berlaku untuk serial
   const tv = detail.media === 'tv';
-  const keywords = tv ? [] : (detail.keywords?.keywords ?? []);
-  const companies = tv ? [] : (detail.production_companies ?? []);
+  const keywords = detail.keywords?.keywords ?? [];
+  const companies = detail.production_companies ?? [];
   const videos = videoGroups(detail.videos?.results, pickTrailer(detail.videos?.results)?.key ?? null);
   const seasons = tv ? orderSeasons(detail.seasons) : [];
   const crewEmpty = crewGroups(detail.credits?.crew).length === 0;
@@ -148,8 +148,8 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage, onPlayVide
       <CrewList crew={detail.credits?.crew ?? []} />
       {tv && <NetworkChips networks={detail.networks ?? []} />}
       <VideoList groups={videos} onPlay={onPlayVideo} />
-      <KeywordChips keywords={keywords} />
-      <CompanyChips companies={companies} />
+      <KeywordChips keywords={keywords} category={tv ? 'tv_trending' : 'trending'} />
+      <CompanyChips companies={companies} category={tv ? 'tv_trending' : 'trending'} />
       {!tv && <AlternativeTitles titles={detail.alternative_titles?.titles ?? []} current={detail.title} />}
       {!tv && <TmdbLists lists={detail.lists?.results ?? []} />}
       <TranslationsPanel options={translations} />

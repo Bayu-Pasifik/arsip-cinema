@@ -1,10 +1,10 @@
 import { useT } from '../i18n';
 import { browsePath, navigate } from '../hooks/useRoute';
-import type { Keyword } from '../types/tmdb';
+import type { Category, Keyword } from '../types/tmdb';
 import { NO_FILTERS } from '../utils/filters';
 
 /** Kata kunci/tema film dari TMDB (bahasa Inggris), maksimal 20. Klik = jelajahi film dengan kata kunci itu. */
-export default function KeywordChips({ keywords }: { keywords: Keyword[] }) {
+export default function KeywordChips({ keywords, category = 'trending' }: { keywords: Keyword[]; category?: Category }) {
   const t = useT();
   if (keywords.length === 0) return null;
   return (
@@ -18,7 +18,7 @@ export default function KeywordChips({ keywords }: { keywords: Keyword[] }) {
             <button
               type="button"
               className="kw-btn"
-              onClick={() => navigate(browsePath('trending', '', { ...NO_FILTERS, keyword: k.id }))}
+              onClick={() => navigate(browsePath(category, '', { ...NO_FILTERS, keyword: k.id }))}
               aria-label={t('more.keywordBrowse', { name: k.name })}
             >
               {k.name}
