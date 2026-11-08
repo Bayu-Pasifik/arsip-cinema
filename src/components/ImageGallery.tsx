@@ -1,4 +1,5 @@
 import { imageUrl } from '../services/tmdb';
+import Carousel from './Carousel';
 import type { GalleryImage } from './ImageLightbox';
 
 interface Props {
@@ -11,15 +12,16 @@ interface Props {
   onOpen: (index: number) => void;
 }
 
-/** Baris thumbnail galeri; klik membuka lightbox pada gambar tersebut. (Animasi muncul diatur oleh StoryMore.) */
+/** Carousel thumbnail galeri; klik membuka lightbox pada gambar tersebut. (Animasi muncul diatur oleh StoryMore.) */
 export default function ImageGallery({ id, title, items, offset, onOpen }: Props) {
   if (items.length === 0) return null;
+  const kind = items[0].kind;
   return (
     <section className="gal" aria-labelledby={`${id}-h`}>
       <h3 id={`${id}-h`} className="tag">
         {title}
       </h3>
-      <ul className="mv-list">
+      <Carousel label={title} className={`mv-carousel-${kind}`}>
         {items.map((img, k) => {
           const src = imageUrl(img.path, img.kind, img.kind === 'backdrop' ? 'w300' : 'w185');
           return (
@@ -33,7 +35,7 @@ export default function ImageGallery({ id, title, items, offset, onOpen }: Props
             </li>
           );
         })}
-      </ul>
+      </Carousel>
     </section>
   );
 }
