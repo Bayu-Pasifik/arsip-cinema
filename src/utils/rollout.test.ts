@@ -28,6 +28,18 @@ describe('releaseRows', () => {
     const r = releaseRows([{ iso_3166_1: 'US', release_dates: [rd('TV-MA', 3, '')] }], 'ID', label, 'en');
     expect(r).toEqual([{ code: 'US', certs: ['TV-MA'], dates: [] }]);
   });
+  it('negara yang muncul dua kali digabung (satu baris, klasifikasi unik)', () => {
+    const r = releaseRows(
+      [
+        { iso_3166_1: 'BR', release_dates: [rd('TV-14', 3, '')] },
+        { iso_3166_1: 'BR', release_dates: [rd('16', 3, ''), rd('TV-14', 3, '')] },
+      ],
+      'ID',
+      label,
+      'en',
+    );
+    expect(r).toEqual([{ code: 'BR', certs: ['TV-14', '16'], dates: [] }]);
+  });
   it('aman untuk data kosong', () => {
     expect(releaseRows(undefined, 'ID', label, 'en')).toEqual([]);
   });
