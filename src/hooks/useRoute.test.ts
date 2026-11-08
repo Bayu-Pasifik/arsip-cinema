@@ -1,14 +1,16 @@
 import { describe, expect, it } from 'vitest';
 import { browsePath, moviePath, parseRoute } from './useRoute';
 
+import { NO_FILTERS } from '../utils/filters';
+
 describe('parseRoute', () => {
   it('/ → home', () => {
     expect(parseRoute('/')).toEqual({ name: 'home' });
   });
 
   it('/browse/:category dengan dan tanpa query', () => {
-    expect(parseRoute('/browse/popular')).toEqual({ name: 'browse', category: 'popular', q: '', genre: null });
-    expect(parseRoute('/browse/top_rated?q=dune')).toEqual({ name: 'browse', category: 'top_rated', q: 'dune', genre: null });
+    expect(parseRoute('/browse/popular')).toEqual({ name: 'browse', category: 'popular', q: '', filters: NO_FILTERS });
+    expect(parseRoute('/browse/top_rated?q=dune')).toEqual({ name: 'browse', category: 'top_rated', q: 'dune', filters: NO_FILTERS });
   });
 
   it('kategori upcoming valid', () => {
@@ -21,7 +23,7 @@ describe('parseRoute', () => {
   });
 
   it('daftar lokal favorites dan watchlist adalah kategori valid', () => {
-    expect(parseRoute('/browse/favorites')).toEqual({ name: 'browse', category: 'favorites', q: '', genre: null });
+    expect(parseRoute('/browse/favorites')).toEqual({ name: 'browse', category: 'favorites', q: '', filters: NO_FILTERS });
     expect(parseRoute('/browse/watchlist')).toMatchObject({ category: 'watchlist' });
   });
 
@@ -31,7 +33,7 @@ describe('parseRoute', () => {
   });
 
   it('decode query berhuruf khusus', () => {
-    expect(parseRoute('/browse/trending?q=the%20dark%20knight')).toMatchObject({ q: 'the dark knight', genre: null });
+    expect(parseRoute('/browse/trending?q=the%20dark%20knight')).toMatchObject({ q: 'the dark knight', filters: NO_FILTERS });
   });
 
   it('/movie/:id valid, termasuk id negatif (demo)', () => {
@@ -56,17 +58,18 @@ describe('pembuat path', () => {
     expect(browsePath('trending', ' the dark ')).toBe('/browse/trending?q=the%20dark');
   });
 
-  it('parameter genre: hanya angka yang diterima, ikut di browsePath', () => {
-    expect(parseRoute('/browse/trending?genre=28')).toMatchObject({ genre: 28 });
-    expect(parseRoute('/browse/trending?genre=abc')).toMatchObject({ genre: null });
-    expect(browsePath('popular', '', 35)).toBe('/browse/popular?genre=35');
-    expect(browsePath('popular', 'a b', 35)).toBe('/browse/popular?q=a%20b&genre=35');
-    expect(parseRoute(browsePath('top_rated', '', 18))).toMatchObject({ category: 'top_rated', genre: 18 });
+  it('parameter filter: hanya nilai valid yang diterima, ikut di browsePath', () => {
+    expect(parseRoute('/browse/trending?genre=28&year=1999')).toMatchObject({ filters: { genre: 28, year: 1999 } });
+    expect(parseRoute('/browse/trending?genre=abc')).toMatchObject({ filters: NO_FILTERS });
+    expect(browsePath('popular', '', { ...NO_FILTERS, genre: 35 })).toBe('/browse/popular?genre=35');
+    expect(browsePath('popular', 'a b', { ...NO_FILTERS, genre: 35, rating: 7 })).toBe('/browse/popular?q=a%20b&genre=35&rating=7');
+    const f = { ...NO_FILTERS, genre: 18, sort: 'revenue.desc' as const, keyword: 3 };
+    expect(parseRoute(browsePath('top_rated', '', f))).toMatchObject({ category: 'top_rated', filters: f });
   });
 
   it('browsePath → parseRoute bolak-balik', () => {
     const route = parseRoute(browsePath('now_playing', 'dune & co'));
-    expect(route).toEqual({ name: 'browse', category: 'now_playing', q: 'dune & co', genre: null });
+    expect(route).toEqual({ name: 'browse', category: 'now_playing', q: 'dune & co', filters: NO_FILTERS });
   });
 
   it('moviePath', () => {

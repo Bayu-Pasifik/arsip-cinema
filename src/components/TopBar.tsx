@@ -1,17 +1,19 @@
-import { forwardRef } from 'react';
+import { forwardRef, useEffect, useRef, useState } from 'react';
 import { LANGUAGES, setLanguage, useLanguage } from '../services/language';
 import { useT } from '../i18n';
+import { useKeywordName } from '../hooks/useKeywordName';
 import { CATEGORIES } from '../services/tmdb';
 import type { Category, Genre } from '../types/tmdb';
+import { filterCount, hasFilters, NO_FILTERS, RATINGS, SORTS, type Filters, type SortKey } from '../utils/filters';
 
 interface Props {
   category: Category;
   query: string;
   searching: boolean;
   searchActive: boolean;
-  genre: number | null;
+  filters: Filters;
   genres: Genre[];
-  onGenre: (g: number | null) => void;
+  onFilters: (f: Filters) => void;
   onCategory: (c: Category) => void;
   onQuery: (q: string) => void;
   onHome: () => void;
@@ -19,12 +21,39 @@ interface Props {
   counts: { favorites: number; watchlist: number };
 }
 
+const thisYear = new Date().getFullYear();
+const YEARS = Array.from({ length: thisYear + 1 - 1929 }, (_, i) => thisYear + 1 - i);
+
 const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
-  { category, query, searching, searchActive, genre, genres, onGenre, onCategory, onQuery, onHome, counts },
+  { category, query, searching, searchActive, filters, genres, onFilters, onCategory, onQuery, onHome, counts },
   ref,
 ) {
   const language = useLanguage();
   const t = useT();
+  const [open, setOpen] = useState(false);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const keywordName = useKeywordName(filters.keyword);
+  const filtered = hasFilters(filters);
+  const count = filterCount(filters);
+  const set = (patch: Partial<Filters>) => onFilters({ ...filters, ...patch });
+
+  // panel filter: Escape atau klik di luar menutup
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    const onDown = (e: PointerEvent) => {
+      if (!panelRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    window.addEventListener('pointerdown', onDown);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      window.removeEventListener('pointerdown', onDown);
+    };
+  }, [open]);
+
   return (
     <header className="topbar" ref={ref}>
       <button type="button" className="brand" onClick={onHome} aria-label={t('top.brandLabel')}>
@@ -34,7 +63,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
       <nav className="cats" aria-label={t('top.categories')}>
         <ul>
           {CATEGORIES.map((c) => {
-            const active = !searchActive && genre === null && c === category;
+            const active = !searchActive && !filtered && c === category;
             return (
               <li key={c}>
                 <button
@@ -57,19 +86,86 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
       </nav>
 
       <div className="tb-right">
-        {genres.length > 0 && (
-          <label className="lang genre">
-            <span className="sr-only">{t('top.genre')}</span>
-            <select value={genre ?? ''} onChange={(e) => onGenre(e.target.value ? Number(e.target.value) : null)}>
-              <option value="">{t('top.genreAll')}</option>
-              {genres.map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
+        <div className="filter-wrap" ref={panelRef}>
+          <button
+            type="button"
+            className={`pill filter-btn${filtered ? ' is-active' : ''}`}
+            aria-expanded={open}
+            aria-controls="filter-panel"
+            onClick={() => setOpen((o) => !o)}
+          >
+            {t('filter.button')}
+            {count > 0 && (
+              <span className="pill-count" aria-label={t('filter.activeCount', { count })}>
+                {count}
+              </span>
+            )}
+          </button>
+          {open && (
+            <div className="filter-panel" id="filter-panel" role="group" aria-label={t('filter.panel')}>
+              {genres.length > 0 && (
+                <label>
+                  <span>{t('top.genre')}</span>
+                  <select value={filters.genre ?? ''} onChange={(e) => set({ genre: e.target.value ? Number(e.target.value) : null })}>
+                    <option value="">{t('top.genreAll')}</option>
+                    {genres.map((g) => (
+                      <option key={g.id} value={g.id}>
+                        {g.name}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              <label>
+                <span>{t('filter.year')}</span>
+                <select value={filters.year ?? ''} onChange={(e) => set({ year: e.target.value ? Number(e.target.value) : null })}>
+                  <option value="">{t('filter.yearAny')}</option>
+                  {YEARS.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>{t('filter.rating')}</span>
+                <select value={filters.rating ?? ''} onChange={(e) => set({ rating: e.target.value ? Number(e.target.value) : null })}>
+                  <option value="">{t('filter.ratingAny')}</option>
+                  {RATINGS.map((r) => (
+                    <option key={r} value={r}>
+                      ★ {r}+
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span>{t('filter.sort')}</span>
+                <select value={filters.sort ?? ''} onChange={(e) => set({ sort: (e.target.value || null) as SortKey | null })}>
+                  <option value="">{t('sort.popularity.desc')}</option>
+                  {SORTS.filter((s) => s !== 'popularity.desc').map((s) => (
+                    <option key={s} value={s}>
+                      {t(`sort.${s}`)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {filters.keyword !== null && (
+                <p className="filter-kw">
+                  <span lang="en">{t('filter.keyword', { name: keywordName ?? `#${filters.keyword}` })}</span>
+                  <button type="button" className="filter-x" onClick={() => set({ keyword: null })} aria-label={t('filter.removeKeyword')}>
+                    ×
+                  </button>
+                </p>
+              )}
+              {filtered && (
+                <button type="button" className="btn btn-ghost filter-reset" onClick={() => onFilters(NO_FILTERS)}>
+                  {t('filter.reset')}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
         <form className="search" role="search" onSubmit={(e) => e.preventDefault()}>
           <label htmlFor="q" className="sr-only">
             {t('top.searchLabel')}

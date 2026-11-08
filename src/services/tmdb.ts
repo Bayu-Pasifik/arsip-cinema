@@ -11,6 +11,7 @@ import type {
   Video,
 } from '../types/tmdb';
 import { translate } from '../i18n';
+import { discoverParams, type Filters } from '../utils/filters';
 import { getLanguage } from './language';
 
 const API_BASE = 'https://api.themoviedb.org/3';
@@ -112,14 +113,13 @@ export async function searchMovies(query: string, page = 1, signal?: AbortSignal
   return toPage(await request<MovieListResponse>('/search/movie', { query, page, include_adult: 'false' }, signal));
 }
 
-export async function discoverByGenre(genre: number, page = 1, signal?: AbortSignal): Promise<MoviePage> {
-  return toPage(
-    await request<MovieListResponse>(
-      '/discover/movie',
-      { with_genres: genre, sort_by: 'popularity.desc', include_adult: 'false', page },
-      signal,
-    ),
-  );
+export async function discoverMovies(filters: Filters, page = 1, signal?: AbortSignal): Promise<MoviePage> {
+  const today = new Date().toISOString().slice(0, 10);
+  return toPage(await request<MovieListResponse>('/discover/movie', { ...discoverParams(filters, today), page }, signal));
+}
+
+export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ id: number; name: string }> {
+  return request<{ id: number; name: string }>(`/keyword/${id}`, {}, signal);
 }
 
 export async function fetchGenres(signal?: AbortSignal): Promise<Genre[]> {

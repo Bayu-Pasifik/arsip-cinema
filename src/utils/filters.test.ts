@@ -1,0 +1,55 @@
+import { describe, expect, it } from 'vitest';
+import { discoverParams, filterCount, filterParts, hasFilters, NO_FILTERS, parseFilters, sameFilters } from './filters';
+
+const parse = (qs: string) => parseFilters(new URLSearchParams(qs));
+
+describe('parseFilters', () => {
+  it('membaca semua filter valid', () => {
+    expect(parse('genre=28&year=1999&rating=7&sort=revenue.desc&keyword=9715')).toEqual({
+      genre: 28,
+      year: 1999,
+      rating: 7,
+      sort: 'revenue.desc',
+      keyword: 9715,
+    });
+  });
+  it('mengabaikan nilai tak valid', () => {
+    expect(parse('genre=abc&year=5&rating=15&sort=drop table&keyword=-1')).toEqual(NO_FILTERS);
+  });
+});
+
+describe('helpers', () => {
+  it('hasFilters / filterCount', () => {
+    expect(hasFilters(NO_FILTERS)).toBe(false);
+    const f = { ...NO_FILTERS, genre: 1, year: 2000 };
+    expect(hasFilters(f)).toBe(true);
+    expect(filterCount(f)).toBe(2);
+  });
+  it('filterParts berurutan tetap & sameFilters', () => {
+    const f = { ...NO_FILTERS, year: 2001, genre: 18 };
+    expect(filterParts(f)).toEqual(['genre=18', 'year=2001']);
+    expect(sameFilters(f, { ...NO_FILTERS, genre: 18, year: 2001 })).toBe(true);
+    expect(sameFilters(f, NO_FILTERS)).toBe(false);
+  });
+});
+
+describe('discoverParams', () => {
+  it('default: populer tanpa batas suara', () => {
+    expect(discoverParams(NO_FILTERS, '2026-01-01')).toEqual({ sort_by: 'popularity.desc', include_adult: 'false' });
+  });
+  it('rating memasang batas suara minimum', () => {
+    const p = discoverParams({ ...NO_FILTERS, rating: 7 }, '2026-01-01');
+    expect(p['vote_average.gte']).toBe(7);
+    expect(p['vote_count.gte']).toBe(50);
+  });
+  it('urutan rating tertinggi butuh banyak suara', () => {
+    expect(discoverParams({ ...NO_FILTERS, sort: 'vote_average.desc' }, 'x')['vote_count.gte']).toBe(300);
+  });
+  it('urutan terbaru dibatasi sampai hari ini', () => {
+    expect(discoverParams({ ...NO_FILTERS, sort: 'primary_release_date.desc' }, '2026-11-08')['primary_release_date.lte']).toBe('2026-11-08');
+  });
+  it('genre, tahun, keyword diteruskan', () => {
+    const p = discoverParams({ ...NO_FILTERS, genre: 35, year: 1994, keyword: 7 }, 'x');
+    expect(p).toMatchObject({ with_genres: 35, primary_release_year: 1994, with_keywords: 7 });
+  });
+});

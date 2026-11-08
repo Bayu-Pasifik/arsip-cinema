@@ -261,7 +261,7 @@ main > * {
 }
 
 .search input {
-  width: clamp(150px, 20vw, 260px);
+  width: clamp(120px, 13vw, 220px);
   min-height: 46px;
   padding: 0 40px 0 20px;
   border-radius: 99px;
@@ -2278,4 +2278,70 @@ main > * {
   .pr-photo {
     max-width: 220px;
   }
+}
+
+/* ---------- panel filter ---------- */
+.filter-wrap {
+  position: relative;
+}
+
+.filter-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 30;
+  display: grid;
+  gap: 12px;
+  width: min(280px, calc(100vw - 2 * var(--pad)));
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 6px 6px 0 rgba(18, 22, 28, 0.12);
+}
+
+.filter-panel label {
+  display: grid;
+  gap: 4px;
+}
+
+.filter-panel label > span {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.filter-panel select {
+  min-height: 42px;
+  padding: 0 12px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.filter-kw {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.filter-x {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  line-height: 1;
+}
+
+.filter-reset {
+  justify-content: center;
 }

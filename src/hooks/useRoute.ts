@@ -1,16 +1,17 @@
 import { useMemo, useSyncExternalStore } from 'react';
 import type { Category } from '../types/tmdb';
+import { filterParts, NO_FILTERS, parseFilters, type Filters } from '../utils/filters';
 
 /**
  * Router mini berbasis History API (tanpa dependensi):
  *   /                          pembuka
- *   /browse/:category?q=...&genre=ID    galeri (category: trending|popular|top_rated|now_playing|favorites|watchlist)
+ *   /browse/:category?q=...&genre=&year=&rating=&sort=&keyword=    galeri (category: trending|popular|top_rated|now_playing|favorites|watchlist)
  *   /movie/:id                 halaman detail film
  *   /person/:id                profil aktor/kru dan filmografi
  */
 export type Route =
   | { name: 'home' }
-  | { name: 'browse'; category: Category; q: string; genre: number | null }
+  | { name: 'browse'; category: Category; q: string; filters: Filters }
   | { name: 'movie'; id: number }
   | { name: 'person'; id: number };
 
@@ -35,21 +36,20 @@ export function parseRoute(loc: string): Route {
   if (parts[0] === 'person' && /^[0-9]+$/.test(parts[1] ?? '')) return { name: 'person', id: Number(parts[1]) };
   if (parts[0] === 'browse') {
     const c = parts[1] as Category;
-    const g = url.searchParams.get('genre') ?? '';
     return {
       name: 'browse',
       category: CATEGORIES.includes(c) ? c : 'trending',
       q: url.searchParams.get('q') ?? '',
-      genre: /^[0-9]+$/.test(g) ? Number(g) : null,
+      filters: parseFilters(url.searchParams),
     };
   }
   return { name: 'home' };
 }
 
-export const browsePath = (category: Category, q = '', genre: number | null = null) => {
+export const browsePath = (category: Category, q = '', filters: Filters = NO_FILTERS) => {
   const parts: string[] = [];
   if (q.trim()) parts.push(`q=${encodeURIComponent(q.trim())}`);
-  if (genre !== null) parts.push(`genre=${genre}`);
+  parts.push(...filterParts(filters));
   const qs = parts.join('&');
   return `/browse/${category}${qs ? `?${qs}` : ''}`;
 };

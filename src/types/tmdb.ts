@@ -166,10 +166,12 @@ export type TmdbCategory = 'trending' | 'popular' | 'top_rated' | 'now_playing' 
 export type CollectionKey = 'favorites' | 'watchlist';
 export type Category = TmdbCategory | CollectionKey;
 
+import type { Filters } from '../utils/filters';
+
 export type ListSource =
   | { kind: 'category'; category: Category }
   | { kind: 'search'; query: string }
-  | { kind: 'genre'; genre: number }
+  | { kind: 'discover'; filters: Filters }
   | { kind: 'demo' };
 
 export type TmdbErrorKind = 'missing-key' | 'auth' | 'rate-limit' | 'not-found' | 'network' | 'http';
