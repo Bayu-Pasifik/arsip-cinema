@@ -1771,8 +1771,9 @@ main > * {
 
 .st-links {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
-  gap: 20px;
+  gap: 8px 20px;
   margin: 0 0 16px;
   font-size: 13px;
   font-weight: 600;

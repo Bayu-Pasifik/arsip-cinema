@@ -7,6 +7,7 @@ import { useMovieDetail } from '../hooks/useMovieDetail';
 import { imageUrl, pickTrailer, releaseYear } from '../services/tmdb';
 import type { Movie } from '../types/tmdb';
 import { buildGallery } from '../utils/gallery';
+import { externalLinks } from '../utils/links';
 import { certification, theatricalDateId } from '../utils/releases';
 import { formatDate, formatMoney, formatRuntime, languageName, statusLabel } from '../utils/format';
 import BackButton from './BackButton';
@@ -97,8 +98,7 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
     ] as [string, string][]
   ).filter(([, v]) => v);
   const collection = detail?.belongs_to_collection?.name;
-  const imdbUrl = detail?.imdb_id ? `https://www.imdb.com/title/${detail.imdb_id}/` : '';
-  const homepage = /^https?:\/\//.test(detail?.homepage ?? '') ? (detail?.homepage as string) : '';
+  const links = externalLinks(detail);
 
   // fokus: simpan pemicu, pindah ke tombol tutup, kembalikan saat selesai
   useEffect(() => {
@@ -492,20 +492,14 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
           <section className="st-ch st-end" aria-label="Penutup">
             <p className="st-end-title">{movie.title}</p>
             {collection && <p className="dim st-collection">Bagian dari {collection}</p>}
-            {(imdbUrl || homepage) && (
+            {links.length > 0 && (
               <p className="st-links">
-                {imdbUrl && (
-                  <a href={imdbUrl} target="_blank" rel="noopener noreferrer">
-                    IMDb <span aria-hidden="true">↗</span>
+                {links.map((l) => (
+                  <a key={l.label} href={l.url} target="_blank" rel="noopener noreferrer">
+                    {l.label} <span aria-hidden="true">↗</span>
                     <span className="sr-only"> (tab baru)</span>
                   </a>
-                )}
-                {homepage && (
-                  <a href={homepage} target="_blank" rel="noopener noreferrer">
-                    Situs resmi <span aria-hidden="true">↗</span>
-                    <span className="sr-only"> (tab baru)</span>
-                  </a>
-                )}
+                ))}
               </p>
             )}
             {trailer && (

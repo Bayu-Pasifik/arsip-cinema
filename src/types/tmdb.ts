@@ -112,6 +112,13 @@ export interface MovieDetail extends Movie {
   reviews?: { results: Review[] };
   'watch/providers'?: { results: Record<string, WatchRegion> };
   keywords?: { keywords: Keyword[] };
+  external_ids?: {
+    imdb_id?: string | null;
+    facebook_id?: string | null;
+    instagram_id?: string | null;
+    twitter_id?: string | null;
+    wikidata_id?: string | null;
+  };
   release_dates?: { results: { iso_3166_1: string; release_dates: ReleaseDate[] }[] };
 }
 
