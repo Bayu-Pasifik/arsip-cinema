@@ -93,6 +93,13 @@ export interface ImageInfo {
   iso_639_1: string | null;
 }
 
+/** Daftar publik TMDB (/movie/{id}/lists). */
+export interface TmdbList {
+  id: number;
+  name: string;
+  item_count: number;
+}
+
 export interface AlternativeTitle {
   iso_3166_1: string;
   title: string;
@@ -128,6 +135,7 @@ export interface MovieDetail extends Movie {
   keywords?: { keywords: Keyword[] };
   translations?: { translations: Translation[] };
   alternative_titles?: { titles: AlternativeTitle[] };
+  lists?: { results: TmdbList[] };
   external_ids?: {
     imdb_id?: string | null;
     facebook_id?: string | null;

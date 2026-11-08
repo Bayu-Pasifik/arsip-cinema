@@ -2516,3 +2516,13 @@ main > * {
   background: var(--surface-2);
   box-shadow: 4px 4px 0 rgba(18, 22, 28, 0.12);
 }
+
+.tl-list {
+  display: grid;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.tl-list a {
+  font-weight: 600;
+}

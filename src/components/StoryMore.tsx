@@ -15,6 +15,7 @@ import CompanyChips from './CompanyChips';
 import KeywordChips from './KeywordChips';
 import MovieRail from './MovieRail';
 import ReviewList from './ReviewList';
+import TmdbLists from './TmdbLists';
 import TranslationsPanel from './TranslationsPanel';
 import { useRegion } from '../services/region';
 import WatchProviders from './WatchProviders';
@@ -107,6 +108,7 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
     !providers &&
     keywords.length === 0 &&
     companies.length === 0 &&
+    (detail.lists?.results.length ?? 0) === 0 &&
     (detail.alternative_titles?.titles.length ?? 0) === 0 &&
     translations.length === 0 &&
     recommendations.length === 0 &&
@@ -126,6 +128,7 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
       <KeywordChips keywords={keywords} />
       <CompanyChips companies={companies} />
       <AlternativeTitles titles={detail.alternative_titles?.titles ?? []} current={detail.title} />
+      <TmdbLists lists={detail.lists?.results ?? []} />
       <TranslationsPanel options={translations} />
       <ImageGallery id="st-gal" title={t('more.gallery')} items={gallery.backdrops} offset={0} onOpen={onOpenImage} />
       <ImageGallery
