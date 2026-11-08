@@ -21,6 +21,7 @@ import KeywordChips from './KeywordChips';
 import NetworkChips from './NetworkChips';
 import MovieRail from './MovieRail';
 import ReviewList from './ReviewList';
+import ReleaseInfo from './ReleaseInfo';
 import SeasonsPanel from './SeasonsPanel';
 import TmdbLists from './TmdbLists';
 import VideoList from './VideoList';
@@ -124,6 +125,7 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage, onPlayVide
     keywords.length === 0 &&
     companies.length === 0 &&
     crewEmpty &&
+    (detail.release_dates?.results.length ?? 0) === 0 &&
     (!tv || (detail.networks ?? []).length === 0) &&
     seasons.length === 0 &&
     videos.length === 0 &&
@@ -146,6 +148,7 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage, onPlayVide
       {providers && <WatchProviders region={providers.results?.[region]} />}
       {seasons.length > 0 && <SeasonsPanel key={detail.id} id={detail.id} seasons={seasons} />}
       <CrewList crew={detail.credits?.crew ?? []} />
+      <ReleaseInfo detail={detail} />
       {tv && <NetworkChips networks={detail.networks ?? []} />}
       <VideoList groups={videos} onPlay={onPlayVideo} />
       <KeywordChips keywords={keywords} category={tv ? 'tv_trending' : 'trending'} />

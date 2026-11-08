@@ -2880,3 +2880,51 @@ main > * {
 .ss-part {
   margin-top: 20px;
 }
+
+/* ---------- rilis & klasifikasi per negara ---------- */
+.ri summary {
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ri-list {
+  display: grid;
+  gap: 8px;
+  max-height: 340px;
+  margin-top: 12px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.ri-row {
+  display: grid;
+  grid-template-columns: minmax(110px, 170px) auto minmax(0, 1fr);
+  gap: 6px 12px;
+  align-items: baseline;
+  font-size: 13px;
+}
+
+.ri-country {
+  font-weight: 600;
+}
+
+.ri-certs {
+  display: flex;
+  gap: 4px;
+}
+
+.ri-certs .st-chip {
+  padding: 1px 8px;
+  font-size: 12px;
+}
+
+@media (max-width: 560px) {
+  .ri-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .ri-dates {
+    grid-column: 1 / -1;
+  }
+}
