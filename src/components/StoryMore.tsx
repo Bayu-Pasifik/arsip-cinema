@@ -6,8 +6,10 @@ import { useReducedMotion } from '../hooks/useEnv';
 import { useRelatedPages } from '../hooks/useRelatedPages';
 import { appendUnique } from '../utils/movies';
 import { crewGroups } from '../utils/crew';
+import { videoGroups } from '../utils/videos';
+import { pickTrailer } from '../services/tmdb';
 import { useT } from '../i18n';
-import type { MovieDetail } from '../types/tmdb';
+import type { MovieDetail, Video } from '../types/tmdb';
 import { buildGallery } from '../utils/gallery';
 import { translationOptions } from '../utils/translations';
 import ImageGallery from './ImageGallery';
@@ -18,6 +20,7 @@ import KeywordChips from './KeywordChips';
 import MovieRail from './MovieRail';
 import ReviewList from './ReviewList';
 import TmdbLists from './TmdbLists';
+import VideoList from './VideoList';
 import TranslationsPanel from './TranslationsPanel';
 import { useRegion } from '../services/region';
 import WatchProviders from './WatchProviders';
@@ -29,10 +32,12 @@ interface Props {
   onOpenMovie: (id: number) => void;
   /** indeks pada daftar gabungan galeri (lihat buildGallery) */
   onOpenImage: (index: number) => void;
+  /** putar video tambahan (teaser, klip, …) di dialog */
+  onPlayVideo: (video: Video) => void;
 }
 
 /** Bagian di bawah cerita scroll: konten tambahan dari TMDB (tiap blok hanya tampil bila datanya ada). */
-export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
+export default function StoryMore({ detail, onOpenMovie, onOpenImage, onPlayVideo }: Props) {
   const t = useT();
   const gallery = useMemo(() => buildGallery(detail), [detail]);
   const root = useRef<HTMLDivElement>(null);
@@ -104,6 +109,7 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
   const providers = detail['watch/providers'];
   const keywords = detail.keywords?.keywords ?? [];
   const companies = detail.production_companies ?? [];
+  const videos = videoGroups(detail.videos?.results, pickTrailer(detail.videos?.results)?.key ?? null);
   const crewEmpty = crewGroups(detail.credits?.crew).length === 0;
   const translations = translationOptions(detail.translations?.translations);
 
@@ -112,6 +118,7 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
     keywords.length === 0 &&
     companies.length === 0 &&
     crewEmpty &&
+    videos.length === 0 &&
     (detail.lists?.results.length ?? 0) === 0 &&
     (detail.alternative_titles?.titles.length ?? 0) === 0 &&
     translations.length === 0 &&
@@ -130,6 +137,7 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
       </div>
       {providers && <WatchProviders region={providers.results?.[region]} />}
       <CrewList crew={detail.credits?.crew ?? []} />
+      <VideoList groups={videos} onPlay={onPlayVideo} />
       <KeywordChips keywords={keywords} />
       <CompanyChips companies={companies} />
       <AlternativeTitles titles={detail.alternative_titles?.titles ?? []} current={detail.title} />

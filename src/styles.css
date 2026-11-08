@@ -2618,3 +2618,45 @@ main > * {
 .pr-photos {
   position: relative;
 }
+
+.vl-group + .vl-group {
+  margin-top: 16px;
+}
+
+.vl-list {
+  display: grid;
+  gap: 6px;
+}
+
+.vl-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  text-align: left;
+  font-size: 14px;
+}
+
+.vl-item:hover,
+.vl-item:focus-visible {
+  background: var(--surface-2);
+}
+
+.vl-play {
+  font-size: 11px;
+}
+
+.vl-name {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+}
+
+.vl-date {
+  font-size: 12px;
+  white-space: nowrap;
+}

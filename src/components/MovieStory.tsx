@@ -8,7 +8,7 @@ import { useMovieDetail } from '../hooks/useMovieDetail';
 import { browsePath, navigate, personPath } from '../hooks/useRoute';
 import { NO_FILTERS } from '../utils/filters';
 import { imageUrl, pickTrailer, releaseYear } from '../services/tmdb';
-import type { Movie } from '../types/tmdb';
+import type { Movie, Video } from '../types/tmdb';
 import { buildGallery } from '../utils/gallery';
 import { externalLinks } from '../utils/links';
 import { certification, theatricalDateId } from '../utils/releases';
@@ -66,9 +66,10 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
   const [more, setMore] = useState<{ label: string; el: HTMLElement }[]>([]);
   const [activeMore, setActiveMore] = useState(-1);
   const [trailerOpen, setTrailerOpen] = useState(false);
+  const [extraVideo, setExtraVideo] = useState<Video | null>(null);
   const [lightbox, setLightbox] = useState<number | null>(null);
   const modalOpenRef = useRef(false);
-  modalOpenRef.current = trailerOpen || lightbox !== null;
+  modalOpenRef.current = trailerOpen || lightbox !== null || extraVideo !== null;
 
   const state = useMovieDetail(movie.id);
   const detail = state.status === 'success' ? state.detail : null;
@@ -613,9 +614,12 @@ export default function MovieStory({ movie, reduced, onClose, leaving, onLeft, o
           )}
         </div>
       </div>
-      <StoryMore detail={detail} onOpenMovie={onOpenMovie} onOpenImage={setLightbox} />
+      <StoryMore detail={detail} onOpenMovie={onOpenMovie} onOpenImage={setLightbox} onPlayVideo={setExtraVideo} />
       {lightbox !== null && gallery.all.length > 0 && (
         <ImageLightbox title={movie.title} images={gallery.all} start={lightbox} reduced={reduced} onClose={() => setLightbox(null)} />
+      )}
+      {extraVideo && (
+        <TrailerModal title={`${movie.title} — ${extraVideo.name}`} videoKey={extraVideo.key} reduced={reduced} onClose={() => setExtraVideo(null)} />
       )}
       {trailerOpen && trailer && (
         <TrailerModal title={movie.title} videoKey={trailer.key} reduced={reduced} onClose={() => setTrailerOpen(false)} />
