@@ -1,12 +1,13 @@
 import { useId, useState } from 'react';
 import { useT } from '../i18n';
+import { useEpisodeGroup, useEpisodeGroups } from '../hooks/useEpisodeGroups';
 import { useSeason } from '../hooks/useSeason';
-import { imageUrl } from '../services/tmdb';
-import type { TvSeason } from '../types/tmdb';
-import { formatDate, formatRuntime } from '../utils/format';
-import { defaultSeason } from '../utils/seasons';
-import { episodeCredits, hasEpisodeCredits, type Person } from '../utils/episodes';
 import { navigate, personPath } from '../hooks/useRoute';
+import { imageUrl } from '../services/tmdb';
+import type { Episode, TvSeason } from '../types/tmdb';
+import { formatDate, formatRuntime } from '../utils/format';
+import { episodeCredits, hasEpisodeCredits, type Person } from '../utils/episodes';
+import { defaultSeason } from '../utils/seasons';
 
 function People({ label, people }: { label: string; people: Person[] }) {
   const t = useT();
@@ -26,12 +27,76 @@ function People({ label, people }: { label: string; people: Person[] }) {
   );
 }
 
+/** Daftar episode; `withSeason` menambah penanda S{musim}E{episode} (untuk urutan alternatif yang melintasi musim). */
+function EpisodeList({ episodes, withSeason = false }: { episodes: Episode[]; withSeason?: boolean }) {
+  const t = useT();
+  return (
+    <ol className="ss-list">
+      {episodes.map((e) => {
+        const still = imageUrl(e.still_path ?? null, 'backdrop', 'w300');
+        const credits = episodeCredits(e);
+        const meta = [formatDate(e.air_date ?? undefined), e.runtime ? formatRuntime(e.runtime) : ''].filter(Boolean).join(' · ');
+        return (
+          <li key={`${e.id}-${e.season_number ?? ''}`} className="ss-ep">
+            {still ? <img src={still} alt="" loading="lazy" width={160} height={90} /> : <span className="ss-ph" aria-hidden="true" />}
+            <div className="ss-body">
+              <p className="ss-name">
+                <span className="dim">{withSeason && e.season_number !== undefined ? `S${e.season_number}E${e.episode_number}` : `${e.episode_number}.`}</span> {e.name}
+              </p>
+              {meta && <p className="dim ss-meta">{meta}</p>}
+              {(e.overview || hasEpisodeCredits(credits)) && (
+                <details>
+                  <summary>{t('more.episodeDetails')}</summary>
+                  {e.overview && <p>{e.overview}</p>}
+                  <People label={t('crew.director')} people={credits.directors} />
+                  <People label={t('crew.writing')} people={credits.writers} />
+                  <People label={t('more.guestStars')} people={credits.guests} />
+                </details>
+              )}
+            </div>
+            {e.vote_average > 0 && (
+              <span className="ss-rate">
+                <span aria-hidden="true">★</span> {e.vote_average.toFixed(1)}
+                <span className="sr-only">{t('common.outOf10')}</span>
+              </span>
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+/** Episode satu urutan alternatif (episode group), dikelompokkan menurut bagian di dalamnya. */
+function GroupView({ groupId }: { groupId: string }) {
+  const t = useT();
+  const state = useEpisodeGroup(groupId);
+  if (state.status === 'loading') return <p className="dim">{t('more.loadingEpisodes')}</p>;
+  if (state.status === 'error') return <p className="dim">{state.message}</p>;
+  const parts = state.group.groups.filter((g) => g.episodes.length > 0).sort((a, b) => a.order - b.order);
+  if (parts.length === 0) return <p className="dim">{t('more.noEpisodes')}</p>;
+  return (
+    <>
+      {state.group.description && <p className="dim ss-overview">{state.group.description}</p>}
+      {parts.map((g) => (
+        <div key={g.id} className="ss-part">
+          <h4 className="wp-label">{g.name}</h4>
+          <EpisodeList episodes={g.episodes} withSeason />
+        </div>
+      ))}
+    </>
+  );
+}
+
 /** Daftar musim dan episode serial TV; episode dimuat saat musim dipilih. `id` = id ber-offset. */
 export default function SeasonsPanel({ id, seasons }: { id: number; seasons: TvSeason[] }) {
   const t = useT();
   const selectId = useId();
+  const groupSelectId = useId();
   const [number, setNumber] = useState(() => defaultSeason(seasons));
+  const [groupId, setGroupId] = useState('');
   const state = useSeason(id, number);
+  const groups = useEpisodeGroups(id);
   if (seasons.length === 0) return null;
   const current = seasons.find((s) => s.season_number === number);
 
@@ -40,60 +105,49 @@ export default function SeasonsPanel({ id, seasons }: { id: number; seasons: TvS
       <h3 id="st-ss-h" className="tag">
         {t('more.seasons')}
       </h3>
-      <label htmlFor={selectId} className="dim tr-label">
-        {t('more.seasonsCount', { count: seasons.length })}
-      </label>
-      <select id={selectId} className="tr-select" value={number} onChange={(e) => setNumber(Number(e.target.value))}>
-        {seasons.map((s) => (
-          <option key={s.id} value={s.season_number}>
-            {s.name} ({t('more.episodeCount', { count: s.episode_count })})
-          </option>
-        ))}
-      </select>
-      {current?.overview && <p className="dim ss-overview">{current.overview}</p>}
 
-      <div aria-live="polite">
-        {state.status === 'loading' && <p className="dim">{t('more.loadingEpisodes')}</p>}
-        {state.status === 'error' && <p className="dim">{state.message}</p>}
-        {state.status === 'success' &&
-          (state.season.episodes.length === 0 ? (
-            <p className="dim">{t('more.noEpisodes')}</p>
-          ) : (
-            <ol className="ss-list">
-              {state.season.episodes.map((e) => {
-                const still = imageUrl(e.still_path ?? null, 'backdrop', 'w300');
-                const credits = episodeCredits(e);
-                const meta = [formatDate(e.air_date ?? undefined), e.runtime ? formatRuntime(e.runtime) : ''].filter(Boolean).join(' · ');
-                return (
-                  <li key={e.id} className="ss-ep">
-                    {still ? <img src={still} alt="" loading="lazy" width={160} height={90} /> : <span className="ss-ph" aria-hidden="true" />}
-                    <div className="ss-body">
-                      <p className="ss-name">
-                        <span className="dim">{e.episode_number}.</span> {e.name}
-                      </p>
-                      {meta && <p className="dim ss-meta">{meta}</p>}
-                      {(e.overview || hasEpisodeCredits(credits)) && (
-                        <details>
-                          <summary>{t('more.episodeDetails')}</summary>
-                          {e.overview && <p>{e.overview}</p>}
-                          <People label={t('crew.director')} people={credits.directors} />
-                          <People label={t('crew.writing')} people={credits.writers} />
-                          <People label={t('more.guestStars')} people={credits.guests} />
-                        </details>
-                      )}
-                    </div>
-                    {e.vote_average > 0 && (
-                      <span className="ss-rate">
-                        <span aria-hidden="true">★</span> {e.vote_average.toFixed(1)}
-                        <span className="sr-only">{t('common.outOf10')}</span>
-                      </span>
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
-          ))}
-      </div>
+      {groups.length > 0 && (
+        <div className="ss-order">
+          <label htmlFor={groupSelectId} className="dim tr-label">
+            {t('more.episodeOrder')}
+          </label>
+          <select id={groupSelectId} className="tr-select" value={groupId} onChange={(e) => setGroupId(e.target.value)}>
+            <option value="">{t('more.orderBroadcast')}</option>
+            {groups.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.name} ({t('more.episodeCount', { count: g.episode_count })})
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {groupId ? (
+        <div aria-live="polite">
+          <GroupView groupId={groupId} />
+        </div>
+      ) : (
+        <>
+          <label htmlFor={selectId} className="dim tr-label">
+            {t('more.seasonsCount', { count: seasons.length })}
+          </label>
+          <select id={selectId} className="tr-select" value={number} onChange={(e) => setNumber(Number(e.target.value))}>
+            {seasons.map((s) => (
+              <option key={s.id} value={s.season_number}>
+                {s.name} ({t('more.episodeCount', { count: s.episode_count })})
+              </option>
+            ))}
+          </select>
+          {current?.overview && <p className="dim ss-overview">{current.overview}</p>}
+
+          <div aria-live="polite">
+            {state.status === 'loading' && <p className="dim">{t('more.loadingEpisodes')}</p>}
+            {state.status === 'error' && <p className="dim">{state.message}</p>}
+            {state.status === 'success' &&
+              (state.season.episodes.length === 0 ? <p className="dim">{t('more.noEpisodes')}</p> : <EpisodeList episodes={state.season.episodes} />)}
+          </div>
+        </>
+      )}
     </section>
   );
 }

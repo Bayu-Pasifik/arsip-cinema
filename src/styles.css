@@ -2870,3 +2870,13 @@ main > * {
   font-size: 13px;
   line-height: 1.5;
 }
+
+.ss-order {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.ss-part {
+  margin-top: 20px;
+}

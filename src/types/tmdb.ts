@@ -123,8 +123,26 @@ export interface Episode {
   runtime?: number | null;
   vote_average: number;
   still_path?: string | null;
+  /** hanya pada urutan alternatif (episode group) */
+  season_number?: number;
   crew?: { id: number; name: string; job: string }[];
   guest_stars?: { id: number; name: string; character: string }[];
+}
+
+export interface EpisodeGroupSummary {
+  id: string;
+  name: string;
+  description?: string;
+  episode_count: number;
+  group_count: number;
+  type?: number;
+}
+
+export interface EpisodeGroup {
+  id: string;
+  name: string;
+  description?: string;
+  groups: { id: string; name: string; order: number; episodes: Episode[] }[];
 }
 
 export interface SeasonDetail {

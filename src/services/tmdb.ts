@@ -2,6 +2,8 @@ import type {
   Category,
   Genre,
   NetworkDetail,
+  EpisodeGroup,
+  EpisodeGroupSummary,
   PersonDetail,
   SeasonDetail,
   PersonSummary,
@@ -253,6 +255,14 @@ export const fetchSeason = (id: number, season: number, signal?: AbortSignal) =>
   request<SeasonDetail>(`/tv/${rawId(id)}/season/${season}`, {}, signal);
 
 export const fetchNetwork = (id: number, signal?: AbortSignal) => request<NetworkDetail>(`/network/${id}`, {}, signal);
+
+/** Urutan episode alternatif serial (DVD, produksi, …); `id` = id ber-offset. */
+export async function fetchEpisodeGroups(id: number, signal?: AbortSignal): Promise<EpisodeGroupSummary[]> {
+  const data = await request<{ results: EpisodeGroupSummary[] }>(`/tv/${rawId(id)}/episode_groups`, {}, signal);
+  return data.results ?? [];
+}
+
+export const fetchEpisodeGroup = (groupId: string, signal?: AbortSignal) => request<EpisodeGroup>(`/tv/episode_group/${encodeURIComponent(groupId)}`, {}, signal);
 
 export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ id: number; name: string }> {
   return request<{ id: number; name: string }>(`/keyword/${id}`, {}, signal);
