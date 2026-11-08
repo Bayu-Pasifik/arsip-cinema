@@ -40,6 +40,11 @@ export interface Video {
   published_at: string;
 }
 
+export interface Keyword {
+  id: number;
+  name: string;
+}
+
 export interface ReleaseDate {
   certification?: string;
   /** 1 Premiere, 2 Bioskop terbatas, 3 Bioskop, 4 Digital, 5 Fisik, 6 TV */
@@ -106,6 +111,7 @@ export interface MovieDetail extends Movie {
   images?: { backdrops: ImageInfo[]; posters: ImageInfo[]; logos: ImageInfo[] };
   reviews?: { results: Review[] };
   'watch/providers'?: { results: Record<string, WatchRegion> };
+  keywords?: { keywords: Keyword[] };
   release_dates?: { results: { iso_3166_1: string; release_dates: ReleaseDate[] }[] };
 }
 
