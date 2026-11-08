@@ -5,6 +5,7 @@ import { useGSAP } from '@gsap/react';
 import { useReducedMotion } from '../hooks/useEnv';
 import { useRelatedPages } from '../hooks/useRelatedPages';
 import { appendUnique } from '../utils/movies';
+import { crewGroups } from '../utils/crew';
 import { useT } from '../i18n';
 import type { MovieDetail } from '../types/tmdb';
 import { buildGallery } from '../utils/gallery';
@@ -12,6 +13,7 @@ import { translationOptions } from '../utils/translations';
 import ImageGallery from './ImageGallery';
 import AlternativeTitles from './AlternativeTitles';
 import CompanyChips from './CompanyChips';
+import CrewList from './CrewList';
 import KeywordChips from './KeywordChips';
 import MovieRail from './MovieRail';
 import ReviewList from './ReviewList';
@@ -102,12 +104,14 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
   const providers = detail['watch/providers'];
   const keywords = detail.keywords?.keywords ?? [];
   const companies = detail.production_companies ?? [];
+  const crewEmpty = crewGroups(detail.credits?.crew).length === 0;
   const translations = translationOptions(detail.translations?.translations);
 
   const empty =
     !providers &&
     keywords.length === 0 &&
     companies.length === 0 &&
+    crewEmpty &&
     (detail.lists?.results.length ?? 0) === 0 &&
     (detail.alternative_titles?.titles.length ?? 0) === 0 &&
     translations.length === 0 &&
@@ -125,6 +129,7 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage }: Props) {
         </h2>
       </div>
       {providers && <WatchProviders region={providers.results?.[region]} />}
+      <CrewList crew={detail.credits?.crew ?? []} />
       <KeywordChips keywords={keywords} />
       <CompanyChips companies={companies} />
       <AlternativeTitles titles={detail.alternative_titles?.titles ?? []} current={detail.title} />

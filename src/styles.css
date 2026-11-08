@@ -2526,3 +2526,30 @@ main > * {
 .tl-list a {
   font-weight: 600;
 }
+
+.crew-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.crew-row {
+  display: grid;
+  grid-template-columns: minmax(110px, 160px) minmax(0, 1fr);
+  gap: 12px;
+  font-size: 14px;
+}
+
+.crew-row dt {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-top: 2px;
+}
+
+.crew-row dd {
+  margin: 0;
+  font-weight: 500;
+}
