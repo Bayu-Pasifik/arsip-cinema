@@ -1,6 +1,7 @@
 import type {
   Category,
   Genre,
+  NetworkDetail,
   PersonDetail,
   SeasonDetail,
   PersonSummary,
@@ -243,6 +244,8 @@ export async function searchCompanies(query: string, signal?: AbortSignal): Prom
 /** Episode satu musim; `id` = id ber-offset serial (lihat utils/media.ts). */
 export const fetchSeason = (id: number, season: number, signal?: AbortSignal) =>
   request<SeasonDetail>(`/tv/${rawId(id)}/season/${season}`, {}, signal);
+
+export const fetchNetwork = (id: number, signal?: AbortSignal) => request<NetworkDetail>(`/network/${id}`, {}, signal);
 
 export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ id: number; name: string }> {
   return request<{ id: number; name: string }>(`/keyword/${id}`, {}, signal);

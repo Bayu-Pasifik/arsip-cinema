@@ -196,6 +196,16 @@ export interface PersonSummary {
   known_for_department?: string;
 }
 
+/** Detail /network/{id}. */
+export interface NetworkDetail {
+  id: number;
+  name: string;
+  logo_path: string | null;
+  headquarters?: string;
+  homepage?: string;
+  origin_country?: string;
+}
+
 /** Detail /company/{id}. */
 export interface CompanyDetail {
   id: number;

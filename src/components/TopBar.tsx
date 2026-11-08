@@ -4,6 +4,7 @@ import { useLanguages } from '../hooks/useLanguages';
 import { useT } from '../i18n';
 import { useKeywordName } from '../hooks/useKeywordName';
 import { useCompany } from '../hooks/useCompanyName';
+import { useNetwork } from '../hooks/useNetwork';
 import { usePersonName } from '../hooks/usePersonName';
 import { useCertifications } from '../hooks/useCertifications';
 import KeywordSearch from './KeywordSearch';
@@ -75,6 +76,7 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
   const collectionName = useCollectionName(filters.collection);
   const company = useCompany(filters.company);
   const companyName = company?.name ?? null;
+  const network = useNetwork(filters.network);
   const castName = usePersonName(filters.cast);
   const crewName = usePersonName(filters.crew);
   const people = usePeopleSearch(searchTerm);
@@ -305,6 +307,33 @@ const TopBar = forwardRef<HTMLElement, Props>(function TopBar(
                     ×
                   </button>
                 </p>
+              )}
+              {filters.network !== null && (
+                <div className="filter-co">
+                  <div className="filter-kw">
+                    <span>{t('filter.network', { name: network?.name ?? `#${filters.network}` })}</span>
+                    <button type="button" className="filter-x" onClick={() => set({ network: null })} aria-label={t('filter.removeNetwork')}>
+                      ×
+                    </button>
+                  </div>
+                  {network && (
+                    <div className="filter-co-info">
+                      {network.logo_path && <img src={imageUrl(network.logo_path, 'logo', 'w92') ?? ''} alt="" width={46} height={46} />}
+                      <p className="dim">
+                        {[network.headquarters, network.origin_country ? regionText(network.origin_country) : ''].filter(Boolean).join(' · ')}
+                        {network.homepage && /^https?:\/\//.test(network.homepage) && (
+                          <>
+                            {' · '}
+                            <a href={network.homepage} target="_blank" rel="noopener noreferrer">
+                              {t('filter.website')}
+                              <span className="sr-only">{t('common.newTab')}</span>
+                            </a>
+                          </>
+                        )}
+                      </p>
+                    </div>
+                  )}
+                </div>
               )}
               {filters.company !== null && (
                 <div className="filter-co">

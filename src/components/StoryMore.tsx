@@ -18,6 +18,7 @@ import AlternativeTitles from './AlternativeTitles';
 import CompanyChips from './CompanyChips';
 import CrewList from './CrewList';
 import KeywordChips from './KeywordChips';
+import NetworkChips from './NetworkChips';
 import MovieRail from './MovieRail';
 import ReviewList from './ReviewList';
 import SeasonsPanel from './SeasonsPanel';
@@ -123,6 +124,7 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage, onPlayVide
     keywords.length === 0 &&
     companies.length === 0 &&
     crewEmpty &&
+    (!tv || (detail.networks ?? []).length === 0) &&
     seasons.length === 0 &&
     videos.length === 0 &&
     (tv || (detail.lists?.results.length ?? 0) === 0) &&
@@ -144,6 +146,7 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage, onPlayVide
       {providers && <WatchProviders region={providers.results?.[region]} />}
       {seasons.length > 0 && <SeasonsPanel key={detail.id} id={detail.id} seasons={seasons} />}
       <CrewList crew={detail.credits?.crew ?? []} />
+      {tv && <NetworkChips networks={detail.networks ?? []} />}
       <VideoList groups={videos} onPlay={onPlayVideo} />
       <KeywordChips keywords={keywords} />
       <CompanyChips companies={companies} />

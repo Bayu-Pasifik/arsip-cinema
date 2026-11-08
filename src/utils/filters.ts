@@ -15,6 +15,8 @@ export interface Filters {
   provider: number | null;
   /** id studio/perusahaan produksi */
   company: number | null;
+  /** id jaringan/penyiar serial TV (with_networks) */
+  network: number | null;
   /** id aktor/kru: film yang dibintanginya (with_cast) */
   cast: number | null;
   /** id aktor/kru: film yang dikerjakannya sebagai kru (with_crew) */
@@ -28,7 +30,7 @@ export interface Filters {
   decade: number | null;
 }
 
-export const NO_FILTERS: Filters = { genre: null, year: null, rating: null, sort: null, keyword: null, collection: null, provider: null, company: null, cast: null, crew: null, cert: null, lang: null, runtime: null, decade: null };
+export const NO_FILTERS: Filters = { genre: null, year: null, rating: null, sort: null, keyword: null, collection: null, provider: null, company: null, network: null, cast: null, crew: null, cert: null, lang: null, runtime: null, decade: null };
 
 export const RATINGS = [5, 6, 7, 8] as const;
 
@@ -65,6 +67,7 @@ export function parseFilters(params: URLSearchParams): Filters {
     collection: int(params.get('collection'), 1, 99999999),
     provider: int(params.get('provider'), 1, 99999999),
     company: int(params.get('company'), 1, 99999999),
+    network: int(params.get('network'), 1, 99999999),
     cast: int(params.get('cast'), 1, 99999999),
     crew: int(params.get('crew'), 1, 99999999),
     cert: /^[A-Za-z0-9+./-]{1,10}$/.test(params.get('cert') ?? '') ? params.get('cert') : null,
@@ -88,6 +91,7 @@ export function filterParts(f: Filters): string[] {
   if (f.collection !== null) parts.push(`collection=${f.collection}`);
   if (f.provider !== null) parts.push(`provider=${f.provider}`);
   if (f.company !== null) parts.push(`company=${f.company}`);
+  if (f.network !== null) parts.push(`network=${f.network}`);
   if (f.cast !== null) parts.push(`cast=${f.cast}`);
   if (f.crew !== null) parts.push(`crew=${f.crew}`);
   if (f.cert !== null) parts.push(`cert=${encodeURIComponent(f.cert)}`);
@@ -107,6 +111,7 @@ export function discoverParamsTv(f: Filters, today: string, region = 'ID'): Reco
   if (f.genre !== null) p.with_genres = f.genre;
   if (f.keyword !== null) p.with_keywords = f.keyword;
   if (f.company !== null) p.with_companies = f.company;
+  if (f.network !== null) p.with_networks = f.network;
   if (f.year !== null) p.first_air_date_year = f.year;
   if (f.lang !== null) p.with_original_language = f.lang;
   if (f.rating !== null) p['vote_average.gte'] = f.rating;

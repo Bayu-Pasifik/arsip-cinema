@@ -5,7 +5,7 @@ const parse = (qs: string) => parseFilters(new URLSearchParams(qs));
 
 describe('parseFilters', () => {
   it('membaca semua filter valid', () => {
-    expect(parse('genre=28&year=1999&rating=7&sort=revenue.desc&keyword=9715&collection=10&provider=8&company=420&cast=6384&crew=525&cert=PG-13&lang=ko&runtime=long&decade=1990')).toEqual({
+    expect(parse('genre=28&year=1999&rating=7&sort=revenue.desc&keyword=9715&collection=10&provider=8&company=420&network=213&cast=6384&crew=525&cert=PG-13&lang=ko&runtime=long&decade=1990')).toEqual({
       genre: 28,
       year: 1999,
       rating: 7,
@@ -14,6 +14,7 @@ describe('parseFilters', () => {
       collection: 10,
       provider: 8,
       company: 420,
+      network: 213,
       cast: 6384,
       crew: 525,
       cert: 'PG-13',
@@ -109,6 +110,10 @@ describe('discoverParamsTv', () => {
   it('urutan terbaru = first_air_date.desc dibatasi hari ini; revenue diabaikan', () => {
     expect(discoverParamsTv({ ...NO_FILTERS, sort: 'primary_release_date.desc' }, '2026-11-08')).toMatchObject({ sort_by: 'first_air_date.desc', 'first_air_date.lte': '2026-11-08' });
     expect(discoverParamsTv({ ...NO_FILTERS, sort: 'revenue.desc' }, 'x').sort_by).toBe('popularity.desc');
+  });
+  it('jaringan TV memakai with_networks (film mengabaikannya)', () => {
+    expect(discoverParamsTv({ ...NO_FILTERS, network: 213 }, 'x')).toMatchObject({ with_networks: 213 });
+    expect(discoverParams({ ...NO_FILTERS, network: 213 }, 'x').with_networks).toBeUndefined();
   });
   it('dekade dan penyedia', () => {
     expect(discoverParamsTv({ ...NO_FILTERS, decade: 1990, provider: 8 }, 'x', 'US')).toMatchObject({

@@ -17,6 +17,7 @@ import { useGenres } from './hooks/useGenres';
 import { useImdbJump } from './hooks/useImdbJump';
 import { useKeywordName } from './hooks/useKeywordName';
 import { useCompanyName } from './hooks/useCompanyName';
+import { useNetwork } from './hooks/useNetwork';
 import { usePersonName } from './hooks/usePersonName';
 import { useProviders } from './hooks/useWatchProviders';
 import { useRegion } from './services/region';
@@ -66,6 +67,7 @@ export default function App() {
   const keywordName = useKeywordName(filters.keyword);
   const collectionName = useCollectionName(filters.collection);
   const companyName = useCompanyName(filters.company);
+  const networkName = useNetwork(filters.network)?.name ?? null;
   const castName = usePersonName(filters.cast);
   const crewName = usePersonName(filters.crew);
   const filtered = hasFilters(filters);
@@ -119,6 +121,7 @@ export default function App() {
             filters.rating !== null ? `★ ${filters.rating}+` : null,
             filters.keyword !== null ? (keywordName ?? `#${filters.keyword}`) : null,
             filters.company !== null ? (companyName ?? `#${filters.company}`) : null,
+            filters.network !== null ? (networkName ?? `#${filters.network}`) : null,
             filters.cast !== null ? (castName ?? `#${filters.cast}`) : null,
             filters.crew !== null ? (crewName ?? `#${filters.crew}`) : null,
             filters.cert,
