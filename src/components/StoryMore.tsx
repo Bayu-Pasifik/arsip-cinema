@@ -7,6 +7,7 @@ import { useRelatedPages } from '../hooks/useRelatedPages';
 import { appendUnique } from '../utils/movies';
 import { crewGroups } from '../utils/crew';
 import { videoGroups } from '../utils/videos';
+import { orderSeasons } from '../utils/seasons';
 import { pickTrailer } from '../services/tmdb';
 import { useT } from '../i18n';
 import type { MovieDetail, Video } from '../types/tmdb';
@@ -19,6 +20,7 @@ import CrewList from './CrewList';
 import KeywordChips from './KeywordChips';
 import MovieRail from './MovieRail';
 import ReviewList from './ReviewList';
+import SeasonsPanel from './SeasonsPanel';
 import TmdbLists from './TmdbLists';
 import VideoList from './VideoList';
 import TranslationsPanel from './TranslationsPanel';
@@ -112,6 +114,7 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage, onPlayVide
   const keywords = tv ? [] : (detail.keywords?.keywords ?? []);
   const companies = tv ? [] : (detail.production_companies ?? []);
   const videos = videoGroups(detail.videos?.results, pickTrailer(detail.videos?.results)?.key ?? null);
+  const seasons = tv ? orderSeasons(detail.seasons) : [];
   const crewEmpty = crewGroups(detail.credits?.crew).length === 0;
   const translations = translationOptions(detail.translations?.translations);
 
@@ -120,6 +123,7 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage, onPlayVide
     keywords.length === 0 &&
     companies.length === 0 &&
     crewEmpty &&
+    seasons.length === 0 &&
     videos.length === 0 &&
     (tv || (detail.lists?.results.length ?? 0) === 0) &&
     (tv || (detail.alternative_titles?.titles.length ?? 0) === 0) &&
@@ -138,6 +142,7 @@ export default function StoryMore({ detail, onOpenMovie, onOpenImage, onPlayVide
         </h2>
       </div>
       {providers && <WatchProviders region={providers.results?.[region]} />}
+      {seasons.length > 0 && <SeasonsPanel key={detail.id} id={detail.id} seasons={seasons} />}
       <CrewList crew={detail.credits?.crew ?? []} />
       <VideoList groups={videos} onPlay={onPlayVideo} />
       <KeywordChips keywords={keywords} />

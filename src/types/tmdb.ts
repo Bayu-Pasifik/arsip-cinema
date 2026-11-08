@@ -112,6 +112,24 @@ export interface TvSeason {
   overview?: string;
 }
 
+export interface Episode {
+  id: number;
+  episode_number: number;
+  name: string;
+  overview?: string;
+  air_date?: string | null;
+  runtime?: number | null;
+  vote_average: number;
+  still_path?: string | null;
+}
+
+export interface SeasonDetail {
+  id: number;
+  name: string;
+  season_number: number;
+  episodes: Episode[];
+}
+
 export interface AlternativeTitle {
   iso_3166_1: string;
   title: string;

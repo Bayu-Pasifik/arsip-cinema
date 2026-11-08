@@ -2,6 +2,7 @@ import type {
   Category,
   Genre,
   PersonDetail,
+  SeasonDetail,
   PersonSummary,
   CollectionSummary,
   CompanyDetail,
@@ -233,6 +234,10 @@ export async function searchCompanies(query: string, signal?: AbortSignal): Prom
   const data = await request<{ results: CompanySummary[] }>('/search/company', { query }, signal);
   return data.results.slice(0, 3);
 }
+
+/** Episode satu musim; `id` = id ber-offset serial (lihat utils/media.ts). */
+export const fetchSeason = (id: number, season: number, signal?: AbortSignal) =>
+  request<SeasonDetail>(`/tv/${rawId(id)}/season/${season}`, {}, signal);
 
 export async function fetchKeyword(id: number, signal?: AbortSignal): Promise<{ id: number; name: string }> {
   return request<{ id: number; name: string }>(`/keyword/${id}`, {}, signal);
